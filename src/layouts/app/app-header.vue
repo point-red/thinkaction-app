@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { BaseInput } from '@/components/index'
+import { BaseInput, BasePopper } from '@/components/index'
 import ComponentToggleSidebar from './component-toggle-sidebar.vue'
 import { appName } from '@/config/app'
+import { RouterLink } from 'vue-router'
 
 const form = ref({
   key: ''
@@ -17,10 +18,14 @@ const form = ref({
       <div class="w-full flex items-center justify-between">
         <!-- Left: Sidebar Toggle Button -->
         <div class="flex">
-          <div class="flex">
-            <img src="/main-logo.png" class="w-[30px] mr-1" alt="ThinkApp Logo" />
-            <h1 class="text-base font-extrabold lg:text-lg">{{ appName }}</h1>
-          </div>
+          <!-- screen: sm -->
+          <component :is="ComponentToggleSidebar" class="pr-4" />
+          <router-link :to="{ path: '/' }">
+            <div class="flex">
+              <img src="/main-logo.png" class="w-[30px] mr-1" alt="ThinkApp Logo" />
+              <h1 class="text-base font-extrabold lg:text-lg">{{ appName }}</h1>
+            </div>
+          </router-link>
         </div>
 
         <!-- Right: Header Buttons -->
@@ -33,17 +38,44 @@ const form = ref({
               placeholder="Cari pengguna"
               class="border-2 border-slate rounded-lg"
             ></component>
-            <a href="">Home</a>
-            <a href=""></a>
-            <button>Create Goals</button>
-            <a href="">Notification</a>
+
+            <router-link :to="{ path: '/' }">
+              <span>Home</span>
+            </router-link>
+
+            <component :is="BasePopper" placement="bottom-start">
+              <button class="ml-5">Create Goals</button>
+              <template #content>
+                <div class="rounded-lg">
+                  <router-link :to="{ path: '/create-resolution' }">
+                    <button class="block px-5 py-3 w-full text-left bg-[#FFD5F3]">
+                      Create Resolution
+                    </button>
+                    <hr />
+                  </router-link>
+                  <router-link :to="{ path: '/create-weekly-goals' }">
+                    <button class="block px-5 py-3 w-full text-left bg-[#D5FFD6]">
+                      Create Weekly Goals
+                    </button>
+                    <hr />
+                  </router-link>
+                  <router-link :to="{ path: '/complete-goals' }">
+                    <button class="block px-5 py-3 w-full text-left bg-[#E5D5FF]">
+                      Complete Goals
+                    </button>
+                  </router-link>
+                </div>
+              </template>
+            </component>
+
+            <router-link :to="{ path: '/notification' }">
+              <span>Notification</span>
+            </router-link>
+
             <div class="avatar avatar-sm">
               <span class="avatar-initial rounded-full bg-warning text-white">JD</span>
             </div>
           </div>
-
-          <!-- screen: sm -->
-          <component :is="ComponentToggleSidebar" class="pr-4" />
         </div>
       </div>
     </div>

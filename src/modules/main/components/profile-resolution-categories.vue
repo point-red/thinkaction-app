@@ -1,13 +1,25 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+type Categories = {
+  [key: string]: any
+  id: string
+  category: string
+}
+
+export interface Props {
+  resolution_categories?: Array<Categories>
+}
+
+const props = withDefaults(defineProps<Props>(), {})
+</script>
 
 <template>
   <div>
-    <div class="grid grid-cols-5 gap-3">
-      <button class="btn btn-outline-info hover:bg-[#3D8AF7]">Finance</button>
-      <button class="btn btn-outline-info hover:bg-[#3D8AF7]">Education</button>
-      <button class="btn btn-outline-info hover:bg-[#3D8AF7]">Spiritual</button>
-      <button class="btn btn-outline-info hover:bg-[#3D8AF7]">Carrier</button>
-      <button class="btn btn-outline-info hover:bg-[#3D8AF7]">All</button>
+    <div class="grid grid-cols-3 gap-1">
+      <div v-for="category in props.resolution_categories" :key="category.id">
+        <button class="btn btn-outline-info hover:bg-[#3D8AF7] overflow-hidden">
+          {{ category.category }}
+        </button>
+      </div>
     </div>
   </div>
 </template>

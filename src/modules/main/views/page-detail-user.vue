@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { RouterLink } from 'vue-router'
 import BaseProfileHeader from '../components/profile-header.vue'
 import BaseResolutionCategory from '../components/profile-resolution-categories.vue'
-import BaseMyPost from '../components/my-post.vue'
+import BaseUserPost from '../components/user-post.vue'
 
 const user = ref({
   id: 'GhtHVSB12NHGBSGHHg',
@@ -80,10 +81,19 @@ const posts = ref({
       :supporter_count="user.supporter_count"
     ></BaseProfileHeader>
 
-    <!-- BUTTON EDIT PROFILE -->
-    <router-link :to="{ path: '/profile/edit' }">
-      <button class="btn bg-[#3D8AF7] w-full font-semibold text-white mt-5">Edit Profile</button>
-    </router-link>
+    <!-- SUPPORTING BUTTON -->
+    <button
+      v-if="user.is_supporting == false"
+      class="btn bg-[#3D8AF7] w-full font-semibold text-white"
+    >
+      Support
+    </button>
+    <button
+      v-if="user.is_supporting == true"
+      class="btn bg-slate-400 w-full font-semibold text-white"
+    >
+      Supporting
+    </button>
 
     <!-- RESOLUTIONS -->
     <hr class="border-2" />
@@ -94,18 +104,19 @@ const posts = ref({
 
     <!-- USER POSTS -->
     <div v-for="post in posts.posts" :key="post.id">
-      <BaseMyPost
-        class=""
-        :id="post.id"
-        :user="post.user"
-        :category="post.category"
-        :caption="post.caption"
-        :photos="post.photos"
-        :is_liked="post.is_liked"
-        :cheers_count="post.cheers_count"
-        :comments_count="post.comments_count"
-        :date_time="post.date_time"
-      ></BaseMyPost>
+      <router-link :to="{ path: `post/${post.id}` }">
+        <BaseUserPost
+          :id="post.id"
+          :user="post.user"
+          :category="post.category"
+          :caption="post.caption"
+          :photos="post.photos"
+          :is_liked="post.is_liked"
+          :cheers_count="post.cheers_count"
+          :comments_count="post.comments_count"
+          :date_time="post.date_time"
+        ></BaseUserPost>
+      </router-link>
     </div>
   </div>
 </template>
