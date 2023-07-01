@@ -30,17 +30,23 @@ const props = withDefaults(defineProps<Props>(), {
 <template>
   <div class="shadow-lg p-3 rounded-lg border-2 mb-5">
     <!-- user info -->
-    <div class="flex space-x-3 mb-3">
-      <img :src="props.user?.avatar" alt="user-photo" class="w-20 h-20 bg-slate-300 rounded-full" />
-      <div>
-        <p class="font-bold">{{ props.user?.name }}</p>
-        <p>{{ props.category }}</p>
-        <p>{{ moment(props.date_time).fromNow() }}</p>
+    <router-link :to="{ path: `post/${props.id}` }">
+      <div class="flex space-x-3 mb-3">
+        <img
+          :src="props.user?.avatar"
+          alt="user-photo"
+          class="w-20 h-20 bg-slate-300 rounded-full"
+        />
+        <div>
+          <p class="font-bold">{{ props.user?.name }}</p>
+          <p>{{ props.category }}</p>
+          <p>{{ moment(props.date_time).fromNow() }}</p>
+        </div>
       </div>
-    </div>
 
-    <!-- caption -->
-    <p>{{ props.caption }}</p>
+      <!-- caption -->
+      <p>{{ props.caption }}</p>
+    </router-link>
 
     <!-- Slider main container -->
     <swiper-container class="mySwiper" navigation="true">

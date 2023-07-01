@@ -63,7 +63,7 @@ export const routes = {
       component: () => import('./views/page-yearly-report.vue')
     },
     {
-      path: 'my-invoice',
+      path: 'post/:id',
       component: () => import('./views/page-detail-post.vue')
     },
     {

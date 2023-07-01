@@ -71,19 +71,17 @@ const posts = ref([
     <!-- jika goals sudah dibuat -->
     <div v-if="posts.length > 0">
       <div v-for="post in posts" :key="post.id">
-        <router-link :to="{ path: `post/${post.id}` }">
-          <UserPost
-            :id="post.id"
-            :user="post.user"
-            :category="post.category"
-            :caption="post.caption"
-            :photos="post.photos"
-            :is_liked="post.is_liked"
-            :cheers_count="post.cheers_count"
-            :comments_count="post.comments_count"
-            :date_time="post.date_time"
-          ></UserPost>
-        </router-link>
+        <UserPost
+          :id="post.id"
+          :user="post.user"
+          :category="post.category"
+          :caption="post.caption"
+          :photos="post.photos"
+          :is_liked="post.is_liked"
+          :cheers_count="post.cheers_count"
+          :comments_count="post.comments_count"
+          :date_time="post.date_time"
+        ></UserPost>
       </div>
     </div>
   </div>
