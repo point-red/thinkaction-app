@@ -13,7 +13,7 @@ const privateTypes = [
 const categories = Categories.map(({ category, id }) => ({ id, label: category }))
 
 const userStore = useUserStore()
-const goals = userStore.weeklyResolutions.map((a) => ({
+const goals = userStore.weeklyResolutions.map((a: any) => ({
   id: a.goal_id,
   label: a.caption
 }))

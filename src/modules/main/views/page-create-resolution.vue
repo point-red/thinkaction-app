@@ -37,8 +37,9 @@ const save = function () {
   let values = form.value
   // @ts-ignore
   let isAllFilled = values.category?.id && values.caption && values.visibility
+  let category: any = values.category
   if (isAllFilled) {
-    values.category = { id: values.category.id, category: values.category.label }
+    values.category = { id: category.id, category: category.label }
     userStore.addResolutionGoal(values)
   }
   router.push('/')

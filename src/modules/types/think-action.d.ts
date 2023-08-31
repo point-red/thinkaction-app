@@ -29,4 +29,5 @@ export type ThinkActionGoal = {
   meta?: any
   goal_type?: string
   date_time?: string
+  created_at?: string
 }
