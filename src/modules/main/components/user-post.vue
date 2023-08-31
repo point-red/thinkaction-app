@@ -67,9 +67,9 @@ const preventView = function (e: any) {}
             </span>
           </router-link>
         </button>
-        <button class="btn btn-icon rounded-full">
+        <router-link :to="{ path: `/post/${props.id}` }" class="btn btn-icon rounded-full">
           <i class="i-fas-comments h-25px w-25px mr-2"></i>{{ props.comments_count }}
-        </button>
+        </router-link>
       </div>
       <div></div>
     </div>
