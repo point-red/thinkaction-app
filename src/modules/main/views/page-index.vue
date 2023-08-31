@@ -1,40 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import UserPost from '../components/user-post.vue'
+import { Goals } from '@/modules/data/goals'
+import { useUserStore } from '@/stores/user'
 
-const posts = ref([
-  {
-    id: 'GhtHVSB12NHGBSGHHt',
-    user: {
-      name: 'Fitri',
-      avatar: 'https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL'
-    },
-    category: 'Finance',
-    caption: 'Lorem ipsum dolor sit amet.',
-    photos: [
-      'https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL',
-      'https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL'
-    ],
-    is_liked: false,
-    cheers_count: 20,
-    comments_count: 10,
-    date_time: '2019-08-24T14:15:22Z'
-  },
-  {
-    id: 'GhtHVSB12NHGBSGHHg',
-    user: {
-      name: 'Fitri A',
-      avatar: 'https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL'
-    },
-    category: 'Finance',
-    caption: 'Lorem ipsum dolor sit amet.',
-    photos: ['https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL'],
-    is_liked: false,
-    cheers_count: 20,
-    comments_count: 10,
-    date_time: '2019-08-24T14:15:22Z'
-  }
-])
+const userStore = useUserStore()
+const posts = ref(userStore.userGoals)
 </script>
 
 <template>
@@ -77,10 +48,11 @@ const posts = ref([
           :category="post.category"
           :caption="post.caption"
           :photos="post.photos"
-          :is_liked="post.is_liked"
+          :is_liked="post.is_liked_by_user"
           :cheers_count="post.cheers_count"
           :comments_count="post.comments_count"
           :date_time="post.date_time"
+          :created_at="post.created_at"
         ></UserPost>
       </div>
     </div>

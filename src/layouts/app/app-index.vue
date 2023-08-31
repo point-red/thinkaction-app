@@ -21,7 +21,7 @@ import AppFooter from './app-footer.vue'
       <main class="main-content">
         <router-view />
       </main>
-      <app-footer class="pt-4 md:invisible"></app-footer>
+      <app-footer class="pt-4 md:hidden"></app-footer>
     </div>
   </div>
 </template>

@@ -15,12 +15,8 @@ export const routes = {
       component: () => import('./views/page-detail-user.vue')
     },
     {
-      path: 'supporters',
-      component: () => import('./views/page-supporter.vue')
-    },
-    {
-      path: 'supporting',
-      component: () => import('./views/page-supporting.vue')
+      path: 'user/:id/:type',
+      component: () => import('./views/page-relations.vue')
     },
     {
       path: 'create-resolution',

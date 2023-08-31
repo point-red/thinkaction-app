@@ -10,7 +10,7 @@ export interface Props {
   fullname: string
   username: string
   avatar: string
-  supporter: Array<User>
+  // supporter: Array<User>
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -25,8 +25,8 @@ const props = withDefaults(defineProps<Props>(), {
       <p class="font-semibold">{{ props.username }}</p>
       <p class="">{{ props.fullname }}</p>
       <div class="flex">
-        <p class="">Supported by {{ props.supporter[0].username + ' ' + '+' }}</p>
-        <p>{{ props.supporter.length - 1 }} more</p>
+        <!-- <p class="">Supported by {{ props.supporter[0].username + ' ' + '+' }}</p> -->
+        <!-- <p>{{ props.supporter.length - 1 }} more</p> -->
       </div>
     </div>
   </div>

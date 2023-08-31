@@ -1,18 +1,21 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { BaseDatepicker, BaseTextarea, BaseSelect } from '@/components/index'
+import { onMounted, ref } from 'vue'
+import { GoalModel } from '@/lib/models/GoalModel'
+import { useUserStore } from '@/stores/user'
+import { Categories } from '@/modules/data/categories'
 
 const list = [
   { id: 1, label: 'Everyone' },
   { id: 2, label: 'Supporter' },
   { id: 3, label: 'Private' }
 ]
+const store = useUserStore()
 
-const categories = [
-  { id: 1, label: 'Finance' },
-  { id: 2, label: 'Health' },
-  { id: 3, label: 'Education' }
-]
+let categorized = ref<any>([])
+
+onMounted(async () => {
+  categorized.value = await GoalModel.generateMonthlyReport(store, new Date().getMonth())
+})
 
 const weekly = ref([
   {
@@ -148,8 +151,6 @@ const weekly = ref([
     ]
   }
 ])
-
-console.log(`LENGTH ${weekly.value.length}`)
 </script>
 
 <template>
@@ -162,23 +163,23 @@ console.log(`LENGTH ${weekly.value.length}`)
         <thead>
           <tr class="basic-table-row">
             <th class="basic-table-head"></th>
-            <th v-for="category in weekly" :key="category.category_id" class="basic-table-head">
+            <th v-for="category in Categories" :key="category.id" class="basic-table-head">
               {{ category.category }}
             </th>
           </tr>
         </thead>
-        <tbody v-for="category in weekly" :key="category.category_id">
-          <tr class="basic-table-row">
-            <td class="basic-table-body">Week {{ weekly.indexOf(category) + 1 }}</td>
+        <tbody>
+          <tr
+            v-for="({ week, categories }, index) in categorized"
+            :key="week.start"
+            class="basic-table-row"
+          >
+            <td class="basic-table-body">Week {{ index + 1 }}</td>
             <td
-              v-for="weekly_goal in category.resolutions"
-              :key="weekly_goal.id"
-              class="basic-table-body {{ weekly_goal.is_complete ? bg-[#3D8AF7] : bg-blueGray }}"
-            >
-              {{ weekly_goal.is_complete }}
-            </td>
-            <td class="basic-table-body">Quality Control Specialist</td>
-            <td class="basic-table-body">Blue</td>
+              v-for="{ id } in Categories"
+              :key="id"
+              :class="'basic-table-body rounded-lg ' + ( !categories.find((c: any) => c.id === id)?.goals?.length? 'bg-gray-300':( categories.find((c: any) => c.id === id)?.goals?.filter((g: any) => g.is_completed).length ?? 1 > 0 ? 'bg-sky-300' : 'bg-pink-300'))"
+            ></td>
           </tr>
         </tbody>
       </table>

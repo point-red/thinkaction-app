@@ -1,32 +1,48 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { BaseInput, BaseCheckbox, BaseSelect } from '@/components/index'
+import { Categories } from '@/modules/data/categories'
+import { useUserStore } from '@/stores/user'
 
-const privacyTypes = [
-  { id: 1, label: 'Everyone' },
-  { id: 2, label: 'Supporter' },
-  { id: 3, label: 'Private' }
+const privateTypes = [
+  { id: 'public', label: 'Everyone' },
+  { id: 'supporter', label: 'Supporter' },
+  { id: 'private', label: 'Private' }
 ]
 
-const categories = [
-  { id: 1, label: 'Finance' },
-  { id: 2, label: 'Health' },
-  { id: 3, label: 'Education' }
-]
+const categories = Categories.map(({ category, id }) => ({ id, label: category }))
 
-const goals = [
-  { id: 1, label: 'Saving 100k' },
-  { id: 2, label: 'Reduce minus eye by 0.5' },
-  { id: 3, label: 'Finish redux module' }
-]
+const userStore = useUserStore()
+const goals = userStore.weeklyResolutions.map((a) => ({
+  id: a.goal_id,
+  label: a.caption
+}))
 
 const checked = ref(false)
 
-const selected = ref({})
-
 const form = ref({
-  caption: ''
+  caption: '',
+  category: {},
+  goal: {},
+  visibility: '',
+  files: []
 })
+
+const submit = function () {
+  let category: any = form.value.category
+  let goal: any = form.value.goal
+  let visibility: any = form.value.visibility
+  let values: any = {}
+  if (category.id && goal.id && visibility.id) {
+    values.category = { id: category.id, category: category.label }
+    values.goal_id = goal.id
+    values.caption = form.value.caption
+    values.visibility = visibility?.id
+    values.is_completed = checked.value
+    values.files = form.value.files
+    userStore.addCompleteGoal(values)
+  }
+}
 </script>
 
 <template>
@@ -43,7 +59,7 @@ const form = ref({
       <span class="font-semibold text-[#3D8AF7] block mb-2">Select Category</span>
       <component
         :is="BaseSelect"
-        v-model="selected"
+        v-model="form.category"
         :list="categories"
         border="full"
         class="mb-8"
@@ -53,7 +69,7 @@ const form = ref({
       <span class="font-semibold text-[#3D8AF7] block mb-2">Goals Achieved</span>
       <component
         :is="BaseSelect"
-        v-model="selected"
+        v-model="form.goal"
         :list="goals"
         border="full"
         class="mb-8"
@@ -80,11 +96,16 @@ const form = ref({
 
       <!-- share with -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Share With</span>
-      <component :is="BaseSelect" v-model="selected" :list="privacyTypes" border="full"></component>
+      <component
+        :is="BaseSelect"
+        v-model="form.visibility"
+        :list="privateTypes"
+        border="full"
+      ></component>
 
       <!-- button -->
       <div class="flex justify-center space-x-2 mt-8">
-        <button class="btn btn-primary bg-[#3D8AF7] px-7">SAVE</button>
+        <button @click="submit" class="btn btn-primary bg-[#3D8AF7] px-7">SAVE</button>
         <button class="btn btn-danger">CANCEL</button>
       </div>
     </div>

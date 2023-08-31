@@ -19,6 +19,7 @@ const post = ref({
   cheers_count: 20,
   comments_count: 10,
   date_time: '2019-08-24T14:15:22Z',
+  created_at: '2019-08-24T14:15:22Z',
   comments: [
     {
       id: 'GhtHVSB12NHGBSGHtg',
@@ -72,9 +73,14 @@ const post = ref({
       :cheers_count="post.cheers_count"
       :comments_count="post.comments_count"
       :date_time="post.date_time"
+      :created_at="post.created_at"
     ></UserPost>
 
-    <div v-for="comment in post.comments" :key="comment.id" class="shadow-lg border-2 rounded-lg">
+    <div
+      v-for="comment in post.comments"
+      :key="comment.id"
+      class="bg-white border border-slate-200 rounded-lg"
+    >
       <PostComment
         :id="comment.id"
         :fullname="comment.fullname"

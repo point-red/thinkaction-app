@@ -1,22 +1,18 @@
 <script setup lang="ts">
 import moment from 'moment'
-
-type User = {
-  [key: string]: any
-  name: string
-  avatar?: string
-}
+import type { ThinkActionUser, ThinkActionCategory } from '@/modules/types/think-action'
 
 export interface Props {
   id?: string
-  user?: User
-  category?: string
+  user?: ThinkActionUser
+  category?: ThinkActionCategory | string
   caption?: string
   photos?: Array<string>
   is_liked?: boolean
   cheers_count?: number
   comments_count?: number
   date_time?: string
+  created_at?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -25,22 +21,27 @@ const props = withDefaults(defineProps<Props>(), {
   cheers_count: 0,
   comments_count: 0
 })
+
+const viewPost = function (e: any) {}
+const preventView = function (e: any) {}
 </script>
 
 <template>
-  <div class="shadow-lg p-3 rounded-lg border-2 mb-5">
+  <div class="shadow-sm bg-white p-3 rounded-lg border mb-5">
     <!-- user info -->
-    <router-link :to="{ path: `post/${props.id}` }">
-      <div class="flex space-x-3 mb-3">
+    <router-link :to="{ path: `/post/${props.id}` }">
+      <div class="flex space-x-3 mb-3 items-center">
         <img
           :src="props.user?.avatar"
           alt="user-photo"
           class="w-20 h-20 bg-slate-300 rounded-full"
         />
         <div>
-          <p class="font-bold">{{ props.user?.name }}</p>
-          <p>{{ props.category }}</p>
-          <p>{{ moment(props.date_time).fromNow() }}</p>
+          <p class="font-bold">{{ props.user?.name! }}</p>
+          <p class="text-sm">
+            {{ typeof props.category === 'string' ? props.category : props.category?.category }}
+          </p>
+          <p class="text-sm text-slate-400">{{ moment(props.created_at).fromNow() }}</p>
         </div>
       </div>
 

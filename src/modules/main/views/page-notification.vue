@@ -21,13 +21,28 @@ const notifications = ref([
 
 <template>
   <div class="main-content-container">
-    <div v-for="notif in notifications" :key="notif.id" class="flex justify-between">
-      <p>{{ notif.body }}</p>
-      <div class="flex space-x-3">
-        <button v-if="notif.type === 'approval'" class="btn btn-primary h-[35px] bg-[#3D8AF7]">
-          Accept
-        </button>
-        <p>{{ moment(notif.created_at).fromNow() }}</p>
+    <div class="dark:bg-slate-700 bg-white/[50] rounded-md border border-slate-200">
+      <div
+        v-for="(notif, index) in notifications"
+        :key="notif.id"
+        class="flex justify-between items-center px-4 py-3 border-slate-200"
+        :class="index !== 0 ? 'border-t' : 'border-t-0'"
+      >
+        <div>
+          <p class="break-words">{{ notif.body }}</p>
+          <time class="text-xs">{{ moment(notif.created_at).fromNow() }} </time>
+        </div>
+        <div class="flex gap-x-4 items-center h-[30px] justify-end items-end flex-col">
+          <div v-if="notif.type === 'approval'" class="flex flex-row gap-1.5">
+            <button class="btn btn-xs px-3 py-1.5 font-medium btn-primary bg-secondary">
+              Decline
+            </button>
+            <button class="btn btn-xs px-3 py-1.5 font-medium btn-primary bg-[#3D8AF7]">
+              Accept
+            </button>
+          </div>
+          <div v-else class=""></div>
+        </div>
       </div>
     </div>
   </div>

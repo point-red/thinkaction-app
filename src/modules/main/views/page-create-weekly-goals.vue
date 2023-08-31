@@ -1,29 +1,58 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { BaseDatepicker, BaseTextarea, BaseSelect } from '@/components/index'
+import { Categories } from '@/modules/data/categories'
+import { useUserStore } from '@/stores/user'
+import router from '@/router'
 
 const list = [
-  { id: 1, label: 'Everyone' },
-  { id: 2, label: 'Supporter' },
-  { id: 3, label: 'Private' }
+  { id: 'public', label: 'Everyone' },
+  { id: 'supporter', label: 'Supporter' },
+  { id: 'private', label: 'Private' }
 ]
 
-const categories = [
-  { id: 1, label: 'Finance' },
-  { id: 2, label: 'Health' },
-  { id: 3, label: 'Education' }
-]
+const userStore = useUserStore()
+const resolutions = userStore.resolutions
 
-const resolution = [
-  { id: 1, label: 'Saving as much as 10 million' },
-  { id: 2, label: 'Reduce eye minus' },
-  { id: 3, label: 'Finish bootcamp react' }
-]
+const selected = ref({
+  visibility: { id: 'public', label: 'Everyone' },
+  resolution: {},
+  category: {}
+})
 
-const selected = ref({})
+const form = ref({
+  caption: '',
+  category: {},
+  resolution: { goal_id: '' },
+  date_time: '',
+  visibility: 'public',
+  files: []
+})
 
-const date = ref()
-const text = ref('')
+const onUpdateVisiblity = function (params: any) {
+  if (!params.id) {
+    form.value.visibility = ''
+    return
+  }
+  const { id } = params
+  form.value.visibility = id
+}
+
+const onUpdateResolution = function (params: any) {
+  form.value.resolution = params
+}
+
+const submit = function () {
+  let values = form.value
+  let isAllFilled = // @ts-ignore-all
+    values.caption && values.visibility && selected.value.resolution?.goal_id && values.category?.id
+  if (isAllFilled) {
+    // @ts-ignore
+    values.category = { id: values.category.id, category: values.category.label }
+    userStore.addWeeklyGoal(values)
+    router.push('/')
+  }
+}
 </script>
 
 <template>
@@ -40,8 +69,8 @@ const text = ref('')
       <span class="font-semibold text-[#3D8AF7] block mb-2">Select Category</span>
       <component
         :is="BaseSelect"
-        v-model="selected"
-        :list="categories"
+        v-model="form.category"
+        :list="Categories.map(({ id, category }) => ({ id, label: category, category }))"
         border="full"
         class="mb-8"
       ></component>
@@ -50,19 +79,27 @@ const text = ref('')
       <span class="font-semibold text-[#3D8AF7] block mb-2">Select Resolution</span>
       <component
         :is="BaseSelect"
-        v-model="selected"
-        :list="resolution"
+        v-model="selected.resolution"
+        @update:modelValue="onUpdateResolution"
+        :list="
+          resolutions.map(({ goal_id, caption }) => ({
+            id: goal_id,
+            label: caption,
+            goal_id,
+            caption
+          }))
+        "
         border="full"
         class="mb-8"
       ></component>
 
       <!-- Weekly Goals -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Weekly Goals</span>
-      <component :is="BaseTextarea" v-model="text" border="simple" class="mb-8"></component>
+      <component :is="BaseTextarea" v-model="form.caption" border="simple" class="mb-8"></component>
 
       <!-- due date input -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Due Date</span>
-      <component :is="BaseDatepicker" v-model="date" border="full" class="mb-8" />
+      <component :is="BaseDatepicker" v-model="form.date_time" border="full" class="mb-8" />
 
       <!-- upload photo -->
       <span class="font-semibold text-[#3D8AF7] block mb-2"
@@ -78,11 +115,17 @@ const text = ref('')
 
       <!-- share with -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Share With</span>
-      <component :is="BaseSelect" v-model="selected" :list="list" border="full"></component>
+      <component
+        :is="BaseSelect"
+        @update:modelValue="onUpdateVisiblity"
+        v-model="selected.visibility"
+        :list="list"
+        border="full"
+      ></component>
 
       <!-- button -->
       <div class="flex justify-center space-x-2 mt-8">
-        <button class="btn btn-primary bg-[#3D8AF7] px-7">SAVE</button>
+        <button @click="submit" class="btn btn-primary bg-[#3D8AF7] px-7">SAVE</button>
         <button class="btn btn-danger">CANCEL</button>
       </div>
     </div>

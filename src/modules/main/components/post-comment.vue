@@ -2,6 +2,7 @@
 import dayjs from 'dayjs'
 import { ref } from 'vue'
 import { BaseTextarea } from '@/components/index'
+import moment from 'moment'
 
 type Reply = {
   [key: string]: any
@@ -36,11 +37,11 @@ let showReplies = ref(false)
     <!-- PARENT -->
     <div>
       <!-- user info -->
-      <div class="flex space-x-3">
-        <img :src="props.avatar" alt="user-photo" class="w-20 h-20 bg-slate-300 rounded-full" />
+      <div class="flex gap-2 items-center">
+        <img :src="props.avatar" alt="user-photo" class="w-16 h-16 bg-slate-300 rounded-[1000px]" />
         <div>
           <p class="font-bold">{{ props.fullname }}</p>
-          <p>{{ dayjs(props.date_time).format('DD/MM/YYYY : HH.mm') }}</p>
+          <p>{{ dayjs(props.date_time).format('DD/MM/YYYY HH:mm') }}</p>
         </div>
       </div>
 
@@ -69,11 +70,15 @@ let showReplies = ref(false)
     <div v-for="reply in props.replies" :key="reply.id" class="ml-10 mb-4">
       <div v-if="showReplies">
         <!-- user info -->
-        <div class="flex space-x-3">
-          <img :src="reply.avatar" alt="user-photo" class="w-20 h-20 bg-slate-300 rounded-full" />
+        <div class="flex items-center gap-2">
+          <img
+            :src="reply.avatar"
+            alt="user-photo"
+            class="w-16 h-16 bg-slate-300 rounded-[1000px]"
+          />
           <div>
             <p class="font-bold">{{ reply.fullname }}</p>
-            <p>{{ reply.date_time }}</p>
+            <p>{{ moment(reply.date_time).fromNow() }}</p>
           </div>
         </div>
 
