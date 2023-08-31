@@ -7,7 +7,7 @@ import moment from 'moment'
 type Reply = {
   [key: string]: any
   id: string
-  fullname: string
+  full_name: string
   avatar: string
   date_time: string
   comment: string
@@ -15,7 +15,7 @@ type Reply = {
 
 export interface Props {
   id?: string
-  fullname?: string
+  full_name?: string
   avatar?: string
   date_time?: string
   comment?: string
@@ -26,10 +26,22 @@ const props = withDefaults(defineProps<Props>(), {
   avatar: '/profile.png'
 })
 
+const emit = defineEmits(['reply'])
+
 const text = ref('')
 
 let showTextarea = ref(false)
 let showReplies = ref(false)
+
+const sendComment = function () {
+  if (text.value) {
+    emit('reply', {
+      comment: text
+    })
+    showTextarea.value = false
+    showReplies.value = true
+  }
+}
 </script>
 
 <template>
@@ -40,7 +52,7 @@ let showReplies = ref(false)
       <div class="flex gap-2 items-center">
         <img :src="props.avatar" alt="user-photo" class="w-16 h-16 bg-slate-300 rounded-[1000px]" />
         <div>
-          <p class="font-bold">{{ props.fullname }}</p>
+          <p class="font-bold">{{ props.full_name }}</p>
           <p>{{ dayjs(props.date_time).format('DD/MM/YYYY HH:mm') }}</p>
         </div>
       </div>
@@ -55,14 +67,14 @@ let showReplies = ref(false)
           v-if="props.replies && props.replies.length != 0"
           class="text-blue-500 underline"
         >
-          See {{ props.replies.length }} replies
+          {{ !showReplies ? 'See ' + props.replies.length + ' replies' : 'Hide replies' }}
         </button>
       </div>
 
       <!-- TEXTAREA -->
       <div v-if="showTextarea" class="mb-4">
         <component :is="BaseTextarea" v-model="text" border="full" class="mb-2"></component>
-        <button class="btn btn-primary bg-[#3D8AF7]">KIRIM</button>
+        <button @click="sendComment()" class="btn btn-primary bg-[#3D8AF7]">KIRIM</button>
       </div>
     </div>
 
@@ -77,7 +89,7 @@ let showReplies = ref(false)
             class="w-16 h-16 bg-slate-300 rounded-[1000px]"
           />
           <div>
-            <p class="font-bold">{{ reply.fullname }}</p>
+            <p class="font-bold">{{ reply.full_name }}</p>
             <p>{{ moment(reply.date_time).fromNow() }}</p>
           </div>
         </div>

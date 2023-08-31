@@ -22,6 +22,18 @@ export const Users = [
     goals_performance: 80,
     supporting_count: 100,
     supporter_count: 100
+  },
+  {
+    id: 'GhtHVSB12NHGBSGHgg',
+    full_name: 'Jeno',
+    username: 'jeno03',
+    avatar: 'https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL',
+    bio: 'nothing to see here',
+    is_private: false,
+    is_supporting: false,
+    goals_performance: 80,
+    supporting_count: 100,
+    supporter_count: 100
   }
 ]
 

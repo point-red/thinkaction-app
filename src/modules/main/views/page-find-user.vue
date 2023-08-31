@@ -1,54 +1,20 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { BaseInput } from '@/components/index'
 import UserSneakPeak from '../components/user-sneakpeak.vue'
+import { Users } from '@/modules/data/users'
 
 const form = ref({
   key: ''
 })
 
-const users = ref([
-  {
-    id: 'GhtHVSB12NHGBSGHHw',
-    fullname: 'Fitri Andriyani',
-    username: 'Fitri07',
-    avatar: 'https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL',
-    supporter: [
-      {
-        id: 'GhtHVSB12NHGBSGHHg',
-        username: 'Alf'
-      },
-      {
-        id: 'GhtHVSB12NHGBSGHdd',
-        username: 'Ali'
-      },
-      {
-        id: 'GhtHVSB12NHGBSGHHs',
-        username: 'Aif'
-      },
-      {
-        id: 'GhtHVSB12NHGBSGHtg',
-        username: 'lif'
-      }
-    ]
-  },
-  {
-    id: 'GhtHVSB12NHGBSGHHt',
-    fullname: 'Fadil',
-    username: 'Fadil_1w',
-    avatar: 'https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL',
-    supporter: [
-      {
-        id: 'GhtHVSB12NHGBSGHHg',
-        username: 'Alf'
-      },
-      {
-        id: 'GhtHVSB12NHGBSGHdd',
-        username: 'Ali'
-      }
-    ]
-  }
-])
+const users = computed(() => {
+  return Users.filter((u) =>
+    [u.username.toLowerCase(), u.full_name.toLowerCase()].some((a) =>
+      a.includes(form.value.key.toLowerCase())
+    )
+  )
+})
 </script>
 
 <template>
@@ -67,10 +33,10 @@ const users = ref([
         <router-link :to="{ path: `user/${user.id}` }">
           <UserSneakPeak
             :id="user.id"
-            :fullname="user.fullname"
+            :fullname="user.full_name"
             :username="user.username"
             :avatar="user.avatar"
-            :supporter="user.supporter"
+            :supporter="['Alf', 'Risky']"
           >
           </UserSneakPeak>
         </router-link>

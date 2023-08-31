@@ -24,11 +24,11 @@ const links = [
   },
   {
     label: 'Monthly Reports',
-    path: '/monthly-reports'
+    path: '/monthly-report'
   },
   {
     label: 'Yearly Reports',
-    path: '/yearly-reports'
+    path: '/yearly-report'
   },
   {
     label: 'My Invoice',
@@ -46,7 +46,7 @@ const links = [
         <!-- Left: Sidebar Toggle Button -->
         <div class="flex">
           <!-- screen: sm -->
-          <component :is="ComponentToggleSidebar" class="pr-4" />
+          <!-- <component :is="ComponentToggleSidebar" class="pr-4" /> -->
           <router-link :to="{ path: '/' }">
             <div class="flex">
               <img src="/main-logo.png" class="w-[30px] mr-1" alt="ThinkApp Logo" />

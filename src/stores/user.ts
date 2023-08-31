@@ -1,4 +1,5 @@
 import { Goals } from '@/modules/data/goals'
+import { Users } from '@/modules/data/users'
 import type { ThinkActionCategory } from '@/modules/types/think-action'
 import { defineStore } from 'pinia'
 
@@ -19,9 +20,69 @@ export const useUserStore = defineStore('user-store', {
     },
     userGoals: Goals,
     resolutions: [],
-    weeklyResolutions: []
+    weeklyResolutions: [],
+    comments: [
+      {
+        ...Users[0],
+        comment_id: 'AIUSVBY4LOW8443Y34H34',
+        goal_id: 'GhtHVSB12NHGBSGHHg',
+        comment: 'Nice Work!',
+        date_time: new Date().toISOString(),
+        replies: [
+          {
+            id: 'GhtHVSB12NHGBSGHgg',
+            full_name: 'Jeno',
+            avatar: 'https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL',
+            date_time: '2019-08-24T14:15:22Z',
+            comment_id: 'SDBYE5RNS5RUYMN5NUR5R55E4',
+            parent_id: 'AIUSVBY4LOW8443Y34H34',
+            comment:
+              'lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet'
+          },
+          {
+            id: 'GhtHVSB12NHGBSGHww',
+            full_name: 'Jaemin',
+            avatar: 'https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL',
+            date_time: '2019-08-24T14:15:22Z',
+            comment_id: 'REHWEHSEB5Y4E5BY45N4',
+            parent_id: 'AIUSVBY4LOW8443Y34H34',
+            comment:
+              'lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet'
+          }
+        ]
+      }
+    ]
   }),
   actions: {
+    getCommentsByGoalId: function (goalId: string) {
+      const comments = this.$state.comments.filter((c) => c.goal_id === goalId)
+      return comments
+    },
+    addCommentToGoal: function (goalId: string, comment: string, parentId?: string) {
+      const id = Math.random().toFixed(32).substring(2)
+      if (parentId) {
+        const commentable = this.$state.comments.find(
+          (c) => c.goal_id === goalId && c.comment_id === parentId
+        )
+        if (commentable) {
+          // @ts-ignore
+          commentable.replies.push({
+            ...this.$state.currentUser,
+            comment,
+            comment_id: id,
+            date_time: new Date().toISOString()
+          })
+        }
+      } else {
+        this.$state.comments.push({
+          ...this.$state.currentUser,
+          comment_id: id,
+          comment,
+          goal_id: goalId,
+          replies: []
+        })
+      }
+    },
     addResolutionGoal: function (params: any) {
       // TODO: Add api here:
 
@@ -116,7 +177,8 @@ export const useUserStore = defineStore('user-store', {
       }
       if (targetGoalIndex >= 0) {
         // @ts-ignore
-        this.$state.weeklyResolutions[targetGoalIndex] = { // @ts-ignore
+        this.$state.weeklyResolutions[targetGoalIndex] = {
+          // @ts-ignore
           ...this.$state.weeklyResolutions[targetGoalIndex], // @ts-ignore
           is_completed, // @ts-ignore
           goal_completed_id: id // @ts-ignore

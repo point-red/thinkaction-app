@@ -163,7 +163,11 @@ const weekly = ref([
         <thead>
           <tr class="basic-table-row">
             <th class="basic-table-head"></th>
-            <th v-for="category in Categories" :key="category.id" class="basic-table-head">
+            <th
+              v-for="category in Categories"
+              :key="category.id"
+              class="basic-table-head text-xs w-28 max-w-[7rem] min-w-[7rem] text-center"
+            >
               {{ category.category }}
             </th>
           </tr>
@@ -172,9 +176,9 @@ const weekly = ref([
           <tr
             v-for="({ week, categories }, index) in categorized"
             :key="week.start"
-            class="basic-table-row"
+            class="basic-table-row h-28"
           >
-            <td class="basic-table-body">Week {{ index + 1 }}</td>
+            <td class="basic-table-body text-sm min-w-[5rem] align-middle">Week {{ index + 1 }}</td>
             <td
               v-for="{ id } in Categories"
               :key="id"
