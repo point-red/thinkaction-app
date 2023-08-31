@@ -62,13 +62,17 @@ const userPosts = computed(() => {
     <div v-if="!props.is_current_user">
       <!-- SUPPORTING BUTTON -->
       <button
-        v-if="props.user.is_supporting == false"
+        @click="isSupporting = true"
+        v-if="isSupporting == false"
         class="btn bg-[#3D8AF7] w-full font-semibold text-white md:hidden"
       >
         Support
       </button>
-      <template v-if="props.user.is_supporting">
-        <button class="btn bg-slate-300 text-sky-500 w-full font-semibold text-white md:hidden">
+      <template v-if="isSupporting">
+        <button
+          @click="isSupporting = false"
+          class="btn bg-slate-300 text-sky-500 w-full font-semibold text-white md:hidden"
+        >
           Supporting
         </button>
         <!-- <button class="  btn bg-slate-400 w-full font-semibold text-white md:hidden">Unsupport</button> -->
