@@ -74,6 +74,7 @@ export const useUserStore = defineStore('user-store', {
           })
         }
       } else {
+        // @ts-ignore
         this.$state.comments.push({
           ...this.$state.currentUser,
           comment_id: id,
