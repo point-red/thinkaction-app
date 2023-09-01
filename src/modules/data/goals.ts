@@ -174,5 +174,5 @@ export const Goals = [
     goal_type: 'resolution',
     meta: {},
     created_at: '2019-08-17T14:15:22Z'
-  },
+  }
 ]
