@@ -15,6 +15,12 @@ const notifications = ref([
     body: 'Ani commented on your goal',
     type: 'system',
     created_at: '2023-06-23T13:45:06.740Z'
+  },
+  {
+    id: 'GhtHVSB12NHGBSGHHI',
+    body: 'Ani cheered on your goal',
+    type: 'system',
+    created_at: '2023-06-24T13:33:06.740Z'
   }
 ])
 </script>
