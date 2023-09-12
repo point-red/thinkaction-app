@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { BaseDatepicker, BaseTextarea, BaseSelect } from '@/components/index'
 import { Categories } from '@/modules/data/categories'
 import { useUserStore } from '@/stores/user'
@@ -12,7 +12,7 @@ const list = [
 ]
 
 const userStore = useUserStore()
-const resolutions = userStore.resolutions
+const resolutions = ref<any>([])
 
 const selected = ref({
   visibility: { id: 'public', label: 'Everyone' },
@@ -27,6 +27,25 @@ const form = ref({
   date_time: '',
   visibility: 'public',
   files: []
+})
+
+const categories = ref<any>([])
+
+onMounted(() => {
+  userStore.getResolutionCategories().then((data) => {
+    categories.value = data
+  })
+  userStore.getResolutions().then((data) => {
+    resolutions.value = data
+  })
+})
+
+const computedResolutions = computed<any>(() => {
+  return resolutions.value.filter(
+    (
+      r: any // @ts-ignore
+    ) => (form.value.category ? r.category === form.value.category?.id : true)
+  )
 })
 
 const onUpdateVisiblity = function (params: any) {
@@ -48,7 +67,7 @@ const submit = function () {
     values.caption && values.visibility && selected.value.resolution?.goal_id && values.category?.id
   if (isAllFilled) {
     // @ts-ignore
-    values.category = { id: values.category.id, category: values.category.label }
+    values.category = values.category.id
     userStore.addWeeklyGoal(values)
     router.push('/')
   }
@@ -70,8 +89,7 @@ const submit = function () {
       <component
         :is="BaseSelect"
         v-model="form.category"
-        :list="Categories.map(({ id, category }) => ({ id, label: category, category }))"
-        border="full"
+        :list="categories.map((category: string) => ({ id: category, label: category }))"
         class="mb-8"
       ></component>
 
@@ -82,10 +100,10 @@ const submit = function () {
         v-model="selected.resolution"
         @update:modelValue="onUpdateResolution"
         :list="
-          resolutions.map(({ goal_id, caption }) => ({
-            id: goal_id,
+          computedResolutions.map(({ id, caption }: any) => ({
+            id: id,
             label: caption,
-            goal_id,
+            goal_id: id,
             caption
           }))
         "

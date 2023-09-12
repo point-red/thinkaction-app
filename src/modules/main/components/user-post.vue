@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import moment from 'moment'
 import type { ThinkActionUser, ThinkActionCategory } from '@/modules/types/think-action'
+import { useUserStore } from '@/stores/user'
+import { computed, ref } from 'vue'
 
 export interface Props {
   id?: string
   user?: ThinkActionUser
+  user_id?: string
   category?: ThinkActionCategory | string
   caption?: string
   photos?: Array<string>
@@ -22,48 +25,91 @@ const props = withDefaults(defineProps<Props>(), {
   comments_count: 0
 })
 
+const store = useUserStore()
 const viewPost = function (e: any) {}
 const preventView = function (e: any) {}
+const actionToggled = ref(false)
+
+const user = computed(() => store.findUserById(props.user_id as string) ?? null)
+const currentUser = computed(() => store.currentUser)
+const likePost = function () {
+  let id = props.id
+  store.likePost(id as string)
+}
+const toggleAction = function () {
+  actionToggled.value = !actionToggled.value
+}
 </script>
 
 <template>
   <div class="shadow-sm bg-white p-3 rounded-lg border mb-5">
     <!-- user info -->
-    <router-link :to="{ path: `/post/${props.id}` }">
-      <div class="flex space-x-3 mb-3 items-center">
-        <img
-          :src="props.user?.avatar"
-          alt="user-photo"
-          class="w-20 h-20 bg-slate-300 rounded-full"
-        />
-        <div>
-          <p class="font-bold">{{ props.user?.name! }}</p>
-          <p class="text-sm">
-            {{ typeof props.category === 'string' ? props.category : props.category?.category }}
-          </p>
-          <p class="text-sm text-slate-400">{{ moment(props.created_at).fromNow() }}</p>
+    <div>
+      <div class="w-full flex gap-x-3 mb-3 items-center">
+        <router-link
+          :to="{ path: `/user/${props.user_id}` }"
+          class="flex gap-x-3 mb-3 items-center"
+        >
+          <img
+            :src="user?.avatar!"
+            alt="user-photo"
+            class="w-14 h-14 object-cover bg-slate-300 rounded-full"
+          />
+          <div>
+            <p class="font-bold">{{ user?.full_name! }}</p>
+            <p class="text-sm">
+              {{ typeof props.category === 'string' ? props.category : props.category?.category }}
+            </p>
+            <p class="text-sm text-slate-400">{{ moment(props.created_at).fromNow() }}</p>
+          </div>
+        </router-link>
+        <div
+          v-click-outside
+          @onClickOutside="() => (actionToggled = false)"
+          class="ml-auto mb-auto relative"
+        >
+          <button @click="toggleAction">
+            <i class="block w-[25px] h-[25px] i-fas-ellipsis-vertical bg-gray-500"></i>
+          </button>
+          <div
+            v-if="actionToggled"
+            class="absolute top-8 right-0 shadow-md rounded-sm bg-white flex text-sm md:text-base flex-col"
+          >
+            <template v-if="currentUser.id === props.user_id">
+              <button class="px-4 md:py-2 py-1.5 hover:bg-slate-100 text-left">Edit</button>
+              <button class="px-4 md:py-2 py-1.5 text-red-500 hover:bg-slate-100 text-left">
+                Delete
+              </button>
+            </template>
+          </div>
         </div>
       </div>
-
       <!-- caption -->
-      <p>{{ props.caption }}</p>
-    </router-link>
+      <p class="my-2">
+        {{ props.caption }}
+      </p>
+    </div>
 
     <!-- Slider main container -->
     <swiper-container class="mySwiper" navigation="true">
       <swiper-slide v-for="photo in props.photos" :key="props.photos?.indexOf(photo)"
-        ><img :src="photo" alt="goals image" class="w-[200px] h-[200px]"
+        ><img :src="photo" alt="goals image" class="w-full max-h-[250px] object-cover"
       /></swiper-slide>
     </swiper-container>
 
     <!-- cheers and comments -->
     <div>
       <div>
-        <button class="btn btn-icon rounded-full">
-          <img src="/cheers.png" class="h-25px w-25px mr-2" />
+        <button class="btn btn-icon rounded-full mt-2">
+          <img
+            src="/cheers.png"
+            class="h-25px w-25px mr-2"
+            @click="likePost()"
+            :class="!is_liked ? 'opacity-50' : 'opacity-100'"
+          />
           <router-link :to="{ path: `/post/${props.id}/cheers` }">
             <span>
-              {{ props.cheers_count }}
+              {{ props.cheers_count + (is_liked ? 1 : 0) }}
             </span>
           </router-link>
         </button>

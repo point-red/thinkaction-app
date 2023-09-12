@@ -2,23 +2,16 @@ import { Goals } from '@/modules/data/goals'
 import { Users } from '@/modules/data/users'
 import type { ThinkActionCategory } from '@/modules/types/think-action'
 import { defineStore } from 'pinia'
+import moment from 'moment'
 
 export const useUserStore = defineStore('user-store', {
   state: () => ({
     currentUser: {
-      id: 'GhtHVSB12NHGBSGHHg',
-      full_name: 'Fitri Andriyani',
-      name: 'Fitri',
-      username: 'fitri07',
-      avatar: 'https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL',
-      bio: 'nothing to see here',
-      is_private: false,
-      is_supporting: false,
-      goals_performance: 80,
-      supporting_count: 100,
-      supporter_count: 100
+      ...Users[0],
+      email: 'johndoe123@gmail.com'
     },
     userGoals: Goals,
+    users: Users,
     resolutions: [],
     weeklyResolutions: [],
     comments: [
@@ -54,9 +47,48 @@ export const useUserStore = defineStore('user-store', {
     ]
   }),
   actions: {
+    findUserById: function (id: string) {
+      return this.$state.users.find((user) => user.id === id)
+    },
+    getGoalsSorted: function () {
+      return this.$state.userGoals.sort((a, b) =>
+        moment(a.created_at).isBefore(b.created_at) ? 1 : -1
+      )
+    },
+    getResolutionCategories: async function () {
+      const user = this.$state.currentUser
+      const resolutions = this.$state.userGoals
+        .filter((g) => g.user_id === user.id && g.goal_type === 'resolution') // @ts-ignore
+        .reduce((p, c) => (p.includes(c.category) ? p : [...p, c.category]), [])
+      return resolutions
+    },
+    getCurrentGoals: async function () {
+      const user = this.$state.currentUser
+      const resolutions = this.$state.userGoals.filter((g) => g.user_id === user.id)
+      return resolutions
+    },
+    getResolutions: async function () {
+      const user = this.$state.currentUser
+      const resolutions = this.$state.userGoals.filter(
+        (g) => g.user_id === user.id && g.goal_type === 'resolution'
+      )
+      return resolutions
+    },
     getCommentsByGoalId: function (goalId: string) {
-      const comments = this.$state.comments.filter((c) => c.goal_id === goalId)
+      const comments = this.$state.comments
+        .filter((c) => c.goal_id === goalId)
+        .sort((a, b) => {
+          if (moment(a.date_time).isAfter(b.date_time)) {
+            return 1
+          }
+          return -1
+        })
       return comments
+    },
+    likePost: function (goalId: string) {
+      this.$state.userGoals = this.$state.userGoals.map((g) => {
+        return g.id === goalId ? { ...g, is_liked_by_user: !g.is_liked_by_user } : g
+      })
     },
     addCommentToGoal: function (goalId: string, comment: string, parentId?: string) {
       const id = Math.random().toFixed(32).substring(2)
@@ -87,7 +119,7 @@ export const useUserStore = defineStore('user-store', {
     addResolutionGoal: function (params: any) {
       // TODO: Add api here:
 
-      const category = params.category as ThinkActionCategory
+      const category = params.category as string
       const date_time = params.date_time
       const caption = params.caption
       const files = params.files
@@ -97,7 +129,10 @@ export const useUserStore = defineStore('user-store', {
       const goal = {
         id,
         user_id: this.$state.currentUser.id,
-        user: this.$state.currentUser,
+        user: {
+          username: this.$state.currentUser.username,
+          avatar: this.$state.currentUser.avatar
+        },
         category,
         caption,
         photos: files,
@@ -116,19 +151,19 @@ export const useUserStore = defineStore('user-store', {
         caption: caption
       })
 
+      // @ts-ignore
       this.$state.userGoals.push(goal)
     },
     addWeeklyGoal: function (params: any) {
       const { resolution, date_time, caption, files, visibility, category } = params
       const goal_id = resolution.goal_id
-
       const id = Math.random().toFixed(32).substring(3)
 
       const goal = {
         id,
         user_id: this.$state.currentUser.id,
         user: this.$state.currentUser,
-        category,
+        category: category as string,
         caption,
         photos: files,
         is_liked_by_user: false,
@@ -148,7 +183,7 @@ export const useUserStore = defineStore('user-store', {
         goal_id: id,
         caption: caption
       })
-
+      // @ts-ignore
       this.$state.userGoals.push(goal)
     },
     addCompleteGoal(params: any) {
@@ -184,6 +219,8 @@ export const useUserStore = defineStore('user-store', {
           is_completed, // @ts-ignore
           goal_completed_id: id // @ts-ignore
         }
+
+        // @ts-ignore
         this.$state.userGoals.push(goal)
       }
     }

@@ -1,11 +1,22 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, onMounted } from 'vue'
 import UserPost from '../components/user-post.vue'
 import { Goals } from '@/modules/data/goals'
 import { useUserStore } from '@/stores/user'
+import moment from 'moment'
+import { useRouter } from 'vue-router'
 
 const userStore = useUserStore()
-const posts = ref(userStore.userGoals)
+const posts = computed(() => {
+  return userStore.getGoalsSorted()
+})
+const router = useRouter()
+
+onMounted(() => {
+  if (!localStorage.getItem('token')) {
+    router.push('/login')
+  }
+})
 </script>
 
 <template>
@@ -45,6 +56,7 @@ const posts = ref(userStore.userGoals)
         <UserPost
           :id="post.id"
           :user="post.user"
+          :user_id="post.user_id"
           :category="post.category"
           :caption="post.caption"
           :photos="post.photos"

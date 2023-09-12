@@ -32,6 +32,22 @@ app.directive('cleave', {
     el.cleave = new Cleave(el, binding.value || {})
   }
 })
+app.directive('click-outside', {
+  mounted: function (element, binding, vnode) {
+    element.clickOutsideEvent = function (event: any) {
+      //  check that click was outside the el and his children
+      if (!(element === event.target || element.contains(event.target))) {
+        // and if it did, call method provided in attribute value
+        vnode.props?.['on:onClickOutside']?.(event)
+        // binding.value(); run the arg
+      }
+    }
+    document.body.addEventListener('click', element.clickOutsideEvent)
+  },
+  unmounted: function (element) {
+    document.body.removeEventListener('click', element.clickOutsideEvent)
+  }
+})
 app.use(VueTippy)
 app.use(router)
 app.use(hljsVuePlugin)

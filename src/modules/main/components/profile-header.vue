@@ -27,7 +27,10 @@ const id = computed(() => {
   <div class="flex text-center space-x-4">
     <div class="md:w-1/4 w-1/3 mr-4 flex flex-col items-center gap-4">
       <div class="flex flex-col gap-2">
-        <img :src="user.avatar" class="m-auto w-[90px] rounded-full" />
+        <img
+          :src="user.avatar"
+          class="m-auto w-[75px] h-[75px] md:h-[90px] object-cover md:w-[90px] rounded-full"
+        />
         <span class="font-semibold text-xs md:text-base">{{ user.full_name ?? '' }}</span>
       </div>
       <template v-if="!user.is_user">

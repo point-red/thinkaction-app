@@ -16,7 +16,7 @@ const selected = ref({
 })
 
 const form = ref({
-  category: {},
+  category: '',
   visibility: '',
   caption: '',
   date_time: '',
@@ -36,13 +36,11 @@ const userStore = useUserStore()
 const save = function () {
   let values = form.value
   // @ts-ignore
-  let isAllFilled = values.category?.id && values.caption && values.visibility
-  let category: any = values.category
+  let isAllFilled = values.category && values.caption && values.visibility
   if (isAllFilled) {
-    values.category = { id: category.id, category: category.label }
     userStore.addResolutionGoal(values)
+    router.push('/')
   }
-  router.push('/')
 }
 </script>
 
@@ -59,10 +57,9 @@ const save = function () {
       <!-- category input -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Category</span>
       <component
-        :is="BaseSelect"
-        :list="Categories.map(({ id, category }) => ({ id, label: category }))"
+        :is="BaseInput"
         v-model="form.category"
-        placeholder="Finance"
+        placeholder="Input your category"
         border="full"
         class="mb-8"
       ></component>

@@ -5,7 +5,7 @@ import type {
   ThinkActionCategory,
   ThinkActionGoal
 } from '../../../types/think-action'
-import { computed, reactive, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import BaseProfileHeader from '../profile-header.vue'
 import BaseResolutionCategory from '../profile-resolution-categories.vue'
@@ -36,8 +36,14 @@ const userPosts = computed(() => {
     return props.posts
   }
   return props.posts.filter((p: ThinkActionGoal) => {
-    return p.category?.id === selectedCategory.value
+    return p.category === selectedCategory.value
   })
+})
+
+const computedCategories = computed(() => {
+  return props.posts
+    .reduce((p, u) => (p.includes(u.category as string) ? p : [...p, u.category as string]), [''])
+    .slice(1)
 })
 </script>
 
@@ -87,7 +93,7 @@ const userPosts = computed(() => {
       <hr class="border" />
       <BaseResolutionCategory
         :selected_category_id="selectedCategory"
-        :resolution_categories="props.categories!"
+        :resolution_categories="computedCategories"
         @select="selectCategory"
       ></BaseResolutionCategory>
       <hr class="border" />
@@ -99,6 +105,7 @@ const userPosts = computed(() => {
         <BaseUserPost
           :key="post.id"
           :id="post.id"
+          :user_id="post.user_id"
           :user="post.user!"
           :category="post.category!"
           :caption="post.caption"

@@ -36,10 +36,11 @@ let showReplies = ref(false)
 const sendComment = function () {
   if (text.value) {
     emit('reply', {
-      comment: text
+      comment: text.value
     })
     showTextarea.value = false
     showReplies.value = true
+    text.value = ''
   }
 }
 </script>
@@ -49,8 +50,12 @@ const sendComment = function () {
     <!-- PARENT -->
     <div>
       <!-- user info -->
-      <div class="flex gap-2 items-center">
-        <img :src="props.avatar" alt="user-photo" class="w-16 h-16 bg-slate-300 rounded-[1000px]" />
+      <div class="flex gap-2 items-center mb-2">
+        <img
+          :src="props.avatar"
+          alt="user-photo"
+          class="object-cover w-14 h-14 bg-slate-300 rounded-[1000px]"
+        />
         <div>
           <p class="font-bold">{{ props.full_name }}</p>
           <p>{{ dayjs(props.date_time).format('DD/MM/YYYY HH:mm') }}</p>
@@ -82,11 +87,11 @@ const sendComment = function () {
     <div v-for="reply in props.replies" :key="reply.id" class="ml-10 mb-4">
       <div v-if="showReplies">
         <!-- user info -->
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 mb-2">
           <img
             :src="reply.avatar"
             alt="user-photo"
-            class="w-16 h-16 bg-slate-300 rounded-[1000px]"
+            class="w-14 h-14 object-cover bg-slate-300 rounded-[1000px]"
           />
           <div>
             <p class="font-bold">{{ reply.full_name }}</p>

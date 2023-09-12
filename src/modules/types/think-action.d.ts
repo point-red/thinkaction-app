@@ -32,7 +32,8 @@ export type ThinkActionComment = {
 export type ThinkActionGoal = {
   id: string
   user: ThinkActionUser
-  category: ThinkActionCategory
+  user_id: string
+  category: ThinkActionCategory | string
   caption: string
   photos?: string[]
   is_liked_by_user: boolean

@@ -1,16 +1,12 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { BaseInput, BaseSelect } from '@/components/index'
+import { useUserStore } from '@/stores/user'
 
-const user = ref({
-  id: 'GhtHVSB12NHGBSGHHg',
-  full_name: 'Fitri Andriyani',
-  username: 'fitri07',
-  email: 'fitri07@gmail.com',
-  password: '123456',
-  avatar: 'https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL',
-  bio: 'nothing to see here',
-  is_private: false
+const userStore = useUserStore()
+
+const user = computed(() => {
+  return userStore.currentUser
 })
 
 const list = [
@@ -46,7 +42,7 @@ const preferredLanguage = ref({ id: 1, label: 'English' })
     </div>
 
     <div class="flex justify-center space-x-5 my-5">
-      <img :src="user.avatar" alt="user photo" class="rounded-full" />
+      <img :src="user.avatar" alt="user photo" class="w-32 h-32 object-cover rounded-full" />
       <div class="mt-5">
         <p>{{ user.full_name }}</p>
 

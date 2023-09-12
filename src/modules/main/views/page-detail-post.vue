@@ -25,6 +25,7 @@ const sendReply = function ({ comment }: any, comment_id?: string) {
       v-if="post"
       :id="post.id"
       :user="post.user"
+      :user_id="post.user_id"
       :category="post.category"
       :caption="post.caption"
       :photos="post.photos"

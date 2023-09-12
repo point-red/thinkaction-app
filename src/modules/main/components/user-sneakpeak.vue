@@ -20,7 +20,11 @@ const props = withDefaults(defineProps<Props>(), {
 
 <template>
   <div class="flex mb-5">
-    <img :src="props.avatar" class="w-[60px] inline-block mr-2 rounded-full" alt="user profile" />
+    <img
+      :src="props.avatar"
+      class="w-[60px] h-[60px] object-cover inline-block mr-2 rounded-full"
+      alt="user profile"
+    />
     <div>
       <p class="font-semibold">{{ props.username }}</p>
       <p class="">{{ props.fullname }}</p>

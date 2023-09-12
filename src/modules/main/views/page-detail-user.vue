@@ -13,7 +13,7 @@ const userStore = useUserStore()
 const route = useRoute()
 
 let goals = computed(() => {
-  return Goals.filter((g) => g.user_id === route.params.id)
+  return userStore.getGoalsSorted().filter((g) => g.user_id === route.params.id)
 })
 
 const states = ref<any>({
@@ -23,7 +23,7 @@ const states = ref<any>({
 })
 
 onMounted(async () => {
-  let user = await UserModel.findUserById(route.params.id as string)
+  let user = await userStore.findUserById(route.params.id as string)
   states.value.user = user
 })
 </script>

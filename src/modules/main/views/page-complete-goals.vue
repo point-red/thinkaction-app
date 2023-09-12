@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { BaseInput, BaseCheckbox, BaseSelect } from '@/components/index'
-import { Categories } from '@/modules/data/categories'
 import { useUserStore } from '@/stores/user'
 
 const privateTypes = [
@@ -9,18 +8,35 @@ const privateTypes = [
   { id: 'supporter', label: 'Supporter' },
   { id: 'private', label: 'Private' }
 ]
-
-const categories = Categories.map(({ category, id }) => ({ id, label: category }))
-
 const userStore = useUserStore()
-const goals = userStore.weeklyResolutions.map((a: any) => ({
-  id: a.goal_id,
-  label: a.caption
-}))
+
+const categories = ref<any>([])
+const goals = ref<any>([])
+
+onMounted(() => {
+  userStore.getResolutionCategories().then((data) => {
+    categories.value = data
+  })
+  userStore.getCurrentGoals().then((data: any) => {
+    goals.value = data
+  })
+})
+
+const computedGoals = computed(() => {
+  return goals.value
+    .filter((g: any) => (form.value.category?.id ? g.category === form.value.category?.id : ''))
+    .map((a: any) => {
+      console.log(a)
+      return {
+        id: a.id,
+        label: a.caption
+      }
+    })
+})
 
 const checked = ref(false)
 
-const form = ref({
+const form = ref<any>({
   caption: '',
   category: {},
   goal: {},
@@ -34,7 +50,7 @@ const submit = function () {
   let visibility: any = form.value.visibility
   let values: any = {}
   if (category.id && goal.id && visibility.id) {
-    values.category = { id: category.id, category: category.label }
+    values.category = category.id
     values.goal_id = goal.id
     values.caption = form.value.caption
     values.visibility = visibility?.id
@@ -49,7 +65,6 @@ const submit = function () {
   <div class="main-content-container">
     <p class="text-lg font-semibold">Create Your Complete Goals</p>
     <hr />
-
     <div>
       <p class="font-semibold text-lg text-[#3D8AF7] text-center mb-8">
         Congratulations! You have achieved your weekly goals, let record them!
@@ -60,8 +75,7 @@ const submit = function () {
       <component
         :is="BaseSelect"
         v-model="form.category"
-        :list="categories"
-        border="full"
+        :list="categories.map((category: string) => ({ id: category, label: category }))"
         class="mb-8"
       ></component>
 
@@ -70,7 +84,7 @@ const submit = function () {
       <component
         :is="BaseSelect"
         v-model="form.goal"
-        :list="goals"
+        :list="computedGoals"
         border="full"
         class="mb-8"
       ></component>
