@@ -17,7 +17,7 @@ let goals = computed(() => {
 })
 
 const states = ref<any>({
-  categories: Categories.filter((c) => goals.value.some((s) => s.category.id === c.id)),
+  categories: Categories.filter((c) => goals.value.some((s) => s.category === c.id)),
   goals: goals,
   user: {}
 })
