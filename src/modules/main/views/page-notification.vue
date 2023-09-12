@@ -30,7 +30,7 @@ const notifications = ref([
       >
         <div>
           <p class="break-words">{{ notif.body }}</p>
-          <time class="text-xs">{{ moment(notif.created_at).fromNow() }} </time>
+          <time class="text-xs lg:hidden block">{{ moment(notif.created_at).fromNow() }} </time>
         </div>
         <div class="flex gap-x-4 items-center h-[30px] justify-end items-end flex-col">
           <div v-if="notif.type === 'approval'" class="flex flex-row gap-1.5">
@@ -40,6 +40,9 @@ const notifications = ref([
             <button class="btn btn-xs px-3 py-1.5 font-medium btn-primary bg-[#3D8AF7]">
               Accept
             </button>
+            <time class="text-xs my-auto hidden lg:block"
+              >{{ moment(notif.created_at).fromNow() }}
+            </time>
           </div>
           <div v-else class=""></div>
         </div>
