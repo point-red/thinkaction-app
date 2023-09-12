@@ -26,12 +26,14 @@ const route = useRoute()
 const menus = [
   {
     path: '/',
+    default: true,
     fillIcon: 'i-fas-house',
     borderIcon: 'i-far-house',
     click: defaultClick
   },
   {
     path: '/find',
+    default: true,
     fillIcon: 'i-fas-magnifying-glass',
     borderIcon: 'i-far-magnifying-glass',
     click: defaultClick
@@ -43,11 +45,13 @@ const menus = [
   },
   {
     path: '/notification',
+    default: true,
     fillIcon: 'i-fas-bell',
     borderIcon: 'i-far-bell',
     click: defaultClick
   },
   {
+    path: '/profile',
     fillIcon: 'i-fas-user',
     borderIcon: 'i-far-user',
     click: toggleDetailAccountVisibility
@@ -95,9 +99,9 @@ const menus = [
         v-for="(menu, index) in menus"
         class="w-full text-center"
         :key="index"
-        :is="menu.path ? RouterLink : 'div'"
+        :is="menu.default ? RouterLink : 'div'"
         v-bind="
-          menu.path
+          menu.default
             ? {
                 to: { path: menu.path }
               }

@@ -33,7 +33,7 @@ onMounted(async () => {
   <div class="main-content-container">
     <UserDetails
       :is_current_user="true"
-      :posts="(states.posts as ThinkActionGoal[])"
+      :posts="(states.goals as ThinkActionGoal[])"
       :categories="states.categories"
       :user="states.user"
     />
