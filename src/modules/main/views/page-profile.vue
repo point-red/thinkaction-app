@@ -2,19 +2,16 @@
 import { ref, onMounted, computed } from 'vue'
 import UserDetails from '@/modules/main/components/users/user-details.vue'
 import { Categories } from '@/modules/data/categories'
-import { Goals } from '@/modules/data/goals'
-import { Users } from '@/modules/data/users'
 import type { ThinkActionGoal } from '@/modules/types/think-action'
 
 import { useUserStore } from '@/stores/user'
 import { useRoute } from 'vue-router'
-import { UserModel } from '@/lib/models/UserModel'
 
 const userStore = useUserStore()
 const route = useRoute()
 
 let goals = computed(() => {
-  return userStore.getGoalsSorted().filter((g) => g.user_id === route.params.id)
+  return userStore.getGoalsSorted().filter((g) => g.user_id === userStore.currentUser.id)
 })
 
 const states = ref<any>({
@@ -24,7 +21,7 @@ const states = ref<any>({
 })
 
 onMounted(async () => {
-  let user = await userStore.findUserById(userStore.currentUser.id as string)
+  let user = await userStore.findUserById(userStore.currentUser.id)
   states.value.user = user
 })
 </script>

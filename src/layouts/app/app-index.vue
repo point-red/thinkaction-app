@@ -21,14 +21,14 @@ import AppFooter from './app-footer.vue'
       <main class="main-content">
         <router-view />
       </main>
-      <app-footer class="pt-4 md:hidden"></app-footer>
+      <app-footer class="md:hidden"></app-footer>
     </div>
   </div>
 </template>
 
 <style lang="postcss">
 .main-container {
-  @apply flex flex-col py-4 w-full;
+  @apply flex flex-col w-full;
 }
 
 .is-sidebar-open .main-container {

@@ -6,12 +6,14 @@ let visibility = ref(false)
 
 let showDetailAccount = ref(false)
 
-const toggle = () => {
+const toggle = (e: any) => {
+  e.stopPropagation()
   visibility.value = !visibility.value
   showDetailAccount.value = false
 }
 
-const toggleDetailAccountVisibility = () => {
+const toggleDetailAccountVisibility = (e: any) => {
+  e.stopPropagation()
   showDetailAccount.value = !showDetailAccount.value
   visibility.value = false
 }
@@ -63,6 +65,8 @@ const menus = [
   <div>
     <!-- SLIDER - CREATE GOALS -->
     <div
+      v-click-outside
+      @onClickOutside="() => (visibility = false)"
       @click="toggle"
       v-if="visibility"
       class="font-semibold rounded-t-[30px] bg-blue text-center text-white space-y-[20px] py-[20px]"
@@ -80,6 +84,8 @@ const menus = [
 
     <!-- SLIDER - DETAIL ACCOUNT -->
     <div
+      v-click-outside
+      @onClickOutside="(e: any) => (showDetailAccount = false)"
       @click="toggleDetailAccountVisibility"
       v-if="showDetailAccount"
       class="font-semibold rounded-t-[30px] bg-blue text-center text-white space-y-[20px] py-[20px]"
@@ -94,7 +100,7 @@ const menus = [
     </div>
 
     <!-- BUTTON NAVIGATION -->
-    <div class="flex justify-between sm:static">
+    <div class="flex justify-between sm:static py-4">
       <component
         v-for="(menu, index) in menus"
         class="w-full text-center"

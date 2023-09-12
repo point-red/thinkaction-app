@@ -1,5 +1,5 @@
 import { Goals } from '@/modules/data/goals'
-import { Users } from '@/modules/data/users'
+import { Users, uuid } from '@/modules/data/users'
 import type { ThinkActionCategory } from '@/modules/types/think-action'
 import { defineStore } from 'pinia'
 import moment from 'moment'
@@ -12,8 +12,12 @@ export const useUserStore = defineStore('user-store', {
     },
     userGoals: Goals,
     users: Users,
-    resolutions: [],
-    weeklyResolutions: [],
+    resolutions: Goals.filter(
+      (g) => g.user_id === Users[0].id && g.goal_type === 'resolutions'
+    ).map((g) => ({ goal_id: g.id, caption: g.caption })),
+    weeklyResolutions: Goals.filter(
+      (g) => g.user_id === Users[0].id && g.goal_type === 'weekly'
+    ).map((g) => ({ goal_id: g.id, caption: g.caption })),
     comments: [
       {
         ...Users[0],
@@ -186,12 +190,16 @@ export const useUserStore = defineStore('user-store', {
       // @ts-ignore
       this.$state.userGoals.push(goal)
     },
-    addCompleteGoal(params: any) {
+    async addCompleteGoal(params: any) {
       const { is_completed, goal_id, caption, files, visibility, category } = params
-      const targetGoalIndex = this.$state.weeklyResolutions.findIndex(
-        (w: any) => w.goal_id === goal_id
+      const goals = await this.getCurrentGoals()
+      const targetGoalIndex = goals.findIndex(
+        (w: any) =>
+          w.id === goal_id &&
+          !goals.some((g) => g.goal_type === 'completed' && (g.meta as any)?.goal_id === goal_id)
       )
-      const id = Math.random().toFixed(32).substring(3)
+
+      const id = uuid()
       const goal = {
         id,
         user_id: this.$state.currentUser.id,
@@ -207,18 +215,18 @@ export const useUserStore = defineStore('user-store', {
         created_at: new Date().toISOString(),
         goal_type: 'complete',
         meta: {
-          week_id: goal_id,
+          goal_id: goal_id,
           is_completed
         }
       }
       if (targetGoalIndex >= 0) {
         // @ts-ignore
-        this.$state.weeklyResolutions[targetGoalIndex] = {
-          // @ts-ignore
-          ...this.$state.weeklyResolutions[targetGoalIndex], // @ts-ignore
-          is_completed, // @ts-ignore
-          goal_completed_id: id // @ts-ignore
-        }
+        // this.$state.weeklyResolutions[targetGoalIndex] = {
+        //   // @ts-ignore
+        //   ...this.$state.weeklyResolutions[targetGoalIndex], // @ts-ignore
+        //   is_completed, // @ts-ignore
+        //   goal_completed_id: id // @ts-ignore
+        // }
 
         // @ts-ignore
         this.$state.userGoals.push(goal)
