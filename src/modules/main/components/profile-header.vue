@@ -6,6 +6,7 @@ import { useUserStore } from '@/stores/user'
 
 type DefaultProps = ThinkActionUser & {
   is_user: boolean
+  is_supporting: boolean
 }
 
 const user = withDefaults(defineProps<DefaultProps>(), {
@@ -35,14 +36,14 @@ const id = computed(() => {
       </div>
       <template v-if="!user.is_user">
         <button
-          v-if="user.is_supporting == false"
+          v-if="!user.is_supporting"
           @click="emit('support')"
           class="btn bg-[#3D8AF7] w-fit mx-auto font-semibold text-white hidden md:block"
         >
           Support
         </button>
         <button
-          v-if="user.is_supporting == true"
+          v-if="user.is_supporting"
           @click="emit('support')"
           class="btn bg-slate-400 w-fit mx-auto font-semibold text-white hidden md:block"
         >

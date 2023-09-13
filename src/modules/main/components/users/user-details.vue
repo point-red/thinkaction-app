@@ -5,11 +5,12 @@ import type {
   ThinkActionCategory,
   ThinkActionGoal
 } from '../../../types/think-action'
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import BaseProfileHeader from '../profile-header.vue'
 import BaseResolutionCategory from '../profile-resolution-categories.vue'
 import BaseUserPost from '../user-post.vue'
+import { useUserStore } from '@/stores/user'
 
 type Props = {
   is_current_user?: boolean
@@ -23,13 +24,16 @@ const props = withDefaults(defineProps<Props>(), {
   user: null
 })
 
+const userStore = useUserStore()
+let isSupporting = computed(() =>
+  props.user ? userStore.isSupporting((props.user as any).id) : false
+)
+
 const selectedCategory = ref('')
 
 const selectCategory = function (id: string) {
   selectedCategory.value = id
 }
-
-let isSupporting = ref(false)
 
 const userPosts = computed(() => {
   if (selectedCategory.value === '') {
@@ -45,6 +49,13 @@ const computedCategories = computed(() => {
     .reduce((p, u) => (p.includes(u.category as string) ? p : [...p, u.category as string]), [''])
     .slice(1)
 })
+// TODO: Add async functions
+const supportUser = function () {
+  userStore.toggleSupport((props.user as any).id)
+}
+// onMounted(() => {
+//   isSupporting.value = userStore.isSupporting((props.user as any).id)
+// })
 </script>
 
 <template>
@@ -58,7 +69,7 @@ const computedCategories = computed(() => {
       :bio="props.user.bio!"
       :is_private="props.user.is_private!"
       :is_supporting="isSupporting"
-      @support="isSupporting = !isSupporting"
+      @support="supportUser"
       :goals_performance="props.user.goals_performance!"
       :supporting_count="props.user.supporting_count!"
       :supporter_count="props.user.supporter_count!"
@@ -68,15 +79,15 @@ const computedCategories = computed(() => {
     <div v-if="!props.is_current_user">
       <!-- SUPPORTING BUTTON -->
       <button
-        @click="isSupporting = true"
-        v-if="isSupporting == false"
+        @click="supportUser"
+        v-if="!isSupporting"
         class="btn bg-[#3D8AF7] w-full font-semibold text-white md:hidden"
       >
         Support
       </button>
       <template v-if="isSupporting">
         <button
-          @click="isSupporting = false"
+          @click="supportUser"
           class="btn bg-slate-300 text-sky-500 w-full font-semibold text-white md:hidden"
         >
           Supporting

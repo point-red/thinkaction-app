@@ -3,17 +3,23 @@ import moment from 'moment'
 
 class GoalModel {
   static async generateMonthlyReport(userStore: any, month: number) {
-    const goals = userStore.weeklyResolutions
-      .map((w: any) => {
-        return {
-          targetGoal: userStore.userGoals.find((g: any) => g.id === w.goal_id),
-          is_completed: w.is_completed ?? false
-        }
-      })
-      .filter((a: any) => !!a.targetGoal)
-      .map((a: any) => {
-        return { ...a.targetGoal, is_completed: a.is_completed }
-      })
+    // const goals = userStore.weeklyResolutions
+    //   .map((w: any) => {
+    //     return {
+    //       targetGoal: userStore.userGoals.find((g: any) => g.id === w.goal_id),
+    //       is_completed: w.is_completed ?? false
+    //     }
+    //   })
+    //   .filter((a: any) => !!a.targetGoal)
+    //   .map((a: any) => {
+    //     return { ...a.targetGoal, is_completed: a.is_completed }
+    //   })
+    let goals = await userStore.getCurrentGoals()
+    goals = goals.filter(
+      (g: any) => g.goal_type === 'completed' && moment(g.created_at).year() === moment().year()
+    )
+    const categories = await userStore.getResolutionCategories()
+    console.log(goals)
 
     const weeks = []
     let firstDay = moment().month(month).startOf('month')
@@ -47,13 +53,13 @@ class GoalModel {
           start,
           end
         },
-        categories: Categories.map(({ category, id }) => {
+        categories: categories.map((category: string) => {
           return {
-            id,
+            id: category,
             category,
             goals: goals.filter(
               (g: any) =>
-                g.category.id === id &&
+                g.category === category &&
                 moment(converted(g.date_time)).isSameOrAfter(start) &&
                 moment(converted(g.date_time)).isSameOrBefore(end)
             )

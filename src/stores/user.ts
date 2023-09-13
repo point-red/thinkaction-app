@@ -1,6 +1,5 @@
 import { Goals } from '@/modules/data/goals'
-import { Users, uuid } from '@/modules/data/users'
-import type { ThinkActionCategory } from '@/modules/types/think-action'
+import { Users, UserRelations, uuid } from '@/modules/data/users'
 import { defineStore } from 'pinia'
 import moment from 'moment'
 
@@ -12,6 +11,7 @@ export const useUserStore = defineStore('user-store', {
     },
     userGoals: Goals,
     users: Users,
+    relations: UserRelations,
     resolutions: Goals.filter(
       (g) => g.user_id === Users[0].id && g.goal_type === 'resolutions'
     ).map((g) => ({ goal_id: g.id, caption: g.caption })),
@@ -51,11 +51,99 @@ export const useUserStore = defineStore('user-store', {
     ]
   }),
   actions: {
+    getRelations: function (user_id: string, type: string, query: string = '') {
+      const data = this.$state.relations.filter((d) => {
+        if (type === 'supporters') {
+          return (
+            (d.user_id === user_id && d.supported_by_related) ||
+            (d.related_user_id === user_id && d.supported_by_current)
+          )
+        } else if (type === 'supporting') {
+          return (
+            (d.user_id === user_id && d.supported_by_current) ||
+            (d.related_user_id === user_id && d.supported_by_related)
+          )
+        }
+        return false
+      })
+      return data
+        .map((d) => {
+          return this.$state.users.find(
+            (u) => (d.user_id === user_id ? d.related_user_id : d.user_id) === u.id
+          )
+        })
+        .filter(
+          (u) => !!u && (u.full_name?.includes(query ?? '') || u?.username?.includes(query ?? ''))
+        )
+    },
+    deleteGoal(goalId: string) {
+      const currentUser = this.$state.currentUser.id
+      const goal = this.userGoals.findIndex((g) => g.id === goalId && g.user_id === currentUser)
+      if (goal >= 0) {
+        this.userGoals.splice(goal, 1)
+      }
+    },
+    isSupporting: function (id: string, currentUserId: string | undefined | null = null) {
+      if (!currentUserId) {
+        currentUserId = this.$state.currentUser.id
+      }
+
+      let relationship = this.$state.relations.find(
+        (r) => r.user_id === currentUserId && r.related_user_id === id
+      )
+
+      if (!relationship) {
+        relationship = this.$state.relations.find(
+          (r) => r.related_user_id === currentUserId && r.user_id === id
+        )
+        if (relationship) {
+          return relationship.supported_by_related
+        }
+        return false
+      } else {
+        return relationship.supported_by_current
+      }
+    },
+    toggleSupport: function (id: string, currentUserId: string | undefined | null = null) {
+      if (!currentUserId) {
+        currentUserId = this.$state.currentUser.id
+      }
+
+      let isReverse = false
+      let relationship = this.$state.relations.findIndex(
+        (r) => r.user_id === currentUserId && r.related_user_id === id
+      )
+      if (relationship < 0) {
+        relationship = this.$state.relations.findIndex(
+          (r) => r.related_user_id === currentUserId && r.user_id === id
+        )
+        if (relationship >= 0) {
+          isReverse = true
+        }
+      }
+
+      if (relationship >= 0) {
+        if (!isReverse) {
+          this.$state.relations[relationship].supported_by_current =
+            !this.$state.relations[relationship].supported_by_current
+        } else {
+          this.$state.relations[relationship].supported_by_related =
+            !this.$state.relations[relationship].supported_by_related
+        }
+      } else {
+        this.$state.relations.push({
+          user_id: currentUserId,
+          related_user_id: id,
+          supported_by_current: true,
+          supported_by_related: false
+        })
+      }
+    },
     findUserById: function (id: string) {
       return this.$state.users.find((user) => user.id === id)
     },
-    getGoalsSorted: function () {
-      return this.$state.userGoals.sort((a, b) =>
+    getGoalsSorted: async function (isCurrent = true) {
+      return (isCurrent ? await this.getFeed() : this.$state.userGoals).sort((a, b) =>
         moment(a.created_at).isBefore(b.created_at) ? 1 : -1
       )
     },
@@ -190,6 +278,17 @@ export const useUserStore = defineStore('user-store', {
       // @ts-ignore
       this.$state.userGoals.push(goal)
     },
+    getSupportingUsers() {
+      const userId = this.$state.currentUser.id
+      return this.$state.relations.filter((u) => u.user_id === userId && u.supported_by_current)
+    },
+    async getFeed() {
+      const supportingUsers = this.getSupportingUsers()
+      const userId = this.$state.currentUser.id
+      return this.$state.userGoals.filter(
+        (g) => supportingUsers.some((u) => u.related_user_id === g.user_id) || g.user_id === userId
+      )
+    },
     async addCompleteGoal(params: any) {
       const { is_completed, goal_id, caption, files, visibility, category } = params
       const goals = await this.getCurrentGoals()
@@ -213,7 +312,7 @@ export const useUserStore = defineStore('user-store', {
         visibility, // public, supporter, private
         date_time: new Date().toISOString(),
         created_at: new Date().toISOString(),
-        goal_type: 'complete',
+        goal_type: 'completed',
         meta: {
           goal_id: goal_id,
           is_completed

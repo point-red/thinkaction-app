@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import UserPost from '../components/user-post.vue'
 import { Goals } from '@/modules/data/goals'
 import { useUserStore } from '@/stores/user'
@@ -7,15 +7,22 @@ import moment from 'moment'
 import { useRouter } from 'vue-router'
 
 const userStore = useUserStore()
-const posts = computed(() => {
-  return userStore.getGoalsSorted()
-})
+const posts = ref<any>([])
 const router = useRouter()
 
 onMounted(() => {
   if (!localStorage.getItem('token')) {
     router.push('/login')
   }
+  userStore.getGoalsSorted().then((r) => {
+    posts.value = r
+  })
+})
+
+watch(userStore.userGoals, (currentValue, oldValue) => {
+  userStore.getGoalsSorted().then((r) => {
+    posts.value = r
+  })
 })
 </script>
 

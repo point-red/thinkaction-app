@@ -21,7 +21,7 @@ onMounted(() => {
     goals.value = data.filter(
       (d: any) =>
         d.goal_type !== 'complete' &&
-        data.some((s: any) => s.meta.goal_id !== d.id && s.goal_type !== 'resolution')
+        !data.some((s: any) => s.meta.goal_id === d.id && s.goal_type === 'resolution')
     )
   })
 })

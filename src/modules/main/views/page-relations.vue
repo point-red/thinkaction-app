@@ -5,6 +5,7 @@ import UserSneakpeak from '../components/user-sneakpeak.vue'
 import { UserModel } from '@/lib/models/UserModel'
 import { useUserStore } from '@/stores/user'
 import { useRoute } from 'vue-router'
+import UserRelationItem from '../components/users/user-relation-item.vue'
 
 let relations = ref<any>([])
 
@@ -14,7 +15,14 @@ const route = useRoute()
 const { id, type } = route.params
 
 const search = async function () {
-  relations.value = await UserModel.findUserRelations(id as string, type as string)
+  relations.value = (await userStore.getRelations(id as string, type as string)).sort(
+    (a: any, b) => {
+      if (a.id === currentUser.id) {
+        return -1
+      }
+      return 0
+    }
+  )
 }
 
 let isSupporting = ref(false)
@@ -45,37 +53,8 @@ const form = ref({
     <!-- LIST SUPPORTER -->
     <div class="flex flex-col gap-2 px-2">
       <div class="flex justify-between" v-for="item in relations" :key="item.user_id">
-        <router-link :to="{ path: `/user/${item.id}` }">
-          <UserSneakpeak
-            :id="item.id"
-            :fullname="item.full_name"
-            :username="item.username"
-            :avatar="item.avatar"
-            :supporter="item.supporter"
-          ></UserSneakpeak>
-        </router-link>
-        <div class="flex space-x-2">
-          <button
-            v-if="isSupporting"
-            @click="isSupporting = false"
-            class="bg-slate-400 h-[40px] rounded-lg mt-6 px-3 text-white font-semibold"
-          >
-            Supporting
-          </button>
-          <button
-            v-if="!isSupporting"
-            @click="isSupporting = true"
-            class="bg-[#3D8AF7] h-[40px] rounded-lg mt-6 px-6 text-white font-semibold"
-          >
-            Support
-          </button>
-          <button
-            v-if="type === 'supporters' && id === currentUser?.id"
-            class="bg-slate-400 h-[40px] rounded-lg mt-6 px-3 text-white font-semibold"
-          >
-            Remove
-          </button>
-        </div>
+        <UserRelationItem :item="item" :id="(id as string)!" :type="(type as string)!">
+        </UserRelationItem>
       </div>
     </div>
   </div>

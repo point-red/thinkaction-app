@@ -23,8 +23,7 @@ export const Users = [
     id: 'e36ffbd7-1a79-4f28-8c62-9a396a7c2718',
     full_name: 'Jane Smith',
     username: 'janesmith456',
-    avatar:
-      'https://fastly.picsum.photos/id/1027/200/300.jpg?hmac=WCxdERZ7sgk4jhwpfIZT0M48pctaaDcidOi3dKSHJYY',
+    avatar: 'https://picsum.photos/299/299',
     bio: 'Travel enthusiast and nature lover.',
     is_private: false,
     is_supporting: false,
