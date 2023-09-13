@@ -16,6 +16,7 @@ export interface Props {
   comments_count?: number
   date_time?: string
   created_at?: string
+  goal_type?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -116,7 +117,11 @@ const deletePost = function () {
             class="absolute z-[100] top-8 right-0 shadow-md rounded-sm bg-white flex text-sm md:text-base flex-col"
           >
             <template v-if="currentUser.id === props.user_id">
-              <button class="px-4 md:py-2 py-1.5 hover:bg-slate-100 text-left">Edit</button>
+              <router-link
+                :to="{ path: 'edit-' + props.goal_type + '/' + props.id }"
+                class="px-4 md:py-2 py-1.5 hover:bg-slate-100 text-left"
+                >Edit</router-link
+              >
               <button
                 @click="openDeleteModal"
                 class="px-4 md:py-2 py-1.5 text-red-500 hover:bg-slate-100 text-left"

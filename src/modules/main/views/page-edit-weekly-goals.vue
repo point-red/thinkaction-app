@@ -3,8 +3,10 @@ import { computed, onMounted, ref } from 'vue'
 import { BaseDatepicker, BaseTextarea, BaseSelect } from '@/components/index'
 import { Categories } from '@/modules/data/categories'
 import { useUserStore } from '@/stores/user'
-import router from '@/router'
+import { useRoute, useRouter } from 'vue-router'
 
+const route = useRoute()
+const router = useRouter()
 const list = [
   { id: 'public', label: 'Everyone' },
   { id: 'supporter', label: 'Supporter' },
@@ -20,7 +22,7 @@ const selected = ref({
   category: {}
 })
 
-const form = ref({
+const form = ref<any>({
   caption: '',
   category: {},
   resolution: { goal_id: '' },
@@ -29,7 +31,9 @@ const form = ref({
   files: []
 })
 
+const id = route.params.id as string
 const categories = ref<any>([])
+const currentGoal = ref<any>(null)
 
 onMounted(() => {
   userStore.getResolutionCategories().then((data) => {
@@ -37,6 +41,30 @@ onMounted(() => {
   })
   userStore.getResolutions().then((data) => {
     resolutions.value = data
+
+    let goal = userStore.findGoalById(id as string)
+    if (goal) {
+      form.value = {
+        category: { id: goal.category, label: goal.category },
+        visibility: goal.visibility,
+        caption: goal.caption,
+        date_time: goal.date_time,
+        resolution: { goal_id: (goal.meta as any).resolution_id },
+        files: goal.photos
+      }
+      selected.value.category = { id: goal.category, label: goal.category }
+      selected.value.visibility = list.find((l) => goal?.visibility === l.id) || list[0]
+      let res =
+        computedResolutions.value.find((c: any) => c.id === (goal?.meta as any)?.resolution_id) ??
+        {}
+      selected.value.resolution = {
+        id: res.id,
+        goal_id: res.id,
+        label: res.caption
+      }
+
+      currentGoal.value = goal
+    }
   })
 })
 
@@ -68,14 +96,14 @@ const submit = function () {
   if (isAllFilled) {
     // @ts-ignore
     values.category = values.category.id
-    userStore.addWeeklyGoal(values)
+    userStore.editWeeklyGoal(values, id)
     router.push('/')
   }
 }
 </script>
 
 <template>
-  <div class="main-content-container">
+  <div v-if="currentGoal" class="main-content-container">
     <p class="text-lg font-semibold">Create Your Weekly Goals</p>
     <hr />
 

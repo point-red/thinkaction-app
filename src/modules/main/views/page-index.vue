@@ -72,6 +72,7 @@ watch(userStore.userGoals, (currentValue, oldValue) => {
           :comments_count="post.comments_count"
           :date_time="post.date_time"
           :created_at="post.created_at"
+          :goal_type="post.goal_type"
         ></UserPost>
       </div>
     </div>

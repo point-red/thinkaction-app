@@ -114,6 +114,7 @@ const supportUser = function () {
       <!-- USER POSTS -->
       <div v-for="post in userPosts" :key="post.id">
         <BaseUserPost
+          :goal_type="post.goal_type"
           :key="post.id"
           :id="post.id"
           :user_id="post.user_id"

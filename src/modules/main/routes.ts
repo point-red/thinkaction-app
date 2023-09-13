@@ -23,8 +23,16 @@ export const routes = {
       component: () => import('./views/page-create-resolution.vue')
     },
     {
-      path: 'edit-goal',
-      component: () => import('./views/page-edit-goal.vue')
+      path: 'edit-resolution/:id',
+      component: () => import('./views/page-edit-resolution.vue')
+    },
+    {
+      path: 'edit-weekly/:id',
+      component: () => import('./views/page-edit-weekly-goals.vue')
+    },
+    {
+      path: 'edit-completed/:id',
+      component: () => import('./views/page-edit-complete-goals.vue')
     },
     {
       path: 'create-weekly-goals',

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { BaseInput, BaseDatepicker, BaseTextarea, BaseSelect } from '@/components/index'
-import { Categories } from '@/modules/data/categories'
 import { useUserStore } from '@/stores/user'
 import router from '@/router'
+import { useRoute } from 'vue-router'
 
 const list = [
   { id: 'public', label: 'Everyone' },
@@ -11,11 +11,15 @@ const list = [
   { id: 'private', label: 'Private' }
 ]
 
-const selected = ref({
+const route = useRoute()
+
+const id = route.params.id
+const selected = ref<any>({
   visibility: ''
 })
 
-const form = ref({
+const currentGoal = ref<any>(null)
+const form = ref<any>({
   category: '',
   visibility: '',
   caption: '',
@@ -38,15 +42,30 @@ const save = function () {
   // @ts-ignore
   let isAllFilled = values.category && values.caption && values.visibility
   if (isAllFilled) {
-    userStore.addResolutionGoal(values)
+    userStore.editResolutionGoal(values, id as string)
     router.push('/')
   }
 }
+
+onMounted(() => {
+  let goal = userStore.findGoalById(id as string)
+  if (goal) {
+    form.value = {
+      category: goal.category,
+      visibility: goal.visibility,
+      caption: goal.caption,
+      date_time: goal.date_time,
+      files: goal.photos
+    }
+    selected.value.visibility = list.find((l) => goal?.visibility === l.id) || list[0]
+    currentGoal.value = goal
+  }
+})
 </script>
 
 <template>
-  <div class="main-content-container">
-    <p class="text-lg font-semibold">Create Your Resolution</p>
+  <div v-if="currentGoal" class="main-content-container">
+    <p class="text-lg font-semibold">Update Resolution</p>
     <hr />
 
     <div>
@@ -60,6 +79,7 @@ const save = function () {
         :is="BaseInput"
         v-model="form.category"
         placeholder="Input your category"
+        border="full"
         class="mb-8"
       ></component>
 
@@ -105,4 +125,5 @@ const save = function () {
       </div>
     </div>
   </div>
+  <div v-else>Goal not found</div>
 </template>

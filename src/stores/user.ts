@@ -76,6 +76,9 @@ export const useUserStore = defineStore('user-store', {
           (u) => !!u && (u.full_name?.includes(query ?? '') || u?.username?.includes(query ?? ''))
         )
     },
+    findGoalById(id: string) {
+      return this.$state.userGoals.find((i) => i.id === id)
+    },
     deleteGoal(goalId: string) {
       const currentUser = this.$state.currentUser.id
       const goal = this.userGoals.findIndex((g) => g.id === goalId && g.user_id === currentUser)
@@ -216,7 +219,7 @@ export const useUserStore = defineStore('user-store', {
       const caption = params.caption
       const files = params.files
       const visibility = params.visibility
-      const id = Math.random().toFixed(32).substring(3)
+      const id = uuid()
 
       const goal = {
         id,
@@ -246,10 +249,37 @@ export const useUserStore = defineStore('user-store', {
       // @ts-ignore
       this.$state.userGoals.push(goal)
     },
+    editResolutionGoal: function (params: any, id: string) {
+      // TODO: Add api here:
+
+      const category = params.category as string
+      const date_time = params.date_time
+      const caption = params.caption
+      const files = params.files
+      const visibility = params.visibility
+
+      const currentGoal = this.findGoalById(id)
+      if (!currentGoal) {
+        return
+      }
+
+      const goal = {
+        ...currentGoal,
+        category,
+        caption,
+        visibility, // public, supporter, private
+        date_time,
+        created_at: new Date().toISOString(),
+        goal_type: 'resolution'
+      }
+
+      // @ts-ignore
+      this.$state.userGoals = this.$state.userGoals.map((u) => (u.id === id ? goal : u))
+    },
     addWeeklyGoal: function (params: any) {
       const { resolution, date_time, caption, files, visibility, category } = params
       const goal_id = resolution.goal_id
-      const id = Math.random().toFixed(32).substring(3)
+      const id = uuid()
 
       const goal = {
         id,
@@ -277,6 +307,31 @@ export const useUserStore = defineStore('user-store', {
       })
       // @ts-ignore
       this.$state.userGoals.push(goal)
+    },
+    editWeeklyGoal(params: any, id: string) {
+      const { resolution, date_time, caption, files, visibility, category } = params
+      const goal_id = resolution.goal_id
+
+      const currentGoal = this.findGoalById(id)
+      if (!currentGoal) {
+        return
+      }
+
+      const goal = {
+        ...currentGoal,
+        caption,
+        photos: files,
+        visibility, // public, supporter, private
+        date_time,
+        created_at: new Date().toISOString(),
+        goal_type: 'weekly',
+        meta: {
+          resolution_id: goal_id
+        }
+      }
+
+      // @ts-ignore
+      this.$state.userGoals = this.$state.userGoals.map((u) => (u.id === id ? goal : u))
     },
     getSupportingUsers() {
       const userId = this.$state.currentUser.id
