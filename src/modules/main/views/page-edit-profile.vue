@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { BaseInput, BaseSelect } from '@/components/index'
 import { useUserStore } from '@/stores/user'
 
@@ -19,6 +19,11 @@ const languages = ref([
   { id: 2, label: 'Indonesian' }
 ])
 
+watch(user, (currentValue, oldValue) => {
+  userStore.users = userStore.users.map((u) =>
+    u.id === userStore.currentUser.id ? currentValue : u
+  )
+})
 const preferredLanguage = ref({ id: 1, label: 'English' })
 </script>
 
@@ -96,7 +101,9 @@ const preferredLanguage = ref({ id: 1, label: 'English' })
       ></component>
 
       <div class="flex flex-col justify-center gap-y-2 my-8">
-        <button class="btn btn-lg btn-primary bg-[#3D8AF7] px-7">Save</button>
+        <button @click="$router.push('/profile')" class="btn btn-lg btn-primary bg-[#3D8AF7] px-7">
+          Save
+        </button>
         <router-link :to="'/profile'" class="btn btn-lg btn-primary bg-[#de2a2a]"
           >Cancel</router-link
         >

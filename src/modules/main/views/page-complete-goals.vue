@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { BaseInput, BaseCheckbox, BaseSelect } from '@/components/index'
 import { useUserStore } from '@/stores/user'
+import { useRouter } from 'vue-router'
 
 const privateTypes = [
   { id: 'public', label: 'Everyone' },
@@ -10,6 +11,7 @@ const privateTypes = [
 ]
 const userStore = useUserStore()
 
+const router = useRouter()
 const categories = ref<any>([])
 const goals = ref<any>([])
 
@@ -30,7 +32,6 @@ const computedGoals = computed(() => {
   return goals.value
     .filter((g: any) => (form.value.category?.id ? g.category === form.value.category?.id : ''))
     .map((a: any) => {
-      console.log(a)
       return {
         id: a.id,
         label: a.caption
@@ -61,6 +62,7 @@ const submit = function () {
     values.is_completed = checked.value
     values.files = form.value.files
     userStore.addCompleteGoal(values)
+    router.push('/')
   }
 }
 </script>

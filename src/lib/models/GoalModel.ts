@@ -19,7 +19,6 @@ class GoalModel {
       (g: any) => g.goal_type === 'completed' && moment(g.created_at).year() === moment().year()
     )
     const categories = await userStore.getResolutionCategories()
-    console.log(goals)
 
     const weeks = []
     let firstDay = moment().month(month).startOf('month')
@@ -72,23 +71,21 @@ class GoalModel {
   }
 
   static async generateYearlyReport(userStore: any, year = new Date().getFullYear()) {
-    const goals = userStore.weeklyResolutions
-      .map((w: any) => {
-        return {
-          targetGoal: userStore.userGoals.find((g: any) => g.id === w.goal_id),
-          is_completed: w.is_completed ?? false
-        }
-      })
-      .filter((a: any) => !!a.targetGoal)
-      .map((a: any) => {
-        return { ...a.targetGoal, is_completed: a.is_completed }
-      })
-
+    let goals = await userStore.getCurrentGoals()
+    goals = goals.filter((g: any) => g.goal_type === 'completed')
+    const categories = await userStore.getResolutionCategories()
     const weeks = []
     let firstDay = moment().year(year).month(0).startOf('year')
     const lastDay = moment().year(year).month(11).endOf('year')
+    while (lastDay.year() !== firstDay.year()) {
+      lastDay.subtract(1, 'day')
+    }
 
-    while (firstDay.date() < lastDay.date() && firstDay.year() === lastDay.year()) {
+    while (
+      (firstDay.month() < lastDay.month() ||
+        (firstDay.date() < lastDay.date() && firstDay.month() === lastDay.month())) &&
+      firstDay.year() === lastDay.year()
+    ) {
       let endOfWeek = firstDay.clone().endOf('week')
       if (endOfWeek.year() !== year) {
         endOfWeek = lastDay.clone()
@@ -98,6 +95,7 @@ class GoalModel {
         end: endOfWeek.toDate()
       })
       firstDay = endOfWeek.clone().add(1, 'days')
+      console.log(firstDay, lastDay)
     }
 
     const converted = function (date: any) {
@@ -116,13 +114,13 @@ class GoalModel {
           start,
           end
         },
-        categories: Categories.map(({ category, id }) => {
+        categories: categories.map((category: string) => {
           return {
-            id,
+            id: category,
             category,
             goals: goals.filter(
               (g: any) =>
-                g.category.id === id &&
+                g.category === category &&
                 moment(converted(g.date_time)).isSameOrAfter(start) &&
                 moment(converted(g.date_time)).isSameOrBefore(end)
             )

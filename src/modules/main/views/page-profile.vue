@@ -19,8 +19,7 @@ const states = ref<any>({
 })
 
 onMounted(async () => {
-  let user = await userStore.findUserById(userStore.currentUser.id)
-  states.value.user = user
+  states.value.user = userStore.currentUser
   goals.value = (await userStore.getGoalsSorted()).filter(
     (g) => g.user_id === userStore.currentUser.id
   )

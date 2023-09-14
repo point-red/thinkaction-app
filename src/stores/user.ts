@@ -187,6 +187,7 @@ export const useUserStore = defineStore('user-store', {
     },
     addCommentToGoal: function (goalId: string, comment: string, parentId?: string) {
       const id = Math.random().toFixed(32).substring(2)
+      if (!comment.length) return
       if (parentId) {
         const commentable = this.$state.comments.find(
           (c) => c.goal_id === goalId && c.comment_id === parentId
@@ -374,17 +375,32 @@ export const useUserStore = defineStore('user-store', {
         }
       }
       if (targetGoalIndex >= 0) {
-        // @ts-ignore
-        // this.$state.weeklyResolutions[targetGoalIndex] = {
-        //   // @ts-ignore
-        //   ...this.$state.weeklyResolutions[targetGoalIndex], // @ts-ignore
-        //   is_completed, // @ts-ignore
-        //   goal_completed_id: id // @ts-ignore
-        // }
-
-        // @ts-ignore
-        this.$state.userGoals.push(goal)
+        this.$state.userGoals.push(goal as any)
       }
+    },
+    async editCompleteGoal(params: any, id: string) {
+      const { is_completed, goal_id, caption, files, visibility, category } = params
+
+      const currentGoal = this.findGoalById(id)
+      if (!currentGoal) {
+        return
+      }
+
+      const goal = {
+        ...currentGoal,
+        category,
+        caption,
+        photos: files,
+        visibility, // public, supporter, private
+        date_time: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        goal_type: 'completed',
+        meta: {
+          goal_id: goal_id,
+          is_completed
+        }
+      }
+      this.$state.userGoals = this.$state.userGoals.map((g) => (g.id === id ? goal : g))
     }
   }
 })
