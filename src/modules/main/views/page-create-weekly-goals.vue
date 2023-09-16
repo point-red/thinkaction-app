@@ -86,19 +86,21 @@ const submit = function () {
 
       <!-- Select Resolution's Category -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Select Category</span>
-      <component
-        :is="BaseSelect"
+      <BaseSelect
+        errorMessage="Choose a category"
+        :is-error="!(form.category as any).id"
         v-model="form.category"
         :list="categories.map((category: string) => ({ id: category, label: category }))"
         class="mb-8"
-      ></component>
+      ></BaseSelect>
 
       <!-- Select Resolution -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Select Resolution</span>
-      <component
-        :is="BaseSelect"
+      <BaseSelect
         v-model="selected.resolution"
         @update:modelValue="onUpdateResolution"
+        errorMessage="Choose a resolution"
+        :is-error="!(selected.resolution as any).id"
         :list="
           computedResolutions.map(({ id, caption }: any) => ({
             id: id,
@@ -107,17 +109,26 @@ const submit = function () {
             caption
           }))
         "
-        border="full"
         class="mb-8"
-      ></component>
+      ></BaseSelect>
 
       <!-- Weekly Goals -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Weekly Goals</span>
-      <component :is="BaseTextarea" v-model="form.caption" border="simple" class="mb-8"></component>
+      <BaseTextarea
+        :error="!form.caption ? 'Input a caption' : ''"
+        v-model="form.caption"
+        border="simple"
+        class="mb-8"
+      ></BaseTextarea>
 
       <!-- due date input -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Due Date</span>
-      <component :is="BaseDatepicker" v-model="form.date_time" border="full" class="mb-8" />
+      <BaseDatepicker
+        :error="!form.date_time ? 'Input a date' : ''"
+        v-model="form.date_time"
+        border="full"
+        class="mb-8"
+      />
 
       <!-- upload photo -->
       <span class="font-semibold text-[#3D8AF7] block mb-2"
@@ -139,6 +150,8 @@ const submit = function () {
         v-model="selected.visibility"
         :list="list"
         border="full"
+        :isError="!(selected.visibility as any)?.id"
+        errorMessage="Choose a visibilty"
       ></component>
 
       <!-- button -->

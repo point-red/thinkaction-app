@@ -95,7 +95,7 @@ const resize = () => {
         <span class="text-sm font-light text-slate-500">{{ helper }}</span>
       </slot>
       <slot name="error" v-if="error">
-        <span class="text-sm font-light text-danger">{{ error }}</span>
+        <span class="text-xs font-light mt-1 ml-2 text-red-400">{{ error }}</span>
       </slot>
     </div>
   </div>

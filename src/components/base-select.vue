@@ -12,6 +12,8 @@ export interface Props {
   placeholder?: string
   border?: 'full' | 'simple' | 'none'
   list: OptionsInterface[]
+  isError?: boolean
+  errorMessage?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -41,6 +43,7 @@ const selected = computed({
       <ListboxButton
         class="list-box-button"
         :class="{
+          'is-error': props.isError,
           border: props.border === 'full',
           'border-b': props.border === 'simple'
         }"
@@ -77,6 +80,9 @@ const selected = computed({
           </ListboxOption>
         </ListboxOptions>
       </transition>
+      <p class="text-xs mt-1 ml-2 text-red-5" v-if="isError">
+        {{ errorMessage }}
+      </p>
     </div>
   </Listbox>
 </template>
@@ -87,6 +93,9 @@ const selected = computed({
 }
 .list-box-button {
   @apply relative w-full dark:bg-slate-800 dark:border-slate-600 bg-white py-2 pl-3 pr-10 text-left focus-visible:border-indigo-500 sm:text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-orange-300;
+}
+.list-box-button.is-error {
+  @apply dark:border-red-600 border-red-400;
 }
 .list-box-button-icon {
   @apply absolute inset-y-0 right-0 flex items-center pr-2;

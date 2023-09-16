@@ -66,39 +66,51 @@ const preferredLanguage = ref({ id: 1, label: 'English' })
     <div class="flex flex-col md:px-0 px-3">
       <!-- input - full_name -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Full Name</span>
-      <component :is="BaseInput" v-model="user.full_name" class="mb-8"></component>
+      <BaseInput
+        :error="!user.full_name ? 'Enter your full name' : ''"
+        v-model="user.full_name"
+        class="mb-8"
+      ></BaseInput>
 
       <!-- input - username -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Username</span>
-      <component :is="BaseInput" v-model="user.username" class="mb-8"></component>
+      <BaseInput
+        :error="!user.username ? 'Enter your username' : ''"
+        v-model="user.username"
+        class="mb-8"
+      ></BaseInput>
 
       <!-- input - email -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Email</span>
-      <component :is="BaseInput" v-model="user.email" class="mb-8"></component>
+      <BaseInput
+        :error="!user.email ? 'Enter your email' : ''"
+        v-model="user.email"
+        class="mb-8"
+      ></BaseInput>
 
       <!-- input - bio -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Bio</span>
-      <component :is="BaseInput" v-model="user.bio" class="mb-8"></component>
+      <BaseInput v-model="user.bio" class="mb-8"></BaseInput>
 
       <!-- share with -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Account Type</span>
-      <component
-        :is="BaseSelect"
+      <BaseSelect
         class="mb-8"
         :modelValue="user.is_private ? list[0] : list[1]"
         @update:modelValue="user.is_private = $event.id === 1"
         :list="list"
         border="full"
-      ></component>
+      ></BaseSelect>
 
       <!-- share with -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Language</span>
-      <component
-        :is="BaseSelect"
+      <BaseSelect
+        :is-error="!(preferredLanguage as any)?.id"
+        errorMessage="Choose a main language"
         v-model="preferredLanguage"
         :list="languages"
         border="full"
-      ></component>
+      ></BaseSelect>
 
       <div class="flex flex-col justify-center gap-y-2 my-8">
         <button @click="$router.push('/profile')" class="btn btn-lg btn-primary bg-[#3D8AF7] px-7">

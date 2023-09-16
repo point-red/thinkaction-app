@@ -75,27 +75,32 @@ onMounted(() => {
 
       <!-- category input -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Category</span>
-      <component
-        :is="BaseInput"
+      <BaseInput
+        :error="!form.category ? 'Enter a category' : ''"
         v-model="form.category"
         placeholder="Input your category"
         border="full"
         class="mb-8"
-      ></component>
+      ></BaseInput>
 
       <!-- due date input -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Due Date</span>
-      <component :is="BaseDatepicker" v-model="form.date_time" border="full" class="mb-8" />
+      <BaseDatepicker
+        :error="!form.date_time ? 'Enter a date' : ''"
+        v-model="form.date_time"
+        border="full"
+        class="mb-8"
+      />
 
       <!-- resolution input -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Resolution</span>
-      <component
-        :is="BaseTextarea"
+      <BaseTextarea
+        :error="!form.category ? 'Enter a caption' : ''"
         placeholder="Make sure you include numbers in them ex: lose 5kg by end of year "
         v-model="form.caption"
         border="simple"
         class="mb-8"
-      ></component>
+      ></BaseTextarea>
 
       <!-- upload photo -->
       <span class="font-semibold text-[#3D8AF7] block mb-2"
@@ -112,6 +117,8 @@ onMounted(() => {
       <!-- share with -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Share With</span>
       <BaseSelect
+        :isError="!(selected.visibility as any)?.id"
+        errorMessage="Choose a visibilty"
         @update:modelValue="onUpdateVisiblity($event)"
         v-model="selected.visibility"
         :list="list"

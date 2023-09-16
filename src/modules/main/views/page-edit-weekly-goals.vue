@@ -114,17 +114,19 @@ const submit = function () {
 
       <!-- Select Resolution's Category -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Select Category</span>
-      <component
-        :is="BaseSelect"
+      <BaseSelect
+        :is-error="!(form.category as any).id"
+        errorMessage="Choose a category"
         v-model="form.category"
         :list="categories.map((category: string) => ({ id: category, label: category }))"
         class="mb-8"
-      ></component>
+      ></BaseSelect>
 
       <!-- Select Resolution -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Select Resolution</span>
-      <component
-        :is="BaseSelect"
+      <BaseSelect
+        :is-error="!(selected.resolution as any).id"
+        errorMessage="Choose a resolution"
         v-model="selected.resolution"
         @update:modelValue="onUpdateResolution"
         :list="
@@ -137,15 +139,25 @@ const submit = function () {
         "
         border="full"
         class="mb-8"
-      ></component>
+      ></BaseSelect>
 
       <!-- Weekly Goals -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Weekly Goals</span>
-      <component :is="BaseTextarea" v-model="form.caption" border="simple" class="mb-8"></component>
+      <BaseTextarea
+        :error="!form.caption ? 'Enter a caption' : ''"
+        v-model="form.caption"
+        border="simple"
+        class="mb-8"
+      ></BaseTextarea>
 
       <!-- due date input -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Due Date</span>
-      <component :is="BaseDatepicker" v-model="form.date_time" border="full" class="mb-8" />
+      <BaseDatepicker
+        :error="!form.date_time ? 'Enter a date' : ''"
+        v-model="form.date_time"
+        border="full"
+        class="mb-8"
+      />
 
       <!-- upload photo -->
       <span class="font-semibold text-[#3D8AF7] block mb-2"
@@ -161,13 +173,14 @@ const submit = function () {
 
       <!-- share with -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Share With</span>
-      <component
-        :is="BaseSelect"
+      <BaseSelect
+        :is-error="!(selected.visibility as any)?.id"
+        :error-message="'Choose a visibility'"
         @update:modelValue="onUpdateVisiblity"
         v-model="selected.visibility"
         :list="list"
         border="full"
-      ></component>
+      ></BaseSelect>
 
       <!-- button -->
       <div class="flex justify-center space-x-2 mt-8">

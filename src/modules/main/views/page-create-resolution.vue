@@ -56,21 +56,27 @@ const save = function () {
 
       <!-- category input -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Category</span>
-      <component
-        :is="BaseInput"
+      <BaseInput
         v-model="form.category"
+        :error="!(form.category as any)? 'Enter a category name': ''"
         placeholder="Input your category"
         class="mb-8"
-      ></component>
+      ></BaseInput>
 
       <!-- due date input -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Due Date</span>
-      <component :is="BaseDatepicker" v-model="form.date_time" border="full" class="mb-8" />
+      <BaseDatepicker
+        :error="!form.date_time ? 'Enter a date' : ''"
+        v-model="form.date_time"
+        border="full"
+        class="mb-8"
+      />
 
       <!-- resolution input -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Resolution</span>
       <component
         :is="BaseTextarea"
+        :error="!form.caption ? 'Enter a caption' : ''"
         placeholder="Make sure you include numbers in them ex: lose 5kg by end of year "
         v-model="form.caption"
         border="simple"
@@ -96,6 +102,8 @@ const save = function () {
         v-model="selected.visibility"
         :list="list"
         border="full"
+        :isError="!(selected.visibility as any)?.id"
+        errorMessage="Choose a visibilty"
       ></BaseSelect>
 
       <!-- button -->

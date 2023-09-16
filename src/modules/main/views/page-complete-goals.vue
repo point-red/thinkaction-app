@@ -78,26 +78,33 @@ const submit = function () {
 
       <!-- Select Resolution's Category -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Select Category</span>
-      <component
-        :is="BaseSelect"
+      <BaseSelect
+        :is-error="!(form.category as any)?.id"
+        error-message="Choose a category"
         v-model="form.category"
         :list="categories.map((category: string) => ({ id: category, label: category }))"
         class="mb-8"
-      ></component>
+      ></BaseSelect>
 
       <!-- Select Goals Achieved -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Goals Achieved</span>
-      <component
-        :is="BaseSelect"
+      <BaseSelect
+        :is-error="!(form.goal as any)?.id"
+        error-message="Choose a goal"
         v-model="form.goal"
         :list="computedGoals"
         border="full"
         class="mb-8"
-      ></component>
+      ></BaseSelect>
 
       <!-- Caption -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Caption</span>
-      <component :is="BaseInput" v-model="form.caption" border="full" class="mb-8"></component>
+      <BaseInput
+        :error="!form.caption ? 'Enter a caption' : ''"
+        v-model="form.caption"
+        border="full"
+        class="mb-8"
+      ></BaseInput>
 
       <!-- upload photo -->
       <span class="font-semibold text-[#3D8AF7] block mb-2"
@@ -116,12 +123,13 @@ const submit = function () {
 
       <!-- share with -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Share With</span>
-      <component
-        :is="BaseSelect"
+      <BaseSelect
+        :is-error="!(form.visibility as any)?.id"
+        error-message="Choose a visibility"
         v-model="form.visibility"
         :list="privateTypes"
         border="full"
-      ></component>
+      ></BaseSelect>
 
       <!-- button -->
       <div class="flex justify-center space-x-2 mt-8">
