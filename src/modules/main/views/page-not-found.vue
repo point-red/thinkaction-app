@@ -11,7 +11,7 @@
       <p class="pt-2 text-slate-500 dark:text-slate-200">This page you are looking not available</p>
 
       <div class="pt-5">
-        <button class="btn btn-primary">Back To Home</button>
+        <button @click="$router.push('/')" class="btn btn-primary">Back To Home</button>
       </div>
     </div>
   </main>
