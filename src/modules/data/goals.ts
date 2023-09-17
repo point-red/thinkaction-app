@@ -17,10 +17,10 @@ export const Goals = [
     cheers_count: 20,
     comments_count: 10,
     visibility: 'public',
-    date_time: '2023-09-12T10:00:00Z',
+    date_time: '2023-09-31T10:00:00Z',
     goal_type: 'resolution',
     meta: {},
-    created_at: '2023-09-12T09:45:00Z'
+    created_at: '2023-09-01T09:45:00Z'
   },
   {
     id: '71eb33e1-87f7-4ec5-9c48-9f0357f9fda4',

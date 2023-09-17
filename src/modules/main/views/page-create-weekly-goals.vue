@@ -4,6 +4,7 @@ import { BaseDatepicker, BaseTextarea, BaseSelect } from '@/components/index'
 import { Categories } from '@/modules/data/categories'
 import { useUserStore } from '@/stores/user'
 import router from '@/router'
+import moment from 'moment'
 
 const list = [
   { id: 'public', label: 'Everyone' },
@@ -124,7 +125,7 @@ const submit = function () {
       <!-- due date input -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Due Date</span>
       <BaseDatepicker
-        :error="!form.date_time ? 'Input a date' : ''"
+        :error="!form.date_time || moment(form.date_time).isBefore(moment()) ? 'Input a date' : ''"
         v-model="form.date_time"
         border="full"
         class="mb-8"

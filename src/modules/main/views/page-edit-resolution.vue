@@ -4,6 +4,7 @@ import { BaseInput, BaseDatepicker, BaseTextarea, BaseSelect } from '@/component
 import { useUserStore } from '@/stores/user'
 import router from '@/router'
 import { useRoute } from 'vue-router'
+import moment from 'moment'
 
 const list = [
   { id: 'public', label: 'Everyone' },
@@ -86,7 +87,9 @@ onMounted(() => {
       <!-- due date input -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Due Date</span>
       <BaseDatepicker
-        :error="!form.date_time ? 'Enter a date' : ''"
+        :error="
+          !form.date_time || moment(form.date_time).isBefore(moment()) ? 'Enter a valid date' : ''
+        "
         v-model="form.date_time"
         border="full"
         class="mb-8"

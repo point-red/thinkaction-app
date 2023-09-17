@@ -15,9 +15,7 @@ class GoalModel {
     //     return { ...a.targetGoal, is_completed: a.is_completed }
     //   })
     let goals = await userStore.getCurrentGoals()
-    goals = goals.filter(
-      (g: any) => g.goal_type === 'completed' && moment(g.created_at).year() === moment().year()
-    )
+    goals = goals.filter((g: any) => moment(g.created_at).year() === moment().year())
     const categories = await userStore.getResolutionCategories()
 
     const weeks = []
@@ -45,6 +43,44 @@ class GoalModel {
       return date
     }
 
+    const allTypes = function (filteredGoals: any, startDate: any, endDate: any) {
+      const combinedGoals = filteredGoals.map((f: any) => {
+        const g = goals.find(
+          (g: any) =>
+            g.meta?.goal_id === f.id && g.meta?.is_completed && g.goal_type === 'completed'
+        )
+        return {
+          ...f,
+          ended_at: g ? g.created_at : null
+        }
+      })
+      for (const item of combinedGoals) {
+        // console.log(item.ended_at)
+        // if (
+        //   item.ended_at &&
+        //   moment(startDate).isSameOrAfter(item.created_at) &&
+        //   moment(endDate).isSameOrBefore(item.created_at)
+        // ) {
+        //   return {
+        //     is_completed: true
+        //   }
+        // }
+        if (item.date_time) {
+          if (moment(converted(item.date_time)).isSameOrAfter(endDate)) {
+            if (
+              moment(converted(item.created_at)).isSameOrBefore(endDate) ||
+              moment(converted(item.date_time)).isSameOrBefore(endDate)
+            ) {
+              return {
+                is_completed: item.ended_at ? true : false
+              }
+            }
+          }
+        }
+      }
+      return {}
+    }
+
     const items = []
     for (const { start, end } of weeks) {
       items.push({
@@ -56,11 +92,10 @@ class GoalModel {
           return {
             id: category,
             category,
-            goals: goals.filter(
-              (g: any) =>
-                g.category === category &&
-                moment(converted(g.date_time)).isSameOrAfter(start) &&
-                moment(converted(g.date_time)).isSameOrBefore(end)
+            goals: allTypes(
+              goals.filter((g: any) => g.category === category),
+              start,
+              end
             )
           }
         })
@@ -71,8 +106,8 @@ class GoalModel {
   }
 
   static async generateYearlyReport(userStore: any, year = new Date().getFullYear()) {
-    let goals = await userStore.getCurrentGoals()
-    goals = goals.filter((g: any) => g.goal_type === 'completed')
+    const goals = await userStore.getCurrentGoals()
+    // goals = goals.filter((g: any) => g.goal_type === 'completed')
     const categories = await userStore.getResolutionCategories()
     const weeks = []
     let firstDay = moment().year(year).month(0).startOf('year')
@@ -95,7 +130,6 @@ class GoalModel {
         end: endOfWeek.toDate()
       })
       firstDay = endOfWeek.clone().add(1, 'days')
-      console.log(firstDay, lastDay)
     }
 
     const converted = function (date: any) {
@@ -105,6 +139,44 @@ class GoalModel {
         }
       }
       return date
+    }
+
+    const allTypes = function (filteredGoals: any, startDate: any, endDate: any) {
+      const combinedGoals = filteredGoals.map((f: any) => {
+        const g = goals.find(
+          (g: any) =>
+            g.meta?.goal_id === f.id && g.meta?.is_completed && g.goal_type === 'completed'
+        )
+        return {
+          ...f,
+          ended_at: g ? g.created_at : null
+        }
+      })
+      for (const item of combinedGoals) {
+        // console.log(item.ended_at)
+        // if (
+        //   item.ended_at &&
+        //   moment(startDate).isSameOrAfter(item.created_at) &&
+        //   moment(endDate).isSameOrBefore(item.created_at)
+        // ) {
+        //   return {
+        //     is_completed: true
+        //   }
+        // }
+        if (item.date_time) {
+          if (moment(converted(item.date_time)).isSameOrAfter(endDate)) {
+            if (
+              moment(converted(item.created_at)).isSameOrBefore(endDate) ||
+              moment(converted(item.date_time)).isSameOrBefore(endDate)
+            ) {
+              return {
+                is_completed: item.ended_at ? true : false
+              }
+            }
+          }
+        }
+      }
+      return {}
     }
 
     const items = []
@@ -118,11 +190,10 @@ class GoalModel {
           return {
             id: category,
             category,
-            goals: goals.filter(
-              (g: any) =>
-                g.category === category &&
-                moment(converted(g.date_time)).isSameOrAfter(start) &&
-                moment(converted(g.date_time)).isSameOrBefore(end)
+            goals: allTypes(
+              goals.filter((g: any) => g.category === category),
+              start,
+              end
             )
           }
         })

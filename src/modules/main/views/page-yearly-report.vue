@@ -62,11 +62,12 @@ watch(year, async (currentValue, oldValue) => {
             class="basic-table-row h-28"
           >
             <td class="basic-table-body text-sm min-w-[5rem] align-middle">Week {{ index + 1 }}</td>
-            <td
-              v-for="{ id } in categories"
-              :key="id"
-              :class="'basic-table-body rounded-lg ' + ( !categories.find((c: any) => c.id === id)?.goals?.length? 'bg-gray-300':( categories.find((c: any) => c.id === id)?.goals?.filter((g: any) => g.is_completed).length ?? 1 > 0 ? 'bg-sky-300' : 'bg-pink-300'))"
-            ></td>
+            <td v-for="{ id } in categories" :key="id" :class="'basic-table-body rounded-lg p-4'">
+              <div
+                class="w-20 h-20 flex rounded-lg"
+                :class="( categories.find((c: any) => c.id === id)?.goals?.is_completed === undefined? 'bg-gray-300':( categories.find((c: any) => c.id === id)?.goals?.is_completed ? 'bg-sky-300' : 'bg-pink-300'))"
+              ></div>
+            </td>
           </tr>
         </tbody>
       </table>
