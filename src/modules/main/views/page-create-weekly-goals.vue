@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { BaseDatepicker, BaseTextarea, BaseSelect } from '@/components/index'
-import { Categories } from '@/modules/data/categories'
+import { BaseDatepicker, BaseTextarea, BaseSelect, BaseInput } from '@/components/index'
 import { useUserStore } from '@/stores/user'
 import router from '@/router'
 import moment from 'moment'
@@ -21,9 +20,9 @@ const selected = ref({
   category: {}
 })
 
-const form = ref({
+const form = ref<any>({
   caption: '',
-  category: {},
+  category: '',
   resolution: { goal_id: '' },
   date_time: '',
   visibility: 'public',
@@ -45,7 +44,7 @@ const computedResolutions = computed<any>(() => {
   return resolutions.value.filter(
     (
       r: any // @ts-ignore
-    ) => (form.value.category ? r.category === form.value.category?.id : true)
+    ) => true
   )
 })
 
@@ -58,17 +57,19 @@ const onUpdateVisiblity = function (params: any) {
   form.value.visibility = id
 }
 
-const onUpdateResolution = function (params: any) {
+const onUpdateResolution = async function (params: any) {
   form.value.resolution = params
+  form.value.category = (await userStore.getCurrentGoals()).find(
+    (d) => d.id === params.id
+  )?.category
 }
 
 const submit = function () {
   let values = form.value
   let isAllFilled = // @ts-ignore-all
-    values.caption && values.visibility && selected.value.resolution?.goal_id && values.category?.id
+    values.caption && values.visibility && selected.value.resolution?.goal_id && values.category
   if (isAllFilled) {
     // @ts-ignore
-    values.category = values.category.id
     userStore.addWeeklyGoal(values)
     router.push('/')
   }
@@ -84,16 +85,6 @@ const submit = function () {
       <p class="font-semibold text-lg text-[#3D8AF7] text-center mb-8">
         Hi Fitri, you are now in week 8, let's set a goal!
       </p>
-
-      <!-- Select Resolution's Category -->
-      <span class="font-semibold text-[#3D8AF7] block mb-2">Select Category</span>
-      <BaseSelect
-        errorMessage="Choose a category"
-        :is-error="!(form.category as any).id"
-        v-model="form.category"
-        :list="categories.map((category: string) => ({ id: category, label: category }))"
-        class="mb-8"
-      ></BaseSelect>
 
       <!-- Select Resolution -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Select Resolution</span>
@@ -112,6 +103,14 @@ const submit = function () {
         "
         class="mb-8"
       ></BaseSelect>
+
+      <span class="font-semibold text-[#3D8AF7] block mb-2">Category</span>
+      <BaseInput
+        :error="!form.category ? 'Select a resolution' : ''"
+        :model-value="form.category"
+        :disabled="true"
+        class="mb-8"
+      ></BaseInput>
 
       <!-- Weekly Goals -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Weekly Goals</span>

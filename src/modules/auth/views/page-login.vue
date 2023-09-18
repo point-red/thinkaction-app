@@ -50,7 +50,7 @@ const login = function () {
 
     <p class="text-slate text-center my-4 font-semibold">or use one of your social profiles</p>
 
-    <button class="btn w-full md:w-[300px] m-auto bg-[#F960D9] font-bold text-white">
+    <button @click="login" class="btn w-full md:w-[300px] m-auto bg-[#F960D9] font-bold text-white">
       <img class="w-[30px] lg:w-[30px] pr-2" src="@/assets/images/google.png" />
       Google
     </button>

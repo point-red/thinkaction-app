@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { BaseDatepicker, BaseTextarea, BaseSelect } from '@/components/index'
-import { Categories } from '@/modules/data/categories'
+import { BaseDatepicker, BaseTextarea, BaseSelect, BaseInput } from '@/components/index'
 import { useUserStore } from '@/stores/user'
 import { useRoute, useRouter } from 'vue-router'
 import moment from 'moment'
@@ -25,7 +24,7 @@ const selected = ref({
 
 const form = ref<any>({
   caption: '',
-  category: {},
+  category: '',
   resolution: { goal_id: '' },
   date_time: '',
   visibility: 'public',
@@ -46,7 +45,7 @@ onMounted(() => {
     let goal = userStore.findGoalById(id as string)
     if (goal) {
       form.value = {
-        category: { id: goal.category, label: goal.category },
+        category: goal.category,
         visibility: goal.visibility,
         caption: goal.caption,
         date_time: goal.date_time,
@@ -61,7 +60,8 @@ onMounted(() => {
       selected.value.resolution = {
         id: res.id,
         goal_id: res.id,
-        label: res.caption
+        label: res.caption,
+        caption: res.caption
       }
 
       currentGoal.value = goal
@@ -73,7 +73,7 @@ const computedResolutions = computed<any>(() => {
   return resolutions.value.filter(
     (
       r: any // @ts-ignore
-    ) => (form.value.category ? r.category === form.value.category?.id : true)
+    ) => true
   )
 })
 
@@ -93,10 +93,9 @@ const onUpdateResolution = function (params: any) {
 const submit = function () {
   let values = form.value
   let isAllFilled = // @ts-ignore-all
-    values.caption && values.visibility && selected.value.resolution?.goal_id && values.category?.id
+    values.caption && values.visibility && selected.value.resolution?.goal_id && values.category
   if (isAllFilled) {
     // @ts-ignore
-    values.category = values.category.id
     userStore.editWeeklyGoal(values, id)
     router.push('/')
   }
@@ -113,22 +112,12 @@ const submit = function () {
         Hi Fitri, you are now in week 8, let's set a goal!
       </p>
 
-      <!-- Select Resolution's Category -->
-      <span class="font-semibold text-[#3D8AF7] block mb-2">Select Category</span>
-      <BaseSelect
-        :is-error="!(form.category as any).id"
-        errorMessage="Choose a category"
-        v-model="form.category"
-        :list="categories.map((category: string) => ({ id: category, label: category }))"
-        class="mb-8"
-      ></BaseSelect>
-
       <!-- Select Resolution -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Select Resolution</span>
       <BaseSelect
         :is-error="!(selected.resolution as any).id"
         errorMessage="Choose a resolution"
-        v-model="selected.resolution"
+        :model-value="selected.resolution"
         @update:modelValue="onUpdateResolution"
         :list="
           computedResolutions.map(({ id, caption }: any) => ({
@@ -141,6 +130,14 @@ const submit = function () {
         border="full"
         class="mb-8"
       ></BaseSelect>
+
+      <span class="font-semibold text-[#3D8AF7] block mb-2">Category</span>
+      <BaseInput
+        :error="!form.category ? 'Select a resolution' : ''"
+        :model-value="form.category"
+        :disabled="true"
+        class="mb-8"
+      ></BaseInput>
 
       <!-- Weekly Goals -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Weekly Goals</span>
