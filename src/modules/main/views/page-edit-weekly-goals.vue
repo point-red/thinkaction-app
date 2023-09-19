@@ -32,13 +32,13 @@ const form = ref<any>({
 })
 
 const id = route.params.id as string
-const categories = ref<any>([])
+// const categories = ref<any>([])
 const currentGoal = ref<any>(null)
 
 onMounted(() => {
-  userStore.getResolutionCategories().then((data) => {
-    categories.value = data
-  })
+  // userStore.getResolutionCategories().then((data) => {
+  //   categories.value = data
+  // })
   userStore.getResolutions().then((data) => {
     resolutions.value = data
 
@@ -49,19 +49,19 @@ onMounted(() => {
         visibility: goal.visibility,
         caption: goal.caption,
         date_time: goal.date_time,
-        resolution: { goal_id: (goal.meta as any).resolution_id },
+        resolution: {
+          goal_id: (goal.meta as any).resolution_id,
+          category: goal.category
+        },
         files: goal.photos
       }
-      selected.value.category = { id: goal.category, label: goal.category }
       selected.value.visibility = list.find((l) => goal?.visibility === l.id) || list[0]
       let res =
-        computedResolutions.value.find((c: any) => c.id === (goal?.meta as any)?.resolution_id) ??
-        {}
+        resolutions.value.find((c: any) => c.id === (goal?.meta as any)?.resolution_id) ?? {}
+      form.value.resolution.caption = res.caption
       selected.value.resolution = {
         id: res.id,
-        goal_id: res.id,
-        label: res.caption,
-        caption: res.caption
+        label: res.category
       }
 
       currentGoal.value = goal
@@ -87,15 +87,17 @@ const onUpdateVisiblity = function (params: any) {
 }
 
 const onUpdateResolution = function (params: any) {
-  form.value.resolution = params
+  form.value.resolution = resolutions.value.find((r: any) => r.id === params.id)
+  selected.value.resolution = params
 }
 
 const submit = function () {
   let values = form.value
-  let isAllFilled = // @ts-ignore-all
-    values.caption && values.visibility && selected.value.resolution?.goal_id && values.category
+  let isAllFilled = values.caption && values.visibility && (selected.value.resolution as any)?.id // @ts-ignore-all
   if (isAllFilled) {
     // @ts-ignore
+    values.category = values.resolution.category
+    values.resolution.goal_id = values.resolution?.id
     userStore.editWeeklyGoal(values, id)
     router.push('/')
   }
@@ -113,28 +115,26 @@ const submit = function () {
       </p>
 
       <!-- Select Resolution -->
-      <span class="font-semibold text-[#3D8AF7] block mb-2">Select Resolution</span>
+      <span class="font-semibold text-[#3D8AF7] block mb-2">Select Category</span>
       <BaseSelect
         :is-error="!(selected.resolution as any).id"
-        errorMessage="Choose a resolution"
+        errorMessage="Choose a category"
         :model-value="selected.resolution"
         @update:modelValue="onUpdateResolution"
         :list="
-          computedResolutions.map(({ id, caption }: any) => ({
+          resolutions.map(({ id, category }: any) => ({
             id: id,
-            label: caption,
-            goal_id: id,
-            caption
+            label: category,
           }))
         "
         border="full"
         class="mb-8"
       ></BaseSelect>
 
-      <span class="font-semibold text-[#3D8AF7] block mb-2">Category</span>
+      <span class="font-semibold text-[#3D8AF7] block mb-2">Resolution</span>
       <BaseInput
-        :error="!form.category ? 'Select a resolution' : ''"
-        :model-value="form.category"
+        :error="!form.resolution?.caption ? 'Select a category' : ''"
+        :model-value="form.resolution?.caption"
         :disabled="true"
         class="mb-8"
       ></BaseInput>

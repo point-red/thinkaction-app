@@ -32,9 +32,9 @@ const form = ref<any>({
 const categories = ref<any>([])
 
 onMounted(() => {
-  userStore.getResolutionCategories().then((data) => {
-    categories.value = data
-  })
+  // userStore.getResolutionCategories().then((data) => {
+  //   categories.value = data
+  // })
   userStore.getResolutions().then((data) => {
     resolutions.value = data
   })
@@ -58,18 +58,20 @@ const onUpdateVisiblity = function (params: any) {
 }
 
 const onUpdateResolution = async function (params: any) {
-  form.value.resolution = params
-  form.value.category = (await userStore.getCurrentGoals()).find(
-    (d) => d.id === params.id
-  )?.category
+  form.value.resolution = resolutions.value.find((r: any) => r.id === params.id)
+  // form.value.category = (await userStore.getCurrentGoals()).find(
+  //   (d) => d.id === params.id
+  // )?.category
 }
 
 const submit = function () {
   let values = form.value
-  let isAllFilled = // @ts-ignore-all
-    values.caption && values.visibility && selected.value.resolution?.goal_id && values.category
+  let isAllFilled = values.caption && values.visibility && (selected.value.resolution as any)?.id // @ts-ignore-all
+
   if (isAllFilled) {
     // @ts-ignore
+    values.category = values.resolution.category
+    values.resolution.goal_id = values.resolution?.id
     userStore.addWeeklyGoal(values)
     router.push('/')
   }
@@ -87,27 +89,26 @@ const submit = function () {
       </p>
 
       <!-- Select Resolution -->
-      <span class="font-semibold text-[#3D8AF7] block mb-2">Select Resolution</span>
+      <span class="font-semibold text-[#3D8AF7] block mb-2">Select Category</span>
       <BaseSelect
         v-model="selected.resolution"
         @update:modelValue="onUpdateResolution"
-        errorMessage="Choose a resolution"
+        errorMessage="Choose a category"
         :is-error="!(selected.resolution as any).id"
         :list="
-          computedResolutions.map(({ id, caption }: any) => ({
+          resolutions.map(({ id, category }: any) => ({
             id: id,
-            label: caption,
-            goal_id: id,
-            caption
+            label: category,
           }))
         "
+        border="full"
         class="mb-8"
       ></BaseSelect>
 
-      <span class="font-semibold text-[#3D8AF7] block mb-2">Category</span>
+      <span class="font-semibold text-[#3D8AF7] block mb-2">Resolution</span>
       <BaseInput
-        :error="!form.category ? 'Select a resolution' : ''"
-        :model-value="form.category"
+        :error="!form.resolution?.caption ? 'Select a category' : ''"
+        :model-value="form.resolution?.caption"
         :disabled="true"
         class="mb-8"
       ></BaseInput>

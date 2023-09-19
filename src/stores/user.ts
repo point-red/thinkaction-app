@@ -321,6 +321,7 @@ export const useUserStore = defineStore('user-store', {
       const goal = {
         ...currentGoal,
         caption,
+        category,
         photos: files,
         visibility, // public, supporter, private
         date_time,
