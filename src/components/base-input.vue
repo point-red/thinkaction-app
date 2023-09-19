@@ -81,7 +81,8 @@ onMounted(() => {
           :class="{
             'border-b border-x-none border-t-none': border === 'simple',
             'border ': border === 'full',
-            'border-none': border === 'none'
+            'border-none': border === 'none',
+            'bg-slate-200': disabled
           }"
           v-model="value"
           :type="props.type"
