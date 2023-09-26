@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import UserPost from '../components/user-post.vue'
-import { Goals } from '@/modules/data/goals'
 import { useUserStore } from '@/stores/user'
-import moment from 'moment'
 import { useRouter } from 'vue-router'
 
 const userStore = useUserStore()
@@ -19,10 +17,8 @@ onMounted(() => {
   })
 })
 
-watch(userStore.userGoals, (currentValue, oldValue) => {
-  userStore.getGoalsSorted().then((r) => {
-    posts.value = r
-  })
+watch(userStore.userGoals, async () => {
+  posts.value = await userStore.getGoalsSorted()
 })
 </script>
 

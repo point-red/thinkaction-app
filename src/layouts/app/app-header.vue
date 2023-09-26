@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { BaseInput, BasePopper } from '@/components/index'
-import ComponentToggleSidebar from './component-toggle-sidebar.vue'
 import { appName } from '@/config/app'
 import { RouterLink } from 'vue-router'
 import { useUserStore } from '@/stores/user'

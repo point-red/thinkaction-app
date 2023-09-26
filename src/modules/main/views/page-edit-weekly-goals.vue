@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { BaseDatepicker, BaseTextarea, BaseSelect, BaseInput } from '@/components/index'
 import { useUserStore } from '@/stores/user'
 import { useRoute, useRouter } from 'vue-router'
@@ -67,14 +67,6 @@ onMounted(() => {
       currentGoal.value = goal
     }
   })
-})
-
-const computedResolutions = computed<any>(() => {
-  return resolutions.value.filter(
-    (
-      r: any // @ts-ignore
-    ) => true
-  )
 })
 
 const onUpdateVisiblity = function (params: any) {

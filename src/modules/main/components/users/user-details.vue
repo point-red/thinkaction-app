@@ -5,7 +5,7 @@ import type {
   ThinkActionCategory,
   ThinkActionGoal
 } from '../../../types/think-action'
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import BaseProfileHeader from '../profile-header.vue'
 import BaseResolutionCategory from '../profile-resolution-categories.vue'

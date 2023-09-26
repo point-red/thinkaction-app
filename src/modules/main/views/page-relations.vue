@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { BaseInput } from '@/components/index'
-import UserSneakpeak from '../components/user-sneakpeak.vue'
-import { UserModel } from '@/lib/models/UserModel'
 import { useUserStore } from '@/stores/user'
 import { useRoute } from 'vue-router'
 import UserRelationItem from '../components/users/user-relation-item.vue'
@@ -15,17 +13,13 @@ const route = useRoute()
 const { id, type } = route.params
 
 const search = async function () {
-  relations.value = (await userStore.getRelations(id as string, type as string)).sort(
-    (a: any, b) => {
-      if (a.id === currentUser.id) {
-        return -1
-      }
-      return 0
+  relations.value = (await userStore.getRelations(id as string, type as string)).sort((a: any) => {
+    if (a.id === currentUser.id) {
+      return -1
     }
-  )
+    return 0
+  })
 }
-
-let isSupporting = ref(false)
 
 search()
 

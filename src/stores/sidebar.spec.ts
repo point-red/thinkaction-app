@@ -33,6 +33,8 @@ describe('sidebar store', () => {
     const currentState = sidebarStore.$state.isSidebarOpen
     sidebarStore.toggleSidebar()
     expect(sidebarStore.$state.isSidebarOpen).not.toBe(currentState)
-    expect(sidebarStore.$state.isSidebarOpen === true || sidebarStore.$state.isSidebarOpen === false).toBeTruthy()
+    expect(
+      sidebarStore.$state.isSidebarOpen === true || sidebarStore.$state.isSidebarOpen === false
+    ).toBeTruthy()
   })
 })

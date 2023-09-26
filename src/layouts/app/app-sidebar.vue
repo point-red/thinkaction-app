@@ -1,11 +1,3 @@
-<script setup lang="ts">
-import AppSidebarShortcut from './app-sidebar-shortcut.vue'
-import AppSidebarPanel from './app-sidebar-panel.vue'
-import { useSidebarStore } from '@/stores/sidebar'
-
-const sidebarStore = useSidebarStore()
-</script>
-
 <template>
   <div></div>
   <!-- Main Sidebar -->

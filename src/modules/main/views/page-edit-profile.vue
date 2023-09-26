@@ -19,7 +19,7 @@ const languages = ref([
   { id: 2, label: 'Indonesian' }
 ])
 
-watch(user, (currentValue, oldValue) => {
+watch(user, (currentValue) => {
   userStore.users = userStore.users.map((u) =>
     u.id === userStore.currentUser.id ? currentValue : u
   )

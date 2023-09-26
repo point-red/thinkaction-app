@@ -18,30 +18,27 @@ const categories = ref<any>([])
 const goals = ref<any>([])
 const currentGoal = ref<any>(null)
 
-onMounted(() => {
-  userStore.getResolutionCategories().then((data) => {
-    categories.value = data
-  })
-  userStore.getCurrentGoals().then((data: any) => {
-    goals.value = data.filter(
-      (d: any) =>
-        d.goal_type !== 'complete' &&
-        !data.some((s: any) => s.meta.goal_id === d.id && s.goal_type === 'resolution')
-    )
+onMounted(async () => {
+  categories.value = await userStore.getResolutionCategories()
+  const data = await userStore.getCurrentGoals()
+  goals.value = data.filter(
+    (d: any) =>
+      d.goal_type !== 'complete' &&
+      !data.some((s: any) => s.meta.goal_id === d.id && s.goal_type === 'resolution')
+  )
 
-    let goal = userStore.findGoalById(id as string)
-    if (goal) {
-      form.value = {
-        category: { id: goal.category, label: goal.category },
-        visibility: privateTypes.find((p) => p.id === (goal as any).visibility) ?? {},
-        caption: goal.caption,
-        goal: { id: goal.id, label: goal.caption },
-        files: goal.photos
-      }
-      checked.value = !!(goal.meta as any).is_completed
-      currentGoal.value = goal
+  let goal = userStore.findGoalById(id as string)
+  if (goal) {
+    form.value = {
+      category: { id: goal.category, label: goal.category },
+      visibility: privateTypes.find((p) => p.id === (goal as any).visibility) ?? {},
+      caption: goal.caption,
+      goal: { id: goal.id, label: goal.caption },
+      files: goal.photos
     }
-  })
+    checked.value = !!(goal.meta as any).is_completed
+    currentGoal.value = goal
+  }
 })
 
 const computedGoals = computed(() => {

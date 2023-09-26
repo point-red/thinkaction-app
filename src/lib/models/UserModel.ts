@@ -15,8 +15,7 @@ class UserModel {
   static async findUserRelations(
     user_id: string,
     type: SupporterType = 'supporters',
-    query: string = '',
-    page: number = 1
+    query: string = ''
   ) {
     // API Request to Backend or use dummy data.
 

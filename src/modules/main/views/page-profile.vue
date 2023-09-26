@@ -5,10 +5,8 @@ import { Categories } from '@/modules/data/categories'
 import type { ThinkActionGoal } from '@/modules/types/think-action'
 
 import { useUserStore } from '@/stores/user'
-import { useRoute } from 'vue-router'
 
 const userStore = useUserStore()
-const route = useRoute()
 
 let goals = ref<any>([])
 
@@ -24,10 +22,9 @@ onMounted(async () => {
     (g) => g.user_id === userStore.currentUser.id
   )
 })
-watch(userStore.userGoals, (currentValue, oldValue) => {
-  userStore.getGoalsSorted().then((r) => {
-    goals.value = r.filter((g) => g.user_id === userStore.currentUser.id)
-  })
+watch(userStore.userGoals, async () => {
+  const data = await userStore.getGoalsSorted()
+  goals.value = data.filter((g) => g.user_id === userStore.currentUser.id)
 })
 </script>
 

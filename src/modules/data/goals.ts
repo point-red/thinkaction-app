@@ -1,5 +1,3 @@
-import { Categories } from './categories'
-
 export const Goals = [
   {
     id: '93e850f0-18e5-439e-8f1e-9f87cfdbb540',

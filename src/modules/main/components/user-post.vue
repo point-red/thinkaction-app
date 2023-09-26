@@ -27,8 +27,6 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const store = useUserStore()
-const viewPost = function (e: any) {}
-const preventView = function (e: any) {}
 const actionToggled = ref(false)
 const isLiked = ref(false)
 const deleteModal = ref(false)
@@ -44,11 +42,11 @@ const likePost = function () {
 onMounted(() => {
   isLiked.value = props.is_liked
 })
-const toggleAction = function (e: any) {
+const toggleAction = function () {
   actionToggled.value = true
 }
 
-const openDeleteModal = function (e: any) {
+const openDeleteModal = function () {
   deleteModal.value = true
   actionToggled.value = false
 }

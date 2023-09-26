@@ -1,10 +1,4 @@
 <script setup lang="ts">
-type User = {
-  [key: string]: any
-  id?: string
-  username?: string
-}
-
 export interface Props {
   id: string
   fullname: string

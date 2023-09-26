@@ -1,4 +1,3 @@
-import { Categories } from '@/modules/data/categories'
 import moment from 'moment'
 
 class GoalModel {

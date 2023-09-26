@@ -27,7 +27,7 @@ onMounted(async () => {
   categorized.value = await GoalModel.generateYearlyReport(store, new Date().getFullYear())
 })
 
-watch(year, async (currentValue, oldValue) => {
+watch(year, async (currentValue) => {
   if (currentValue.id)
     categorized.value = await GoalModel.generateYearlyReport(store, currentValue.id)
 })

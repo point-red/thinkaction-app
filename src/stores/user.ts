@@ -256,7 +256,6 @@ export const useUserStore = defineStore('user-store', {
       const category = params.category as string
       const date_time = params.date_time
       const caption = params.caption
-      const files = params.files
       const visibility = params.visibility
 
       const currentGoal = this.findGoalById(id)

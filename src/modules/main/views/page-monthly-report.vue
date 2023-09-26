@@ -5,11 +5,6 @@ import { useUserStore } from '@/stores/user'
 import { BaseSelect } from '@/components'
 import moment from 'moment'
 
-const list = [
-  { id: 1, label: 'Everyone' },
-  { id: 2, label: 'Supporter' },
-  { id: 3, label: 'Private' }
-]
 const monthList = ref<any>([])
 const month = ref<any>({
   id: new Date().getMonth(),
@@ -35,7 +30,7 @@ onMounted(async () => {
   categorized.value = await GoalModel.generateMonthlyReport(store, new Date().getMonth())
 })
 
-watch(month, async (currentValue, oldValue) => {
+watch(month, async (currentValue) => {
   if (currentValue.id)
     categorized.value = await GoalModel.generateMonthlyReport(store, currentValue.id)
 })

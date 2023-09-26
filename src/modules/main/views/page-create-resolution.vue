@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import { BaseInput, BaseDatepicker, BaseTextarea, BaseSelect } from '@/components/index'
-import { Categories } from '@/modules/data/categories'
 import { useUserStore } from '@/stores/user'
 import moment from 'moment'
 import router from '@/router'

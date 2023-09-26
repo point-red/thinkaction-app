@@ -22,10 +22,9 @@ onMounted(async () => {
   goals.value = (await userStore.getGoalsSorted(false)).filter((g) => g.user_id === route.params.id)
   states.value.user = user
 })
-watch(userStore.userGoals, (currentValue, oldValue) => {
-  userStore.getGoalsSorted().then((r) => {
-    goals.value = r.filter((g) => g.user_id === route.params.id)
-  })
+watch(userStore.userGoals, async () => {
+  const data = await userStore.getGoalsSorted()
+  goals.value = data.filter((g) => g.user_id === route.params.id)
 })
 </script>
 

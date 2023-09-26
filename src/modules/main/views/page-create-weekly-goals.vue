@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { BaseDatepicker, BaseTextarea, BaseSelect, BaseInput } from '@/components/index'
 import { useUserStore } from '@/stores/user'
 import router from '@/router'
@@ -29,23 +29,8 @@ const form = ref<any>({
   files: []
 })
 
-const categories = ref<any>([])
-
-onMounted(() => {
-  // userStore.getResolutionCategories().then((data) => {
-  //   categories.value = data
-  // })
-  userStore.getResolutions().then((data) => {
-    resolutions.value = data
-  })
-})
-
-const computedResolutions = computed<any>(() => {
-  return resolutions.value.filter(
-    (
-      r: any // @ts-ignore
-    ) => true
-  )
+onMounted(async () => {
+  resolutions.value = await userStore.getResolutions()
 })
 
 const onUpdateVisiblity = function (params: any) {
@@ -59,9 +44,6 @@ const onUpdateVisiblity = function (params: any) {
 
 const onUpdateResolution = async function (params: any) {
   form.value.resolution = resolutions.value.find((r: any) => r.id === params.id)
-  // form.value.category = (await userStore.getCurrentGoals()).find(
-  //   (d) => d.id === params.id
-  // )?.category
 }
 
 const submit = function () {
