@@ -2,7 +2,7 @@
 import { onMounted, ref, watch } from 'vue'
 import { GoalModel } from '@/lib/models/GoalModel'
 import { useUserStore } from '@/stores/user'
-import moment from 'moment'
+import dayjs from 'dayjs'
 import { BaseSelect } from '@/components'
 
 const store = useUserStore()
@@ -14,11 +14,11 @@ const year = ref<any>({ id: 2023, label: '2023' })
 
 onMounted(async () => {
   let years = []
-  let firstYear = moment(new Date(2019, 0, 1)).year()
-  while (firstYear <= moment().year()) {
+  let firstYear = dayjs(new Date(2019, 0, 1)).year()
+  while (firstYear <= dayjs().year()) {
     years.push({
       id: firstYear,
-      label: moment(new Date(firstYear, 0)).format('YYYY')
+      label: dayjs(new Date(firstYear, 0)).format('YYYY')
     })
     firstYear += 1
   }

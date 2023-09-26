@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import moment from 'moment'
+import dayjs from 'dayjs'
 import type { ThinkActionUser, ThinkActionCategory } from '@/modules/types/think-action'
 import { useUserStore } from '@/stores/user'
 import { computed, onMounted, ref } from 'vue'
@@ -95,7 +95,7 @@ const deletePost = function () {
             <p class="text-sm">
               {{ typeof props.category === 'string' ? props.category : props.category?.category }}
             </p>
-            <p class="text-sm text-slate-400">{{ moment(props.created_at).fromNow() }}</p>
+            <p class="text-sm text-slate-400">{{ dayjs(props.created_at).fromNow() }}</p>
           </div>
         </router-link>
         <div

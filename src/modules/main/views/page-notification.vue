@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import moment from 'moment'
+import dayjs from 'dayjs'
 
 const notifications = ref([
   {
@@ -36,7 +36,7 @@ const notifications = ref([
       >
         <div>
           <p class="break-words">{{ notif.body }}</p>
-          <time class="text-xs lg:hidden block">{{ moment(notif.created_at).fromNow() }} </time>
+          <time class="text-xs lg:hidden block">{{ dayjs(notif.created_at).fromNow() }} </time>
         </div>
         <div class="flex gap-x-4 items-center h-[30px] justify-end items-end flex-col">
           <div v-if="notif.type === 'approval'" class="flex flex-row gap-1.5">
@@ -47,7 +47,7 @@ const notifications = ref([
               Accept
             </button>
             <time class="text-xs my-auto hidden lg:block"
-              >{{ moment(notif.created_at).fromNow() }}
+              >{{ dayjs(notif.created_at).fromNow() }}
             </time>
           </div>
           <div v-else class=""></div>

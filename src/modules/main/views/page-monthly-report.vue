@@ -3,12 +3,12 @@ import { onMounted, ref, watch } from 'vue'
 import { GoalModel } from '@/lib/models/GoalModel'
 import { useUserStore } from '@/stores/user'
 import { BaseSelect } from '@/components'
-import moment from 'moment'
+import dayjs from 'dayjs'
 
 const monthList = ref<any>([])
 const month = ref<any>({
   id: new Date().getMonth(),
-  label: moment(new Date(moment().year(), new Date().getMonth())).format('MMM YYYY')
+  label: dayjs(new Date(dayjs().year(), new Date().getMonth())).format('MMM YYYY')
 })
 const store = useUserStore()
 
@@ -17,11 +17,11 @@ let Categories = ref<any>([])
 
 onMounted(async () => {
   let months = []
-  let firstMonth = moment(new Date(moment().year(), 0, 1)).month()
-  while (firstMonth <= moment().month() && firstMonth < 11) {
+  let firstMonth = dayjs(new Date(dayjs().year(), 0, 1)).month()
+  while (firstMonth <= dayjs().month() && firstMonth < 11) {
     months.push({
       id: firstMonth,
-      label: moment(new Date(moment().year(), firstMonth)).format('MMM YYYY')
+      label: dayjs(new Date(dayjs().year(), firstMonth)).format('MMM YYYY')
     })
     firstMonth += 1
   }

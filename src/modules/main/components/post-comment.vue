@@ -2,7 +2,6 @@
 import dayjs from 'dayjs'
 import { ref } from 'vue'
 import { BaseTextarea } from '@/components/index'
-import moment from 'moment'
 
 type Reply = {
   [key: string]: any
@@ -95,7 +94,7 @@ const sendComment = function () {
           />
           <div>
             <p class="font-bold">{{ reply.full_name }}</p>
-            <p>{{ moment(reply.date_time).fromNow() }}</p>
+            <p>{{ dayjs(reply.date_time).fromNow() }}</p>
           </div>
         </div>
 

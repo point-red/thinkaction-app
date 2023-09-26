@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import moment from 'moment'
+import dayjs from 'dayjs'
 import { BasePopper } from '@/components/index'
 import BaseModal, { type SizeType } from '@/components/base-modal.vue'
 const showModal = ref(false)
@@ -49,7 +49,7 @@ const props = withDefaults(defineProps<Props>(), {
         <div>
           <p class="font-bold">{{ props.user?.name }}</p>
           <p>{{ props.category }}</p>
-          <p>{{ moment(props.date_time).fromNow() }}</p>
+          <p>{{ dayjs(props.date_time).fromNow() }}</p>
         </div>
       </div>
 

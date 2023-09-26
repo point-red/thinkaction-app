@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue'
 import { BaseDatepicker, BaseTextarea, BaseSelect, BaseInput } from '@/components/index'
 import { useUserStore } from '@/stores/user'
 import { useRoute, useRouter } from 'vue-router'
-import moment from 'moment'
+import dayjs from 'dayjs'
 
 const route = useRoute()
 const router = useRouter()
@@ -144,7 +144,7 @@ const submit = function () {
       <span class="font-semibold text-[#3D8AF7] block mb-2">Due Date</span>
       <BaseDatepicker
         :error="
-          !form.date_time || moment(form.date_time).isBefore(moment()) ? 'Enter a valid date' : ''
+          !form.date_time || dayjs(form.date_time).isBefore(dayjs()) ? 'Enter a valid date' : ''
         "
         v-model="form.date_time"
         border="full"

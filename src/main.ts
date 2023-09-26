@@ -25,6 +25,9 @@ import Cleave from 'cleave.js'
 // tippy
 import { plugin as VueTippy } from 'vue-tippy'
 import 'tippy.js/dist/tippy.css'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+dayjs.extend(relativeTime)
 
 const app = createApp(MainApp)
 app.directive('cleave', {

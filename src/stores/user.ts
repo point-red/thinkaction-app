@@ -1,7 +1,7 @@
 import { Goals } from '@/modules/data/goals'
 import { Users, UserRelations, uuid } from '@/modules/data/users'
 import { defineStore } from 'pinia'
-import moment from 'moment'
+import dayjs from 'dayjs'
 
 export const useUserStore = defineStore('user-store', {
   state: () => ({
@@ -147,7 +147,7 @@ export const useUserStore = defineStore('user-store', {
     },
     getGoalsSorted: async function (isCurrent = true) {
       return (isCurrent ? await this.getFeed() : this.$state.userGoals).sort((a, b) =>
-        moment(a.created_at).isBefore(b.created_at) ? 1 : -1
+        dayjs(a.created_at).isBefore(b.created_at) ? 1 : -1
       )
     },
     getResolutionCategories: async function () {
@@ -173,7 +173,7 @@ export const useUserStore = defineStore('user-store', {
       const comments = this.$state.comments
         .filter((c) => c.goal_id === goalId)
         .sort((a, b) => {
-          if (moment(a.date_time).isAfter(b.date_time)) {
+          if (dayjs(a.date_time).isAfter(b.date_time)) {
             return 1
           }
           return -1

@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue'
 import { BaseDatepicker, BaseTextarea, BaseSelect, BaseInput } from '@/components/index'
 import { useUserStore } from '@/stores/user'
 import router from '@/router'
-import moment from 'moment'
+import dayjs from 'dayjs'
 
 const list = [
   { id: 'public', label: 'Everyone' },
@@ -107,7 +107,7 @@ const submit = function () {
       <!-- due date input -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Due Date</span>
       <BaseDatepicker
-        :error="!form.date_time || moment(form.date_time).isBefore(moment()) ? 'Input a date' : ''"
+        :error="!form.date_time || dayjs(form.date_time).isBefore(dayjs()) ? 'Input a date' : ''"
         v-model="form.date_time"
         border="full"
         class="mb-8"

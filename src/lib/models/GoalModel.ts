@@ -1,25 +1,14 @@
-import moment from 'moment'
+import dayjs from 'dayjs'
 
 class GoalModel {
   static async generateMonthlyReport(userStore: any, month: number) {
-    // const goals = userStore.weeklyResolutions
-    //   .map((w: any) => {
-    //     return {
-    //       targetGoal: userStore.userGoals.find((g: any) => g.id === w.goal_id),
-    //       is_completed: w.is_completed ?? false
-    //     }
-    //   })
-    //   .filter((a: any) => !!a.targetGoal)
-    //   .map((a: any) => {
-    //     return { ...a.targetGoal, is_completed: a.is_completed }
-    //   })
     let goals = await userStore.getCurrentGoals()
-    goals = goals.filter((g: any) => moment(g.created_at).year() === moment().year())
+    goals = goals.filter((g: any) => dayjs(g.created_at).year() === dayjs().year())
     const categories = await userStore.getResolutionCategories()
 
     const weeks = []
-    let firstDay = moment().month(month).startOf('month')
-    const lastDay = moment().month(month).endOf('month')
+    let firstDay = dayjs().month(month).startOf('month')
+    const lastDay = dayjs().month(month).endOf('month')
 
     while (firstDay.date() < lastDay.date() && firstDay.month() === lastDay.month()) {
       let endOfWeek = firstDay.clone().endOf('week')
@@ -54,21 +43,16 @@ class GoalModel {
         }
       })
       for (const item of combinedGoals) {
-        // console.log(item.ended_at)
-        // if (
-        //   item.ended_at &&
-        //   moment(startDate).isSameOrAfter(item.created_at) &&
-        //   moment(endDate).isSameOrBefore(item.created_at)
-        // ) {
-        //   return {
-        //     is_completed: true
-        //   }
-        // }
         if (item.date_time) {
-          if (moment(converted(item.date_time)).isSameOrAfter(endDate)) {
+          if (
+            dayjs(converted(item.date_time)).isSame(endDate) ||
+            dayjs(converted(item.date_time)).isAfter(endDate)
+          ) {
             if (
-              moment(converted(item.created_at)).isSameOrBefore(endDate) ||
-              moment(converted(item.date_time)).isSameOrBefore(endDate)
+              dayjs(converted(item.created_at)).isSame(endDate) ||
+              dayjs(converted(item.created_at)).isBefore(endDate) ||
+              dayjs(converted(item.date_time)).isSame(endDate) ||
+              dayjs(converted(item.date_time)).isBefore(endDate)
             ) {
               return {
                 is_completed: item.ended_at ? true : false
@@ -109,8 +93,8 @@ class GoalModel {
     // goals = goals.filter((g: any) => g.goal_type === 'completed')
     const categories = await userStore.getResolutionCategories()
     const weeks = []
-    let firstDay = moment().year(year).month(0).startOf('year')
-    const lastDay = moment().year(year).month(11).endOf('year')
+    let firstDay = dayjs().year(year).month(0).startOf('year')
+    const lastDay = dayjs().year(year).month(11).endOf('year')
     while (lastDay.year() !== firstDay.year()) {
       lastDay.subtract(1, 'day')
     }
@@ -152,21 +136,16 @@ class GoalModel {
         }
       })
       for (const item of combinedGoals) {
-        // console.log(item.ended_at)
-        // if (
-        //   item.ended_at &&
-        //   moment(startDate).isSameOrAfter(item.created_at) &&
-        //   moment(endDate).isSameOrBefore(item.created_at)
-        // ) {
-        //   return {
-        //     is_completed: true
-        //   }
-        // }
         if (item.date_time) {
-          if (moment(converted(item.date_time)).isSameOrAfter(endDate)) {
+          if (
+            dayjs(converted(item.date_time)).isSame(endDate) ||
+            dayjs(converted(item.date_time)).isAfter(endDate)
+          ) {
             if (
-              moment(converted(item.created_at)).isSameOrBefore(endDate) ||
-              moment(converted(item.date_time)).isSameOrBefore(endDate)
+              dayjs(converted(item.created_at)).isSame(endDate) ||
+              dayjs(converted(item.created_at)).isBefore(endDate) ||
+              dayjs(converted(item.date_time)).isSame(endDate) ||
+              dayjs(converted(item.date_time)).isBefore(endDate)
             ) {
               return {
                 is_completed: item.ended_at ? true : false

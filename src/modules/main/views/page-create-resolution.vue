@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { BaseInput, BaseDatepicker, BaseTextarea, BaseSelect } from '@/components/index'
 import { useUserStore } from '@/stores/user'
-import moment from 'moment'
+import dayjs from 'dayjs'
 import router from '@/router'
 
 const list = [
@@ -67,7 +67,7 @@ const save = function () {
       <span class="font-semibold text-[#3D8AF7] block mb-2">Due Date</span>
       <BaseDatepicker
         :error="
-          !form.date_time || moment(form.date_time).isBefore(moment()) ? 'Enter a valid date' : ''
+          !form.date_time || dayjs(form.date_time).isBefore(dayjs()) ? 'Enter a valid date' : ''
         "
         v-model="form.date_time"
         border="full"
