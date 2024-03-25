@@ -23,17 +23,17 @@ onMounted(() => {
     goals.value = data.filter(
       (d: any) =>
         d.goal_type !== 'complete' &&
-        !data.some((s: any) => s.meta.goal_id === d.id && s.goal_type === 'resolution')
+        !data.some((s: any) => s.meta.goal_id === d._id && s.goal_type === 'resolution')
     )
   })
 })
 
 const computedGoals = computed(() => {
   return goals.value
-    .filter((g: any) => (form.value.category?.id ? g.category === form.value.category?.id : ''))
+    .filter((g: any) => (form.value.category?._id ? g.category === form.value.category?._id : ''))
     .map((a: any) => {
       return {
-        id: a.id,
+        id: a._id,
         label: a.caption
       }
     })
@@ -54,11 +54,11 @@ const submit = function () {
   let goal: any = form.value.goal
   let visibility: any = form.value.visibility
   let values: any = {}
-  if (category.id && goal.id && visibility.id) {
-    values.category = category.id
-    values.goal_id = goal.id
+  if (category._id && goal._id && visibility._id) {
+    values.category = category._id
+    values.goal_id = goal._id
     values.caption = form.value.caption
-    values.visibility = visibility?.id
+    values.visibility = visibility?._id
     values.is_completed = checked.value
     values.files = form.value.files
     userStore.addCompleteGoal(values)
@@ -79,7 +79,7 @@ const submit = function () {
       <!-- Select Resolution's Category -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Select Category</span>
       <BaseSelect
-        :is-error="!(form.category as any)?.id"
+        :is-error="!(form.category as any)?._id"
         error-message="Choose a category"
         v-model="form.category"
         :list="categories.map((category: string) => ({ id: category, label: category }))"
@@ -89,7 +89,7 @@ const submit = function () {
       <!-- Select Goals Achieved -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Goals Achieved</span>
       <BaseSelect
-        :is-error="!(form.goal as any)?.id"
+        :is-error="!(form.goal as any)?._id"
         error-message="Choose a goal"
         v-model="form.goal"
         :list="computedGoals"
@@ -124,7 +124,7 @@ const submit = function () {
       <!-- share with -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Share With</span>
       <BaseSelect
-        :is-error="!(form.visibility as any)?.id"
+        :is-error="!(form.visibility as any)?._id"
         error-message="Choose a visibility"
         v-model="form.visibility"
         :list="privateTypes"

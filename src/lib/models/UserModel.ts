@@ -9,7 +9,7 @@ class UserModel {
   }
 
   static async findUserById(id: string) {
-    return Users.find((u: ThinkActionUser) => u.id === id)
+    return Users.find((u: ThinkActionUser) => u._id === id)
   }
 
   static async findUserRelations(
@@ -35,7 +35,7 @@ class UserModel {
     })
     return data
       .map((d) => {
-        return Users.find((u) => (d.user_id === user_id ? d.related_user_id : d.user_id) === u.id)
+        return Users.find((u) => (d.user_id === user_id ? d.related_user_id : d.user_id) === u._id)
       })
       .filter(
         (u) => !!u && (u.full_name?.includes(query ?? '') || u?.username?.includes(query ?? ''))

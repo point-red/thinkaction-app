@@ -17,14 +17,11 @@ const states = ref<any>({
 })
 
 onMounted(async () => {
-  states.value.user = userStore.currentUser
-  goals.value = (await userStore.getGoalsSorted()).filter(
-    (g) => g.user_id === userStore.currentUser.id
-  )
+  states.value.user = await userStore.getUserById(userStore.currentUser._id)
+  goals.value = userStore.currentUser?.categoryResolution ?? []
 })
-watch(userStore.userGoals, async () => {
-  const data = await userStore.getGoalsSorted()
-  goals.value = data.filter((g) => g.user_id === userStore.currentUser.id)
+watch(userStore.currentUser, async () => {
+  goals.value = userStore.currentUser?.categoryResolution ?? []
 })
 </script>
 

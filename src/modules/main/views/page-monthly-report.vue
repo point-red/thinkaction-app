@@ -31,8 +31,8 @@ onMounted(async () => {
 })
 
 watch(month, async (currentValue) => {
-  if (currentValue.id)
-    categorized.value = await GoalModel.generateMonthlyReport(store, currentValue.id)
+  if (currentValue._id)
+    categorized.value = await GoalModel.generateMonthlyReport(store, currentValue._id)
 })
 </script>
 
@@ -68,7 +68,7 @@ watch(month, async (currentValue) => {
             <td v-for="{ id } in categories" :key="id" :class="'basic-table-body rounded-lg p-4'">
               <div
                 class="w-20 h-20 flex rounded-lg"
-                :class="( categories.find((c: any) => c.id === id)?.goals?.is_completed === undefined? 'bg-gray-300':( categories.find((c: any) => c.id === id)?.goals?.is_completed ? 'bg-sky-300' : 'bg-pink-300'))"
+                :class="( categories.find((c: any) => c._id === id)?.goals?.is_completed === undefined? 'bg-gray-300':( categories.find((c: any) => c._id === id)?.goals?.is_completed ? 'bg-sky-300' : 'bg-pink-300'))"
               ></div>
             </td>
           </tr>

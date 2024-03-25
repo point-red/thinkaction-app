@@ -1,11 +1,14 @@
 {
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
+    "source.fixAll.eslint": "explicit"
   },
-  "editor.formatOnSave": true,
-  "css.customData": [".vscode/unocss.json"],
+  "editor.formatOnSave": false,
+  "css.customData": [
+    ".vscode/unocss.json"
+  ],
   "files.associations": {
     "*.css": "postcss"
   },
-  "vue.codeActions.enabled": false
+  "vue.codeActions.enabled": false,
+  "typescript.tsdk": "node_modules\\typescript\\lib"
 }

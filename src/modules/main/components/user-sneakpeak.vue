@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { getFile } from '@/lib/connection'
+
 export interface Props {
   id: string
   fullname: string
@@ -15,7 +17,7 @@ const props = withDefaults(defineProps<Props>(), {
 <template>
   <div class="flex mb-5">
     <img
-      :src="props.avatar"
+      :src="props.avatar ? getFile(props.avatar) : '/public/profile.png'"
       class="w-[60px] h-[60px] object-cover inline-block mr-2 rounded-full"
       alt="user profile"
     />

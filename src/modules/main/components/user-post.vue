@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
 import type { ThinkActionUser, ThinkActionCategory } from '@/modules/types/think-action'
+import { usePostStore } from '@/stores/post'
 import { useUserStore } from '@/stores/user'
 import { computed, onMounted, ref } from 'vue'
+import { getFile } from '@/lib/connection'
 
 export interface Props {
   id?: string
@@ -11,9 +13,9 @@ export interface Props {
   category?: ThinkActionCategory | string
   caption?: string
   photos?: Array<string>
-  is_liked?: boolean
-  cheers_count?: number
-  comments_count?: number
+  likeCount?: number
+  likedByCurrent?: boolean
+  commentCount?: number
   date_time?: string
   created_at?: string
   goal_type?: string
@@ -21,26 +23,26 @@ export interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   avatar: '/public/profile.png',
-  is_liked: false,
-  cheers_count: 0,
-  comments_count: 0
+  likedByCurrent: false,
+  likeCount: 0,
+  commentCount: 0
 })
 
-const store = useUserStore()
+const store = usePostStore()
+const userStore = useUserStore()
 const actionToggled = ref(false)
 const isLiked = ref(false)
 const deleteModal = ref(false)
 
-const user = computed(() => store.findUserById(props.user_id as string) ?? null)
-const currentUser = computed(() => store.currentUser)
-const likePost = function () {
+const currentUser = computed(() => userStore.currentUser)
+const likePost = async function () {
   let id = props.id
-  store.likePost(id as string)
+  await store.likePost(id as string)
   isLiked.value = !isLiked.value
 }
 
 onMounted(() => {
-  isLiked.value = props.is_liked
+  isLiked.value = props.likedByCurrent
 })
 const toggleAction = function () {
   actionToggled.value = true
@@ -52,7 +54,7 @@ const openDeleteModal = function () {
 }
 
 const deletePost = function () {
-  store.deleteGoal(props.id as string)
+  // store.deleteGoal(props.id as string)
   deleteModal.value = false
 }
 </script>
@@ -86,14 +88,14 @@ const deletePost = function () {
           class="flex gap-x-3 mb-3 items-center"
         >
           <img
-            :src="user?.avatar!"
+            :src="getFile(props.user?.photo!)"
             alt="user-photo"
             class="w-14 h-14 object-cover bg-slate-300 rounded-full"
           />
           <div>
-            <p class="font-bold">{{ user?.full_name! }}</p>
+            <p class="font-bold">{{ props.user?.fullname! ?? props.user?.username! }}</p>
             <p class="text-sm">
-              {{ typeof props.category === 'string' ? props.category : props.category?.category }}
+              {{ typeof props.category === 'string' ? props.category : '' }}
             </p>
             <p class="text-sm text-slate-400">{{ dayjs(props.created_at).fromNow() }}</p>
           </div>
@@ -114,7 +116,7 @@ const deletePost = function () {
             v-if="actionToggled"
             class="absolute z-[100] top-8 right-0 shadow-md rounded-sm bg-white flex text-sm md:text-base flex-col"
           >
-            <template v-if="currentUser.id === props.user_id">
+            <template v-if="currentUser._id === props.user_id">
               <router-link
                 :to="{ path: 'edit-' + props.goal_type + '/' + props.id }"
                 class="px-4 md:py-2 py-1.5 hover:bg-slate-100 text-left"
@@ -140,7 +142,7 @@ const deletePost = function () {
     <swiper-container class="mySwiper" navigation="true">
       <swiper-slide v-for="photo in props.photos" :key="props.photos?.indexOf(photo)"
         ><img
-          :src="photo"
+          :src="getFile(photo!)"
           alt="goals image"
           class="w-full md:max-h-none max-h-[250px] object-cover"
       /></swiper-slide>
@@ -158,12 +160,12 @@ const deletePost = function () {
           />
           <router-link :to="{ path: `/post/${props.id}/cheers` }">
             <span>
-              {{ props.cheers_count + (isLiked ? 1 : 0) }}
+              {{ props.likeCount }}
             </span>
           </router-link>
         </button>
         <router-link :to="{ path: `/post/${props.id}` }" class="btn btn-icon rounded-full">
-          <i class="i-fas-comments h-25px w-25px mr-2"></i>{{ props.comments_count }}
+          <i class="i-fas-comments h-25px w-25px mr-2"></i>{{ props.commentCount }}
         </router-link>
       </div>
       <div></div>

@@ -34,7 +34,7 @@ onMounted(async () => {
 })
 
 const onUpdateVisiblity = function (params: any) {
-  if (!params.id) {
+  if (!params._id) {
     form.value.visibility = ''
     return
   }
@@ -43,17 +43,17 @@ const onUpdateVisiblity = function (params: any) {
 }
 
 const onUpdateResolution = async function (params: any) {
-  form.value.resolution = resolutions.value.find((r: any) => r.id === params.id)
+  form.value.resolution = resolutions.value.find((r: any) => r._id === params._id)
 }
 
 const submit = function () {
   let values = form.value
-  let isAllFilled = values.caption && values.visibility && (selected.value.resolution as any)?.id // @ts-ignore-all
+  let isAllFilled = values.caption && values.visibility && (selected.value.resolution as any)?._id // @ts-ignore-all
 
   if (isAllFilled) {
     // @ts-ignore
     values.category = values.resolution.category
-    values.resolution.goal_id = values.resolution?.id
+    values.resolution.goal_id = values.resolution?._id
     userStore.addWeeklyGoal(values)
     router.push('/')
   }
@@ -76,7 +76,7 @@ const submit = function () {
         v-model="selected.resolution"
         @update:modelValue="onUpdateResolution"
         errorMessage="Choose a category"
-        :is-error="!(selected.resolution as any).id"
+        :is-error="!(selected.resolution as any)._id"
         :list="
           resolutions.map(({ id, category }: any) => ({
             id: id,
@@ -133,7 +133,7 @@ const submit = function () {
         v-model="selected.visibility"
         :list="list"
         border="full"
-        :isError="!(selected.visibility as any)?.id"
+        :isError="!(selected.visibility as any)?._id"
         errorMessage="Choose a visibilty"
       ></component>
 

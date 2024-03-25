@@ -35,7 +35,7 @@ class GoalModel {
       const combinedGoals = filteredGoals.map((f: any) => {
         const g = goals.find(
           (g: any) =>
-            g.meta?.goal_id === f.id && g.meta?.is_completed && g.goal_type === 'completed'
+            g.meta?.goal_id === f._id && g.meta?.is_completed && g.goal_type === 'completed'
         )
         return {
           ...f,
@@ -128,7 +128,7 @@ class GoalModel {
       const combinedGoals = filteredGoals.map((f: any) => {
         const g = goals.find(
           (g: any) =>
-            g.meta?.goal_id === f.id && g.meta?.is_completed && g.goal_type === 'completed'
+            g.meta?.goal_id === f._id && g.meta?.is_completed && g.goal_type === 'completed'
         )
         return {
           ...f,

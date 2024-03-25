@@ -3,15 +3,23 @@ import { computed } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import type { ThinkActionUser } from '../../types/think-action'
 import { useUserStore } from '@/stores/user'
+import { getFile } from '@/lib/connection'
 
-type DefaultProps = ThinkActionUser & {
+type DefaultProps = {
   is_user: boolean
-  is_supporting: boolean
+  isSupporting: boolean
+  supporterCount: number
+  supportingCount: number
+  bio: string
+  avatar: string
+  [key: string]: any
 }
 
 const user = withDefaults(defineProps<DefaultProps>(), {
   avatar: '/profile.png',
-  is_user: false
+  is_user: false,
+  supporterCount: 0,
+  supportingCount: 0
 })
 
 const userStore = useUserStore()
@@ -20,7 +28,7 @@ const route = useRoute()
 const emit = defineEmits(['support'])
 
 const id = computed(() => {
-  return route.params.id ?? userStore.currentUser.id
+  return route.params.id ?? userStore.currentUser._id
 })
 </script>
 
@@ -29,25 +37,25 @@ const id = computed(() => {
     <div class="md:w-1/4 w-1/3 mr-4 flex flex-col items-center gap-4">
       <div class="flex flex-col gap-2">
         <img
-          :src="user.avatar"
+          :src="user.avatar ? getFile(user.avatar) : '/public/profile.png'"
           class="m-auto w-[75px] h-[75px] md:h-[90px] object-cover md:w-[90px] rounded-full"
         />
         <span class="font-semibold text-xs md:text-base">{{ user.full_name ?? '' }}</span>
       </div>
       <template v-if="!user.is_user">
         <button
-          v-if="!user.is_supporting"
-          @click="emit('support')"
-          class="btn bg-[#3D8AF7] w-fit mx-auto font-semibold text-white hidden md:block"
-        >
-          Support
-        </button>
-        <button
-          v-if="user.is_supporting"
+          v-if="user.isSupporting"
           @click="emit('support')"
           class="btn bg-slate-400 w-fit mx-auto font-semibold text-white hidden md:block"
         >
           Supporting
+        </button>
+        <button
+          v-else
+          @click="emit('support')"
+          class="btn bg-[#3D8AF7] w-fit mx-auto font-semibold text-white hidden md:block"
+        >
+          Support
         </button>
       </template>
     </div>
@@ -59,15 +67,15 @@ const id = computed(() => {
           <p class="text-lg">{{ user.goals_performance + '%' }}</p>
           <p>Goals Perf.</p>
         </div>
-        <router-link :to="{ path: '/user/' + id + '/supporters' }">
+        <router-link :to="{ path: '/user/' + id + '/supporter' }">
           <div>
-            <p class="text-lg">{{ user.supporter_count }}</p>
+            <p class="text-lg">{{ user.supporterCount }}</p>
             <p>Supporters</p>
           </div>
         </router-link>
         <router-link :to="{ path: '/user/' + id + '/supporting' }">
           <div>
-            <p class="text-lg">{{ user.supporting_count }}</p>
+            <p class="text-lg">{{ user.supportingCount }}</p>
             <p>Supporting</p>
           </div>
         </router-link>

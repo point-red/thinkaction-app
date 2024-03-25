@@ -3,16 +3,24 @@ import { ref } from 'vue'
 import { BaseInput } from '@/components/index'
 import { uuid } from '@/modules/data/users'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
+const userStore = useUserStore()
 const form = ref({
   email: '',
   password: ''
 })
 
-const login = function () {
-  localStorage.setItem('token', uuid())
-  router.push('/')
+const login = async function () {
+  if (!form.value.email || !form.value.password) {
+    return
+  }
+  const loggedIn = await userStore.login(form.value)
+  if (loggedIn) {
+    router.push('/')
+    return
+  }
 }
 </script>
 
@@ -25,7 +33,7 @@ const login = function () {
       <p class="text-[grey]">Hi there! Nice to see you again</p>
     </div>
 
-    <form action="" @submit="login" method="post" class="space-y-5 text-center">
+    <form @submit.prevent="login" method="post" class="space-y-5 text-center">
       <div class="space-y-2">
         <component
           :is="BaseInput"
@@ -43,7 +51,8 @@ const login = function () {
           type="password"
           error=""
           class="text-left"
-        ></component>
+        >
+        </component>
       </div>
       <button class="btn w-full md:w-[300px] bg-[#3D8AF7] font-bold text-white">Sign In</button>
     </form>

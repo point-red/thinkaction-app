@@ -19,7 +19,7 @@ const toggleHeader = function () {
 const links = [
   {
     label: 'Profile',
-    path: '/user/' + userStore.currentUser?.id
+    path: '/profile'
   },
   {
     label: 'Monthly Reports',

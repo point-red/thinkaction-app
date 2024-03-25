@@ -3,18 +3,24 @@ import { computed, ref } from 'vue'
 import { BaseInput } from '@/components/index'
 import UserSneakPeak from '../components/user-sneakpeak.vue'
 import { Users } from '@/modules/data/users'
+import { watchDebounced } from '@vueuse/core'
+import client from '@/lib/connection'
 
 const form = ref({
   key: ''
 })
 
-const users = computed(() => {
-  return Users.filter((u) =>
-    [u.username.toLowerCase(), u.full_name.toLowerCase()].some((a) =>
-      a.includes(form.value.key.toLowerCase())
-    )
-  )
-})
+const users = ref<any>([])
+
+watchDebounced(
+  () => form.value.key,
+  async () => {
+    const {
+      data: { data }
+    } = await client().get(`/users/search?username=${form.value.key}`)
+    users.value = data
+  }
+)
 </script>
 
 <template>
@@ -29,13 +35,13 @@ const users = computed(() => {
 
     <!-- search result -->
     <div>
-      <div v-for="user in users" :key="user.id">
-        <router-link :to="{ path: `user/${user.id}` }">
+      <div v-for="user in users" :key="user._id">
+        <router-link :to="{ path: `user/${user._id}` }">
           <UserSneakPeak
-            :id="user.id"
-            :fullname="user.full_name"
+            :id="user._id"
+            :fullname="user.fullname"
             :username="user.username"
-            :avatar="user.avatar"
+            :avatar="user.photo"
             :supporter="['Alf', 'Risky']"
           >
           </UserSneakPeak>

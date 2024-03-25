@@ -1,31 +1,31 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { BaseInput } from '@/components/index'
-import { useUserStore } from '@/stores/user'
 import { useRoute } from 'vue-router'
 import UserRelationItem from '../components/users/user-relation-item.vue'
+import client from '@/lib/connection'
+import { watchDebounced } from '@vueuse/core'
 
 let relations = ref<any>([])
 
-const userStore = useUserStore()
-const currentUser = userStore.currentUser
 const route = useRoute()
 const { id, type } = route.params
-
-const search = async function () {
-  relations.value = (await userStore.getRelations(id as string, type as string)).sort((a: any) => {
-    if (a.id === currentUser.id) {
-      return -1
-    }
-    return 0
-  })
-}
-
-search()
 
 const form = ref({
   key: ''
 })
+
+watchDebounced(
+  () => form.value.key,
+  async () => {
+    const {
+      data: { data }
+    } = await client().get(
+      `/users/${route.params.id}/${type}?username=${form.value.key}&page=1&limit=10`
+    )
+    relations.value = data
+  }
+)
 </script>
 
 <template>
@@ -46,8 +46,13 @@ const form = ref({
 
     <!-- LIST SUPPORTER -->
     <div class="flex flex-col gap-2 px-2">
-      <div class="flex justify-between" v-for="item in relations" :key="item.user_id">
-        <UserRelationItem :item="item" :id="(id as string)!" :type="(type as string)!">
+      <div class="flex justify-between" v-for="(item, index) in relations" :key="item.user_id">
+        <UserRelationItem
+          @update="(u: any) => relations[index] = u"
+          :item="item"
+          :id="(id as string)!"
+          :type="(type as string)!"
+        >
         </UserRelationItem>
       </div>
     </div>

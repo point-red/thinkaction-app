@@ -31,7 +31,7 @@ const form = ref<any>({
   files: []
 })
 
-const id = route.params.id as string
+const id = route.params._id as string
 // const categories = ref<any>([])
 const currentGoal = ref<any>(null)
 
@@ -57,10 +57,10 @@ onMounted(() => {
       }
       selected.value.visibility = list.find((l) => goal?.visibility === l.id) || list[0]
       let res =
-        resolutions.value.find((c: any) => c.id === (goal?.meta as any)?.resolution_id) ?? {}
+        resolutions.value.find((c: any) => c._id === (goal?.meta as any)?.resolution_id) ?? {}
       form.value.resolution.caption = res.caption
       selected.value.resolution = {
-        id: res.id,
+        id: res._id,
         label: res.category
       }
 
@@ -70,7 +70,7 @@ onMounted(() => {
 })
 
 const onUpdateVisiblity = function (params: any) {
-  if (!params.id) {
+  if (!params._id) {
     form.value.visibility = ''
     return
   }
@@ -79,17 +79,17 @@ const onUpdateVisiblity = function (params: any) {
 }
 
 const onUpdateResolution = function (params: any) {
-  form.value.resolution = resolutions.value.find((r: any) => r.id === params.id)
+  form.value.resolution = resolutions.value.find((r: any) => r._id === params._id)
   selected.value.resolution = params
 }
 
 const submit = function () {
   let values = form.value
-  let isAllFilled = values.caption && values.visibility && (selected.value.resolution as any)?.id // @ts-ignore-all
+  let isAllFilled = values.caption && values.visibility && (selected.value.resolution as any)?._id // @ts-ignore-all
   if (isAllFilled) {
     // @ts-ignore
     values.category = values.resolution.category
-    values.resolution.goal_id = values.resolution?.id
+    values.resolution.goal_id = values.resolution?._id
     userStore.editWeeklyGoal(values, id)
     router.push('/')
   }
@@ -109,7 +109,7 @@ const submit = function () {
       <!-- Select Resolution -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Select Category</span>
       <BaseSelect
-        :is-error="!(selected.resolution as any).id"
+        :is-error="!(selected.resolution as any)._id"
         errorMessage="Choose a category"
         :model-value="selected.resolution"
         @update:modelValue="onUpdateResolution"
@@ -166,7 +166,7 @@ const submit = function () {
       <!-- share with -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Share With</span>
       <BaseSelect
-        :is-error="!(selected.visibility as any)?.id"
+        :is-error="!(selected.visibility as any)?._id"
         :error-message="'Choose a visibility'"
         @update:modelValue="onUpdateVisiblity"
         v-model="selected.visibility"

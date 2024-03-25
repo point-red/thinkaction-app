@@ -2,21 +2,20 @@ import { Goals } from '@/modules/data/goals'
 import { Users, UserRelations, uuid } from '@/modules/data/users'
 import { defineStore } from 'pinia'
 import dayjs from 'dayjs'
+import client from '@/lib/connection'
 
 export const useUserStore = defineStore('user-store', {
   state: () => ({
-    currentUser: {
-      ...Users[0],
-      email: 'johndoe123@gmail.com'
-    },
+    currentUser: JSON.parse(localStorage.getItem('auth.user') ?? '{}'),
+    token: localStorage.getItem('token'),
     userGoals: Goals,
     users: Users,
     relations: UserRelations,
     resolutions: Goals.filter(
-      (g) => g.user_id === Users[0].id && g.goal_type === 'resolutions'
+      (g) => g.user_id === Users[0]._id && g.goal_type === 'resolutions'
     ).map((g) => ({ goal_id: g.id, caption: g.caption })),
     weeklyResolutions: Goals.filter(
-      (g) => g.user_id === Users[0].id && g.goal_type === 'weekly'
+      (g) => g.user_id === Users[0]._id && g.goal_type === 'weekly'
     ).map((g) => ({ goal_id: g.id, caption: g.caption })),
     comments: [
       {
@@ -51,6 +50,52 @@ export const useUserStore = defineStore('user-store', {
     ]
   }),
   actions: {
+    async login(form: any) {
+      try {
+        const { data } = await client().post(`/users/login`, form)
+        if (data.status === 'success') {
+          this.token = data.token
+          localStorage.setItem('token', data.token)
+          const {
+            data: { user }
+          } = data
+          this.currentUser = user
+          localStorage.setItem('auth.user', JSON.stringify(user))
+        }
+        return true
+      } catch (e) {
+        return false
+      }
+    },
+    async updateProfile(form: any) {
+      try {
+        const { data } = await client().patch(`/users`, form)
+        if (data.status === 'success') {
+          const { data: user } = data
+          this.currentUser = user
+          localStorage.setItem('auth.user', JSON.stringify(user))
+        }
+        return true
+      } catch (e) {
+        return false
+      }
+    },
+    getUserById: async function (_id: string) {
+      try {
+        const { data } = await client().get(`/users/${_id}`)
+        if (data.status === 'success') {
+          const { data: user } = data
+          if (this.currentUser?._id === user._id) {
+            this.currentUser = Object.assign(this.currentUser, user)
+            localStorage.setItem('auth.user', JSON.stringify(user))
+          }
+          return user
+        }
+        return null
+      } catch (e) {
+        return null
+      }
+    },
     getRelations: function (user_id: string, type: string, query: string = '') {
       const data = this.$state.relations.filter((d) => {
         if (type === 'supporters') {
@@ -69,7 +114,7 @@ export const useUserStore = defineStore('user-store', {
       return data
         .map((d) => {
           return this.$state.users.find(
-            (u) => (d.user_id === user_id ? d.related_user_id : d.user_id) === u.id
+            (u) => (d.user_id === user_id ? d.related_user_id : d.user_id) === u._id
           )
         })
         .filter(
@@ -80,7 +125,7 @@ export const useUserStore = defineStore('user-store', {
       return this.$state.userGoals.find((i) => i.id === id)
     },
     deleteGoal(goalId: string) {
-      const currentUser = this.$state.currentUser.id
+      const currentUser = this.$state.currentUser._id
       const goal = this.userGoals.findIndex((g) => g.id === goalId && g.user_id === currentUser)
       if (goal >= 0) {
         this.userGoals.splice(goal, 1)
@@ -88,7 +133,7 @@ export const useUserStore = defineStore('user-store', {
     },
     isSupporting: function (id: string, currentUserId: string | undefined | null = null) {
       if (!currentUserId) {
-        currentUserId = this.$state.currentUser.id
+        currentUserId = this.$state.currentUser._id
       }
 
       let relationship = this.$state.relations.find(
@@ -107,65 +152,41 @@ export const useUserStore = defineStore('user-store', {
         return relationship.supported_by_current
       }
     },
-    toggleSupport: function (id: string, currentUserId: string | undefined | null = null) {
-      if (!currentUserId) {
-        currentUserId = this.$state.currentUser.id
-      }
-
-      let isReverse = false
-      let relationship = this.$state.relations.findIndex(
-        (r) => r.user_id === currentUserId && r.related_user_id === id
-      )
-      if (relationship < 0) {
-        relationship = this.$state.relations.findIndex(
-          (r) => r.related_user_id === currentUserId && r.user_id === id
-        )
-        if (relationship >= 0) {
-          isReverse = true
-        }
-      }
-
-      if (relationship >= 0) {
-        if (!isReverse) {
-          this.$state.relations[relationship].supported_by_current =
-            !this.$state.relations[relationship].supported_by_current
-        } else {
-          this.$state.relations[relationship].supported_by_related =
-            !this.$state.relations[relationship].supported_by_related
-        }
-      } else {
-        this.$state.relations.push({
-          user_id: currentUserId,
-          related_user_id: id,
-          supported_by_current: true,
-          supported_by_related: false
-        })
+    toggleSupport: async function (id: string, isSupporting: boolean = false) {
+      const {
+        data: { data }
+      } = await client().post(`/users/${isSupporting ? 'un' : ''}support`, {
+        userId: id
+      })
+      return {
+        ...data,
+        isSupporting: !isSupporting
       }
     },
     findUserById: function (id: string) {
-      return this.$state.users.find((user) => user.id === id)
+      return this.$state.users.find((user) => user._id === id)
     },
-    getGoalsSorted: async function (isCurrent = true) {
-      return (isCurrent ? await this.getFeed() : this.$state.userGoals).sort((a, b) =>
-        dayjs(a.created_at).isBefore(b.created_at) ? 1 : -1
+    getGoalsSorted: function (isCurrent = true) {
+      return (isCurrent ? this.currentUser.categoryResolutions ?? [] : this.$state.userGoals).sort(
+        (a: any, b: any) => (dayjs(a.createdDate).isBefore(b.createdDate) ? 1 : -1)
       )
     },
     getResolutionCategories: async function () {
       const user = this.$state.currentUser
       const resolutions = this.$state.userGoals
-        .filter((g) => g.user_id === user.id && g.goal_type === 'resolution') // @ts-ignore
+        .filter((g) => g.user_id === user._id && g.goal_type === 'resolution') // @ts-ignore
         .reduce((p, c) => (p.includes(c.category) ? p : [...p, c.category]), [])
       return resolutions
     },
     getCurrentGoals: async function () {
       const user = this.$state.currentUser
-      const resolutions = this.$state.userGoals.filter((g) => g.user_id === user.id)
+      const resolutions = this.$state.userGoals.filter((g) => g.user_id === user._id)
       return resolutions
     },
     getResolutions: async function () {
       const user = this.$state.currentUser
       const resolutions = this.$state.userGoals.filter(
-        (g) => g.user_id === user.id && g.goal_type === 'resolution'
+        (g) => g.user_id === user._id && g.goal_type === 'resolution'
       )
       return resolutions
     },
@@ -179,11 +200,6 @@ export const useUserStore = defineStore('user-store', {
           return -1
         })
       return comments
-    },
-    likePost: function (goalId: string) {
-      this.$state.userGoals = this.$state.userGoals.map((g) => {
-        return g.id === goalId ? { ...g, is_liked_by_user: !g.is_liked_by_user } : g
-      })
     },
     addCommentToGoal: function (goalId: string, comment: string, parentId?: string) {
       const id = Math.random().toFixed(32).substring(2)
@@ -212,43 +228,20 @@ export const useUserStore = defineStore('user-store', {
         })
       }
     },
-    addResolutionGoal: function (params: any) {
+    addResolutionGoal: async function (params: any) {
       // TODO: Add api here:
 
-      const category = params.category as string
-      const date_time = params.date_time
-      const caption = params.caption
-      const files = params.files
-      const visibility = params.visibility
-      const id = uuid()
-
-      const goal = {
-        id,
-        user_id: this.$state.currentUser.id,
-        user: {
-          username: this.$state.currentUser.username,
-          avatar: this.$state.currentUser.avatar
-        },
-        category,
-        caption,
-        photos: files,
-        is_liked_by_user: false,
-        cheers_count: 0,
-        comments_count: 0,
-        visibility, // public, supporter, private
-        date_time,
-        created_at: new Date().toISOString(),
-        goal_type: 'resolution',
-        meta: {}
-      }
+      const {
+        data: { data: post }
+      } = await client().post('/posts/resolutions', params)
       // @ts-ignore
       this.$state.resolutions.push({
-        goal_id: id,
-        caption: caption
+        goal_id: post._id,
+        caption: params.get('caption')
       })
 
       // @ts-ignore
-      this.$state.userGoals.push(goal)
+      this.$state.userGoals.push(post)
     },
     editResolutionGoal: function (params: any, id: string) {
       // TODO: Add api here:
@@ -274,7 +267,7 @@ export const useUserStore = defineStore('user-store', {
       }
 
       // @ts-ignore
-      this.$state.userGoals = this.$state.userGoals.map((u) => (u.id === id ? goal : u))
+      this.$state.userGoals = this.$state.userGoals.map((u) => (u._id === id ? goal : u))
     },
     addWeeklyGoal: function (params: any) {
       const { resolution, date_time, caption, files, visibility, category } = params
@@ -283,7 +276,7 @@ export const useUserStore = defineStore('user-store', {
 
       const goal = {
         id,
-        user_id: this.$state.currentUser.id,
+        user_id: this.$state.currentUser._id,
         user: this.$state.currentUser,
         category: category as string,
         caption,
@@ -332,15 +325,15 @@ export const useUserStore = defineStore('user-store', {
       }
 
       // @ts-ignore
-      this.$state.userGoals = this.$state.userGoals.map((u) => (u.id === id ? goal : u))
+      this.$state.userGoals = this.$state.userGoals.map((u) => (u._id === id ? goal : u))
     },
     getSupportingUsers() {
-      const userId = this.$state.currentUser.id
+      const userId = this.$state.currentUser._id
       return this.$state.relations.filter((u) => u.user_id === userId && u.supported_by_current)
     },
     async getFeed() {
       const supportingUsers = this.getSupportingUsers()
-      const userId = this.$state.currentUser.id
+      const userId = this.$state.currentUser._id
       return this.$state.userGoals.filter(
         (g) => supportingUsers.some((u) => u.related_user_id === g.user_id) || g.user_id === userId
       )
@@ -350,14 +343,14 @@ export const useUserStore = defineStore('user-store', {
       const goals = await this.getCurrentGoals()
       const targetGoalIndex = goals.findIndex(
         (w: any) =>
-          w.id === goal_id &&
+          w._id === goal_id &&
           !goals.some((g) => g.goal_type === 'completed' && (g.meta as any)?.goal_id === goal_id)
       )
 
       const id = uuid()
       const goal = {
         id,
-        user_id: this.$state.currentUser.id,
+        user_id: this.$state.currentUser._id,
         user: this.$state.currentUser,
         category,
         caption,

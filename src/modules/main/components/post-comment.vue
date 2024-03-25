@@ -2,6 +2,8 @@
 import dayjs from 'dayjs'
 import { ref } from 'vue'
 import { BaseTextarea } from '@/components/index'
+import { getFile } from '@/lib/connection'
+import { useCommentStore } from '@/stores/comment'
 
 type Reply = {
   [key: string]: any
@@ -18,21 +20,26 @@ export interface Props {
   avatar?: string
   date_time?: string
   comment?: string
-  replies?: Array<Reply>
+  replyCount?: number
+  postId: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  avatar: '/profile.png'
+  avatar: undefined,
+  replyCount: 0
 })
 
 const emit = defineEmits(['reply'])
+const replies = ref<any>([])
+const commentStore = useCommentStore()
 
 const text = ref('')
 
 let showTextarea = ref(false)
 let showReplies = ref(false)
+const repliesFetched = ref(false)
 
-const sendComment = function () {
+const sendComment = async function () {
   if (text.value) {
     emit('reply', {
       comment: text.value
@@ -40,7 +47,25 @@ const sendComment = function () {
     showTextarea.value = false
     showReplies.value = true
     text.value = ''
+    repliesFetched.value = false
+    await fetchReplies()
   }
+}
+
+const getUserInfo = (reply: any) => {
+  return reply.userInfo?.[0] ?? reply.userInfo ?? {}
+}
+
+const fetchReplies = async () => {
+  if (!repliesFetched.value) {
+    const comments = await commentStore.getComments(props.postId, { commentId: props.id })
+    replies.value = comments
+    repliesFetched.value = true
+  }
+}
+const toggleReplies = async () => {
+  showReplies.value = !showReplies.value
+  await fetchReplies()
 }
 </script>
 
@@ -51,13 +76,14 @@ const sendComment = function () {
       <!-- user info -->
       <div class="flex gap-2 items-center mb-2">
         <img
-          :src="props.avatar"
+          :src="props.avatar ? getFile(props.avatar) : '/profile.png'"
           alt="user-photo"
           class="object-cover w-14 h-14 bg-slate-300 rounded-[1000px]"
         />
         <div>
           <p class="font-bold">{{ props.full_name }}</p>
-          <p>{{ dayjs(props.date_time).format('DD/MM/YYYY HH:mm') }}</p>
+          <!-- <p>{{ dayjs(props.date_time).format('DD/MM/YYYY HH:mm') }}</p> -->
+          <p>{{ dayjs(props.date_time).fromNow() }}</p>
         </div>
       </div>
 
@@ -66,12 +92,8 @@ const sendComment = function () {
 
       <div class="flex justify-between my-2">
         <button @click="showTextarea = !showTextarea" class="text-blue-500 underline">Reply</button>
-        <button
-          @click="showReplies = !showReplies"
-          v-if="props.replies && props.replies.length != 0"
-          class="text-blue-500 underline"
-        >
-          {{ !showReplies ? 'See ' + props.replies.length + ' replies' : 'Hide replies' }}
+        <button @click="toggleReplies()" v-if="replyCount > 0" class="text-blue-500 underline">
+          {{ !showReplies ? 'See ' + replyCount + ' replies' : 'Hide replies' }}
         </button>
       </div>
 
@@ -83,23 +105,25 @@ const sendComment = function () {
     </div>
 
     <!-- REPLIES -->
-    <div v-for="reply in props.replies" :key="reply.id" class="ml-10 mb-4">
+    <div v-for="reply in replies" :key="reply._id" class="ml-10 mb-4">
       <div v-if="showReplies">
         <!-- user info -->
         <div class="flex items-center gap-2 mb-2">
           <img
-            :src="reply.avatar"
+            :src="getUserInfo(reply)?.photo ? getFile(getUserInfo(reply)?.photo) : '/profile.png'"
             alt="user-photo"
             class="w-14 h-14 object-cover bg-slate-300 rounded-[1000px]"
           />
           <div>
-            <p class="font-bold">{{ reply.full_name }}</p>
-            <p>{{ dayjs(reply.date_time).fromNow() }}</p>
+            <p class="font-bold">
+              {{ getUserInfo(reply).fullname ?? getUserInfo(reply).username }}
+            </p>
+            <p>{{ dayjs(getUserInfo(reply).createdAt).fromNow() }}</p>
           </div>
         </div>
 
         <!-- caption -->
-        <span>{{ reply.comment }}</span>
+        <span>{{ reply.message }}</span>
       </div>
     </div>
   </div>

@@ -14,7 +14,7 @@ const list = [
 
 const route = useRoute()
 
-const id = route.params.id
+const id = route.params._id
 const selected = ref<any>({
   visibility: ''
 })
@@ -29,7 +29,7 @@ const form = ref<any>({
 })
 
 const onUpdateVisiblity = function (params: any) {
-  if (!params.id) {
+  if (!params._id) {
     form.value.visibility = ''
     return
   }
@@ -58,7 +58,7 @@ onMounted(() => {
       date_time: goal.date_time,
       files: goal.photos
     }
-    selected.value.visibility = list.find((l) => goal?.visibility === l.id) || list[0]
+    selected.value.visibility = list.find((l) => goal?.visibility === l._id) || list[0]
     currentGoal.value = goal
   }
 })
@@ -120,7 +120,7 @@ onMounted(() => {
       <!-- share with -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Share With</span>
       <BaseSelect
-        :isError="!(selected.visibility as any)?.id"
+        :isError="!(selected.visibility as any)?._id"
         errorMessage="Choose a visibilty"
         @update:modelValue="onUpdateVisiblity($event)"
         v-model="selected.visibility"

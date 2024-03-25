@@ -6,7 +6,7 @@ export const uuid = function () {
 
 export const Users = [
   {
-    id: '47d5e69b-5346-4c88-8f41-7e31e977f5ab',
+    _id: '47d5e69b-5346-4c88-8f41-7e31e977f5ab',
     goal_type: 'resolution',
     full_name: 'John Doe',
     username: 'johndoe123',
@@ -20,7 +20,7 @@ export const Users = [
     supporter_count: 82
   },
   {
-    id: 'e36ffbd7-1a79-4f28-8c62-9a396a7c2718',
+    _id: 'e36ffbd7-1a79-4f28-8c62-9a396a7c2718',
     full_name: 'Jane Smith',
     username: 'janesmith456',
     avatar: 'https://picsum.photos/299/299',
@@ -32,7 +32,7 @@ export const Users = [
     supporter_count: 60
   },
   {
-    id: 'a1f4a1ca-8c35-4a42-a8c0-5f6d5e889aed',
+    _id: 'a1f4a1ca-8c35-4a42-a8c0-5f6d5e889aed',
     full_name: 'David Johnson',
     username: 'davidj85',
     avatar: 'https://picsum.photos/300/300',
@@ -44,7 +44,7 @@ export const Users = [
     supporter_count: 75
   },
   {
-    id: 'f231c27d-4a05-464f-ba7b-53c38cfe0c2f',
+    _id: 'f231c27d-4a05-464f-ba7b-53c38cfe0c2f',
     full_name: 'Emily Wilson',
     username: 'emilywonder',
     avatar: 'https://picsum.photos/301/301',
@@ -56,7 +56,7 @@ export const Users = [
     supporter_count: 48
   },
   {
-    id: '889bcd09-0a0b-4b87-8c22-51a3b3987034',
+    _id: '889bcd09-0a0b-4b87-8c22-51a3b3987034',
     full_name: 'Michael Brown',
     username: 'mikebrown',
     avatar: 'https://picsum.photos/302/302',
@@ -68,7 +68,7 @@ export const Users = [
     supporter_count: 40
   },
   {
-    id: '6e89f049-834b-475b-a6a7-081fce1095d9',
+    _id: '6e89f049-834b-475b-a6a7-081fce1095d9',
     full_name: 'Olivia Davis',
     username: 'oliviad',
     avatar: 'https://picsum.photos/303/303',
@@ -80,7 +80,7 @@ export const Users = [
     supporter_count: 70
   },
   {
-    id: 'c1a0f792-057d-48eb-8047-158bdff8a32e',
+    _id: 'c1a0f792-057d-48eb-8047-158bdff8a32e',
     full_name: 'William Taylor',
     username: 'willtay',
     avatar: 'https://picsum.photos/304/304',
@@ -92,7 +92,7 @@ export const Users = [
     supporter_count: 30
   },
   {
-    id: '72ec4395-c9b0-4ec3-bcdf-952ce41b6ecb',
+    _id: '72ec4395-c9b0-4ec3-bcdf-952ce41b6ecb',
     full_name: 'Sophia Anderson',
     username: 'sophiaa',
     avatar: 'https://picsum.photos/305/305',
@@ -104,7 +104,7 @@ export const Users = [
     supporter_count: 55
   },
   {
-    id: 'f11d4c86-7c52-4ac3-9d11-19f1cdd3c7c1',
+    _id: 'f11d4c86-7c52-4ac3-9d11-19f1cdd3c7c1',
     full_name: 'James Martinez',
     username: 'jamesm',
     avatar: 'https://picsum.photos/306/306',
@@ -116,7 +116,7 @@ export const Users = [
     supporter_count: 35
   },
   {
-    id: '1b8d166b-b4c7-4027-8dd9-7b5bbec8f672',
+    _id: '1b8d166b-b4c7-4027-8dd9-7b5bbec8f672',
     full_name: 'Ava Robinson',
     username: 'avarob',
     avatar: 'https://picsum.photos/307/307',

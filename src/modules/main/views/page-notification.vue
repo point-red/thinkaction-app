@@ -30,7 +30,7 @@ const notifications = ref([
     <div class="dark:bg-slate-700 bg-white/[50] rounded-md border border-slate-200">
       <div
         v-for="(notif, index) in notifications"
-        :key="notif.id"
+        :key="notif._id"
         class="flex justify-between items-center px-4 py-3 border-slate-200"
         :class="index !== 0 ? 'border-t' : 'border-t-0'"
       >

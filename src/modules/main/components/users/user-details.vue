@@ -25,9 +25,8 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const userStore = useUserStore()
-let isSupporting = computed(() =>
-  props.user ? userStore.isSupporting((props.user as any).id) : false
-)
+
+const emit = defineEmits(['update'])
 
 const selectedCategory = ref('')
 
@@ -40,21 +39,28 @@ const userPosts = computed(() => {
     return props.posts
   }
   return props.posts.filter((p: ThinkActionGoal) => {
-    return p.category === selectedCategory.value
+    return p.name === selectedCategory.value
   })
 })
 
 const computedCategories = computed(() => {
   return props.posts
-    .reduce((p, u) => (p.includes(u.category as string) ? p : [...p, u.category as string]), [''])
+    .reduce((p, u) => (p.includes(u.name as string) ? p : [...p, u.name as string]), [''])
     .slice(1)
 })
 // TODO: Add async functions
-const supportUser = function () {
-  userStore.toggleSupport((props.user as any).id)
+const supportUser = async function () {
+  const data = await userStore.toggleSupport(
+    (props.user as any)._id,
+    (props.user as any).isSupporting
+  )
+  emit('update', {
+    ...props.user,
+    ...data
+  })
 }
 // onMounted(() => {
-//   isSupporting.value = userStore.isSupporting((props.user as any).id)
+//   isSupporting.value = userStore.isSupporting((props.user as any)._id)
 // })
 </script>
 
@@ -62,17 +68,17 @@ const supportUser = function () {
   <div v-if="props.user" class="main-content-container">
     <!-- PROFILE HEADER -->
     <BaseProfileHeader
-      :id="props.user.id"
-      :full_name="props.user.full_name!"
+      :id="props.user._id"
+      :full_name="props.user.fullname!"
       :username="props.user.username"
-      :avatar="props.user.avatar"
+      :avatar="props.user.photo"
       :bio="props.user.bio!"
-      :is_private="props.user.is_private!"
-      :is_supporting="isSupporting"
+      :is_private="!props.user.isPublic!"
+      :is-supporting="props.user.isSupporting"
       @support="supportUser"
       :goals_performance="props.user.goals_performance!"
-      :supporting_count="props.user.supporting_count!"
-      :supporter_count="props.user.supporter_count!"
+      :supporting-count="props.user.supportingCount!"
+      :supporter-count="props.user.supporterCount!"
       :is_user="props.is_current_user"
     ></BaseProfileHeader>
 
@@ -80,12 +86,12 @@ const supportUser = function () {
       <!-- SUPPORTING BUTTON -->
       <button
         @click="supportUser"
-        v-if="!isSupporting"
+        v-if="!props.user.isSupporting"
         class="btn bg-[#3D8AF7] w-full font-semibold text-white md:hidden"
       >
         Support
       </button>
-      <template v-if="isSupporting">
+      <template v-if="props.user.isSupporting">
         <button
           @click="supportUser"
           class="btn bg-slate-300 text-sky-500 w-full font-semibold text-white md:hidden"
@@ -112,21 +118,21 @@ const supportUser = function () {
 
     <div class="space-y-2">
       <!-- USER POSTS -->
-      <div v-for="post in userPosts" :key="post.id">
+      <div v-for="post in userPosts" :key="post._id">
         <BaseUserPost
-          :goal_type="post.goal_type"
-          :key="post.id"
-          :id="post.id"
-          :user_id="post.user_id"
-          :user="post.user!"
-          :category="post.category!"
-          :caption="post.caption"
-          :photos="post.photos"
+          :goal_type="post.name"
+          :key="post._id"
+          :id="post._id"
+          :user_id="user?._id!"
+          :user="user!"
+          :category="post.name!"
+          :caption="post.resolution"
+          :photos="post.photo"
           :is_liked="post.is_liked_by_user"
           :cheers_count="post.cheers_count"
           :comments_count="post.comments_count"
           :date_time="post.date_time"
-          :created_at="post.created_at"
+          :created_at="post.createdDate"
         ></BaseUserPost>
       </div>
     </div>

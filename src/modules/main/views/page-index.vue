@@ -2,23 +2,24 @@
 import { ref, onMounted, watch } from 'vue'
 import UserPost from '../components/user-post.vue'
 import { useUserStore } from '@/stores/user'
+import { usePostStore } from '@/stores/post'
 import { useRouter } from 'vue-router'
 
 const userStore = useUserStore()
+const postStore = usePostStore()
 const posts = ref<any>([])
 const router = useRouter()
 
-onMounted(() => {
+onMounted(async () => {
   if (!localStorage.getItem('token')) {
     router.push('/login')
+    return
   }
-  userStore.getGoalsSorted().then((r) => {
-    posts.value = r
-  })
+  posts.value = await postStore.getPosts()
 })
 
-watch(userStore.userGoals, async () => {
-  posts.value = await userStore.getGoalsSorted()
+watch(postStore.posts, async () => {
+  posts.value = await postStore.getPosts()
 })
 </script>
 
@@ -55,17 +56,17 @@ watch(userStore.userGoals, async () => {
 
     <!-- jika goals sudah dibuat -->
     <div v-if="posts.length > 0">
-      <div v-for="post in posts" :key="post.id">
+      <div v-for="post in posts" :key="post._id">
         <UserPost
-          :id="post.id"
-          :user="post.user"
-          :user_id="post.user_id"
-          :category="post.category"
+          :id="post._id"
+          :user="post.userInfo"
+          :user_id="post.userId"
+          :category="post.name"
           :caption="post.caption"
-          :photos="post.photos"
-          :is_liked="post.is_liked_by_user"
-          :cheers_count="post.cheers_count"
-          :comments_count="post.comments_count"
+          :photos="post.photo"
+          :liked-by-current="post.likedByCurrent"
+          :like-count="post.likeCount"
+          :comment-count="post.commentCount"
           :date_time="post.date_time"
           :created_at="post.created_at"
           :goal_type="post.goal_type"

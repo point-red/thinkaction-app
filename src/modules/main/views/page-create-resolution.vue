@@ -6,7 +6,7 @@ import dayjs from 'dayjs'
 import router from '@/router'
 
 const list = [
-  { id: 'public', label: 'Everyone' },
+  { id: 'everyone', label: 'Everyone' },
   { id: 'supporter', label: 'Supporter' },
   { id: 'private', label: 'Private' }
 ]
@@ -16,29 +16,43 @@ const selected = ref({
 })
 
 const form = ref({
-  category: '',
-  visibility: '',
+  categoryName: '',
+  shareWith: '',
   caption: '',
-  date_time: '',
-  files: []
+  dueDate: '',
+  photos: [] as any
 })
 
 const onUpdateVisiblity = function (params: any) {
   if (!params.id) {
-    form.value.visibility = ''
+    form.value.shareWith = params.id
     return
   }
   const { id } = params
-  form.value.visibility = id
+  form.value.shareWith = id
+}
+
+const onImageChange = function (event: any) {
+  form.value.photos = [...event.target.files] ?? []
 }
 
 const userStore = useUserStore()
-const save = function () {
+const save = async function () {
   let values = form.value
   // @ts-ignore
-  let isAllFilled = values.category && values.caption && values.visibility
+  let isAllFilled = values.categoryName && values.caption && values.shareWith && values.dueDate
+
+  const formData = new FormData()
+  formData.append('caption', values.caption)
+  formData.append('categoryName', values.categoryName)
+  formData.append('shareWith', values.shareWith)
+  formData.append('dueDate', new Date(values.dueDate.split('-').reverse().join('-')).toISOString())
+  values.photos.forEach((photo: any) => {
+    formData.append('photo[]', photo)
+  })
+
   if (isAllFilled) {
-    userStore.addResolutionGoal(values)
+    await userStore.addResolutionGoal(formData)
     router.push('/')
   }
 }
@@ -57,8 +71,8 @@ const save = function () {
       <!-- category input -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Category</span>
       <BaseInput
-        v-model="form.category"
-        :error="!(form.category as any)? 'Enter a category name': ''"
+        v-model="form.categoryName"
+        :error="!(form.categoryName as any)? 'Enter a category name': ''"
         placeholder="Input your category"
         class="mb-8"
       ></BaseInput>
@@ -66,10 +80,8 @@ const save = function () {
       <!-- due date input -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Due Date</span>
       <BaseDatepicker
-        :error="
-          !form.date_time || dayjs(form.date_time).isBefore(dayjs()) ? 'Enter a valid date' : ''
-        "
-        v-model="form.date_time"
+        :error="!form.dueDate || dayjs(form.dueDate).isBefore(dayjs()) ? 'Enter a valid date' : ''"
+        v-model="form.dueDate"
         border="full"
         class="mb-8"
       />
@@ -90,7 +102,12 @@ const save = function () {
         >Share the photo of your vision here</span
       >
       <label class="btn btn-primary bg-[#3D8AF7] mb-8">
-        <input type="file" class="pointer-events-none absolute opacity-0" />
+        <input
+          type="file"
+          @change="onImageChange"
+          multiple
+          class="pointer-events-none absolute opacity-0"
+        />
         <div class="flex items-center space-x-2">
           <i class="block i-far-arrow-up-from-bracket"></i>
           <span>Choose File</span>

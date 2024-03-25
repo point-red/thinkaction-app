@@ -1,20 +1,38 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import UserPost from '../components/user-post.vue'
 import PostComment from '../components/post-comment.vue'
 import { useUserStore } from '@/stores/user'
 import { useRoute } from 'vue-router'
 import { BaseTextarea } from '@/components'
+import { usePostStore } from '@/stores/post'
+import { useCommentStore } from '@/stores/comment'
+import { watch } from 'fs'
 
 const { id: postId } = useRoute().params
 const store = useUserStore()
-const post = store.userGoals.find((f) => f.id === postId)
-let comments = computed(() => store.getCommentsByGoalId(postId as string))
+const commentStore = useCommentStore()
+const postStore = usePostStore()
+const post = ref<any>(null)
+const comments = ref<any>([])
 const text = ref('')
 
-const sendReply = function ({ comment }: any, comment_id?: string) {
+const sendReply = async function ({ comment }: any, commentId?: string) {
   text.value = ''
-  store.addCommentToGoal(postId as string, comment, comment_id)
+  await commentStore.postComment(postId as string, comment, commentId ? { commentId } : {})
+  if (!commentId) {
+    comments.value = await commentStore.getComments(postId as string)
+  }
+  post.value = postStore.addComment(postId as string)
+}
+
+onMounted(async () => {
+  post.value = await postStore.getPostById(postId as string)
+  comments.value = await commentStore.getComments(postId as string)
+})
+
+const getUserInfo = (comment: any) => {
+  return comment?.userInfo?.[0] ?? comment?.userInfo ?? {}
 }
 </script>
 
@@ -23,15 +41,15 @@ const sendReply = function ({ comment }: any, comment_id?: string) {
     <!-- USER POSTS -->
     <UserPost
       v-if="post"
-      :id="post.id"
-      :user="post.user"
-      :user_id="post.user_id"
-      :category="post.category"
+      :id="post._id"
+      :user="post.userInfo"
+      :user_id="post.userId"
+      :category="post.categoryName"
       :caption="post.caption"
-      :photos="post.photos"
-      :is_liked="post.is_liked_by_user"
-      :cheers_count="post.cheers_count"
-      :comments_count="post.comments_count"
+      :photos="post.photo"
+      :liked-by-current="post.likedByCurrent"
+      :like-count="post.likeCount"
+      :comment-count="post.commentCount"
       :date_time="post.date_time"
       :created_at="post.created_at"
     ></UserPost>
@@ -55,17 +73,19 @@ const sendReply = function ({ comment }: any, comment_id?: string) {
 
     <div
       v-for="comment in comments"
-      :key="comment.comment_id"
+      :key="comment._id"
       class="bg-white border border-slate-200 rounded-lg"
     >
       <PostComment
-        :id="comment.comment_id"
-        :full_name="comment.full_name"
-        :avatar="comment.avatar"
-        :date_time="comment.date_time"
-        :comment="comment.comment"
-        :replies="comment.replies"
-        @reply="sendReply($event, comment.comment_id)"
+        :id="comment._id"
+        :full_name="getUserInfo(comment).fullname ?? getUserInfo(comment).username"
+        :avatar="getUserInfo(comment).photo"
+        :date_time="comment.createdDate"
+        :post-id="(postId as string)"
+        :reply-count="comment.replyCount"
+        :comment="comment.message"
+        :replies="comment.replies ?? []"
+        @reply="sendReply($event, comment._id)"
       ></PostComment>
     </div>
   </div>

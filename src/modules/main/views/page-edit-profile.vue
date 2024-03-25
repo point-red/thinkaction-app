@@ -1,13 +1,16 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { BaseInput, BaseSelect } from '@/components/index'
 import { useUserStore } from '@/stores/user'
+import router from '@/router'
+import { getFile } from '@/lib/connection'
 
 const userStore = useUserStore()
 
 const user = computed(() => {
   return userStore.currentUser
 })
+const uploadedPicture = ref<any>(null)
 
 const list = [
   { id: 1, label: 'Private' },
@@ -19,11 +22,21 @@ const languages = ref([
   { id: 2, label: 'Indonesian' }
 ])
 
-watch(user, (currentValue) => {
-  userStore.users = userStore.users.map((u) =>
-    u.id === userStore.currentUser.id ? currentValue : u
-  )
-})
+const editProfilePicture = (event: any) => {
+  user.value.photo = event.target.files[0]
+  uploadedPicture.value = URL.createObjectURL(event.target.files[0])
+}
+
+const updateProfile = () => {
+  const multipartFormData = new FormData()
+  multipartFormData.append('fullname', user.value.fullname)
+  multipartFormData.append('username', user.value.username)
+  multipartFormData.append('bio', user.value.bio)
+  multipartFormData.append('photo', user.value.photo)
+  multipartFormData.append('isPublic', user.value.isPublic)
+  userStore.updateProfile(multipartFormData)
+  router.push('/profile')
+}
 const preferredLanguage = ref({ id: 1, label: 'English' })
 </script>
 
@@ -47,14 +60,22 @@ const preferredLanguage = ref({ id: 1, label: 'English' })
     </div>
 
     <div class="flex justify-center space-x-5 my-5">
-      <img :src="user.avatar" alt="user photo" class="w-32 h-32 object-cover rounded-full" />
+      <img
+        :src="uploadedPicture || (user.photo ? getFile(user.photo) : '/profile.png')"
+        alt="user photo"
+        class="w-32 h-32 object-cover rounded-full"
+      />
       <div class="mt-5">
-        <p>{{ user.full_name }}</p>
+        <p>{{ user.fullname }}</p>
 
         <!-- CHANGE FOTO PROFILE -->
         <span class="font-semibold text-[#3D8AF7] block mb-2">Change your profile picture</span>
         <label class="btn btn-primary bg-[#3D8AF7] mb-8">
-          <input type="file" class="pointer-events-none absolute opacity-0" />
+          <input
+            type="file"
+            @change="editProfilePicture"
+            class="pointer-events-none absolute opacity-0"
+          />
           <div class="flex items-center space-x-2">
             <i class="block i-far-arrow-up-from-bracket"></i>
             <span>Choose File</span>
@@ -67,8 +88,8 @@ const preferredLanguage = ref({ id: 1, label: 'English' })
       <!-- input - full_name -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Full Name</span>
       <BaseInput
-        :error="!user.full_name ? 'Enter your full name' : ''"
-        v-model="user.full_name"
+        :error="!user.fullname ? 'Enter your full name' : ''"
+        v-model="user.fullname"
         class="mb-8"
       ></BaseInput>
 
@@ -96,8 +117,8 @@ const preferredLanguage = ref({ id: 1, label: 'English' })
       <span class="font-semibold text-[#3D8AF7] block mb-2">Account Type</span>
       <BaseSelect
         class="mb-8"
-        :modelValue="user.is_private ? list[0] : list[1]"
-        @update:modelValue="user.is_private = $event.id === 1"
+        :modelValue="user.isPublic ? list[1] : list[0]"
+        @update:modelValue="user.isPublic = $event.id === 2"
         :list="list"
         border="full"
       ></BaseSelect>
@@ -113,7 +134,7 @@ const preferredLanguage = ref({ id: 1, label: 'English' })
       ></BaseSelect>
 
       <div class="flex flex-col justify-center gap-y-2 my-8">
-        <button @click="$router.push('/profile')" class="btn btn-lg btn-primary bg-[#3D8AF7] px-7">
+        <button @click="updateProfile" class="btn btn-lg btn-primary bg-[#3D8AF7] px-7">
           Save
         </button>
         <router-link :to="'/profile'" class="btn btn-lg btn-primary bg-[#de2a2a]"

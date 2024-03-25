@@ -2,65 +2,28 @@
 import { ref } from 'vue'
 import { BaseInput } from '@/components/index'
 import UserSneakpeak from '../components/user-sneakpeak.vue'
+import client from '@/lib/connection'
+import { watchDebounced } from '@vueuse/core'
+import { useRoute } from 'vue-router'
 
-const supporters = ref([
-  {
-    user_support_id: 'jA2jnsbg55468',
-    fullname: 'Fitri',
-    username: 'fitria07',
-    is_supporting: true,
-    avatar: 'https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL',
-    supporter: [
-      {
-        id: 'GhtHVSB12NHGBSGHHg',
-        username: 'Alf'
-      }
-    ]
-  },
-  {
-    user_support_id: 'jA2jnsb3T5468',
-    fullname: 'Fadil',
-    username: 'fadil_1w',
-    is_supporting: true,
-    avatar: 'https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL',
-    supporter: [
-      {
-        id: 'GhtHVSB12NHGBSGHHg',
-        username: 'Alf'
-      }
-    ]
-  },
-  {
-    user_support_id: 'jA2jnsb2T5468',
-    fullname: 'Jaemin',
-    username: 'jaemin',
-    is_supporting: true,
-    avatar: 'https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL',
-    supporter: [
-      {
-        id: 'GhtHVSB12NHGBSGHHg',
-        username: 'Alf'
-      }
-    ]
-  },
-  {
-    user_support_id: 'jA2jnsggT5468',
-    fullname: 'Jeno',
-    username: 'jeno',
-    is_supporting: true,
-    avatar: 'https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL',
-    supporter: [
-      {
-        id: 'GhtHVSB12NHGBSGHHg',
-        username: 'Alf'
-      }
-    ]
-  }
-])
+const supporters = ref<any>([])
+const route = useRoute()
 
 const form = ref({
   key: ''
 })
+
+watchDebounced(
+  () => form.value.key,
+  async () => {
+    const {
+      data: { data }
+    } = await client().get(
+      `/users/${route.params.id}/supporting?username=${form.value.key}&page=1&limit=10`
+    )
+    supporters.value = data
+  }
+)
 </script>
 
 <template>
@@ -75,18 +38,14 @@ const form = ref({
     </component>
 
     <!-- LIST SUPPORTER -->
-    <div
-      class="flex justify-between"
-      v-for="supporter in supporters"
-      :key="supporter.user_support_id"
-    >
-      <router-link :to="{ path: `user/${supporter.user_support_id}` }">
+    <div class="flex justify-between" v-for="supporter in supporters" :key="supporter._id">
+      <router-link :to="{ path: `user/${supporter._id}` }">
         <UserSneakpeak
-          :id="supporter.user_support_id"
+          :id="supporter._id"
           :fullname="supporter.fullname"
           :username="supporter.username"
-          :avatar="supporter.avatar"
-          :supporter="supporter.supporter"
+          :avatar="supporter.photo"
+          :supporter="supporter.supporters"
         ></UserSneakpeak>
       </router-link>
       <button
