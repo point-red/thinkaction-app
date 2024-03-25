@@ -1,5 +1,4 @@
 import { UserRelations, Users } from '@/modules/data/users'
-import type { ThinkActionUser } from '@/modules/types/think-action'
 
 type SupporterType = 'supporters' | 'supporting' | string
 
@@ -9,7 +8,7 @@ class UserModel {
   }
 
   static async findUserById(id: string) {
-    return Users.find((u: ThinkActionUser) => u._id === id)
+    return Users.find((u: any) => u._id === id)
   }
 
   static async findUserRelations(

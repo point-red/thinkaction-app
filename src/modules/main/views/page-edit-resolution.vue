@@ -58,7 +58,7 @@ onMounted(() => {
       date_time: goal.date_time,
       files: goal.photos
     }
-    selected.value.visibility = list.find((l) => goal?.visibility === l._id) || list[0]
+    selected.value.visibility = list.find((l) => goal?.visibility === l.id) || list[0]
     currentGoal.value = goal
   }
 })

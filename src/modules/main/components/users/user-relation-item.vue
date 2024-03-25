@@ -3,7 +3,6 @@ import { computed } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { RouterLink } from 'vue-router'
 import UserSneakpeak from '../user-sneakpeak.vue'
-import { getFile } from '@/lib/connection'
 
 type Props = {
   item: any

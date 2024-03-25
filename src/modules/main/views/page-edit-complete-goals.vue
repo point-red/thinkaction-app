@@ -24,16 +24,16 @@ onMounted(async () => {
   goals.value = data.filter(
     (d: any) =>
       d.goal_type !== 'complete' &&
-      !data.some((s: any) => s.meta.goal_id === d._id && s.goal_type === 'resolution')
+      !data.some((s: any) => s.meta.goal_id === d.id && s.goal_type === 'resolution')
   )
 
   let goal = userStore.findGoalById(id as string)
   if (goal) {
     form.value = {
       category: { id: goal.category, label: goal.category },
-      visibility: privateTypes.find((p) => p._id === (goal as any).visibility) ?? {},
+      visibility: privateTypes.find((p) => p.id === (goal as any).visibility) ?? {},
       caption: goal.caption,
-      goal: { id: goal._id, label: goal.caption },
+      goal: { id: goal.id, label: goal.caption },
       files: goal.photos
     }
     checked.value = !!(goal.meta as any).is_completed
