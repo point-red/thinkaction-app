@@ -7,10 +7,27 @@ import { BaseSelect } from '@/components'
 
 const store = useUserStore()
 
-let categorized = ref<any>([])
 let Categories = ref<any>([])
 let yearList = ref<any>([])
-const year = ref<any>({ id: 2023, label: '2023' })
+let reports = ref<any>([])
+const year = ref<any>({ id: dayjs().year(), label: `${dayjs().year()}` })
+
+const getYearlyReport = async (year = dayjs().year()) => {
+  const yearlyReports = await store.getYearlyReports(year)
+  const weeks = GoalModel.getWeeks()
+  reports.value = Object.keys(yearlyReports)
+    .filter((y) => y.startsWith('week') && parseInt(y.replace('week', ''), 10) <= weeks.length)
+    .reduce(
+      (prev, key) => [
+        {
+          week: 'Week ' + key.replace('week', ''),
+          report: yearlyReports[key]
+        },
+        ...prev
+      ],
+      [] as any
+    )
+}
 
 onMounted(async () => {
   let years = []
@@ -24,12 +41,11 @@ onMounted(async () => {
   }
   yearList.value = years
   Categories.value = await store.getResolutionCategories()
-  categorized.value = await GoalModel.generateYearlyReport(store, new Date().getFullYear())
+  await getYearlyReport()
 })
 
 watch(year, async (currentValue) => {
-  if (currentValue._id)
-    categorized.value = await GoalModel.generateYearlyReport(store, currentValue._id)
+  if (currentValue.id) await getYearlyReport(currentValue.id)
 })
 </script>
 
@@ -57,15 +73,25 @@ watch(year, async (currentValue) => {
         </thead>
         <tbody>
           <tr
-            v-for="({ week, categories }, index) in categorized"
+            v-for="({ week, report }, index) in reports"
             :key="week.start"
             class="basic-table-row h-28"
           >
             <td class="basic-table-body text-sm min-w-[5rem] align-middle">Week {{ index + 1 }}</td>
-            <td v-for="{ id } in categories" :key="id" :class="'basic-table-body rounded-lg p-4'">
+            <td
+              v-for="category in Categories"
+              :key="category"
+              :class="'basic-table-body rounded-lg p-4'"
+            >
               <div
                 class="w-20 h-20 flex rounded-lg"
-                :class="( categories.find((c: any) => c._id === id)?.goals?.is_completed === undefined? 'bg-gray-300':( categories.find((c: any) => c._id === id)?.goals?.is_completed ? 'bg-sky-300' : 'bg-pink-300'))"
+                :class="
+                  report[category] === undefined
+                    ? 'bg-gray-300'
+                    : report[category]
+                    ? 'bg-sky-300'
+                    : 'bg-pink-300'
+                "
               ></div>
             </td>
           </tr>

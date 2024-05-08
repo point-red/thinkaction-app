@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { BaseInput } from '@/components/index'
 import { useRoute } from 'vue-router'
 import UserRelationItem from '../components/users/user-relation-item.vue'
@@ -13,6 +13,15 @@ const { id, type } = route.params
 
 const form = ref({
   key: ''
+})
+
+onMounted(async () => {
+  const {
+    data: { data }
+  } = await client().get(
+    `/users/${route.params.id}/${type}?username=${form.value.key}&page=1&limit=10`
+  )
+  relations.value = data
 })
 
 watchDebounced(

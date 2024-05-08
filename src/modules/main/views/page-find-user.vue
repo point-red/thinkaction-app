@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { BaseInput } from '@/components/index'
 import UserSneakPeak from '../components/user-sneakpeak.vue'
-import { Users } from '@/modules/data/users'
 import { watchDebounced } from '@vueuse/core'
 import client from '@/lib/connection'
 
@@ -11,6 +10,13 @@ const form = ref({
 })
 
 const users = ref<any>([])
+
+onMounted(async () => {
+  const {
+    data: { data }
+  } = await client().get(`/users/search?username=${form.value.key}`)
+  users.value = data
+})
 
 watchDebounced(
   () => form.value.key,

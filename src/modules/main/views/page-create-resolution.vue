@@ -47,7 +47,7 @@ const save = async function () {
   formData.append('categoryName', values.categoryName)
   formData.append('shareWith', values.shareWith)
   formData.append('dueDate', new Date(values.dueDate.split('-').reverse().join('-')).toISOString())
-  values.photos.forEach((photo: any) => {
+  values.photos?.forEach((photo: any) => {
     formData.append('photo[]', photo)
   })
 

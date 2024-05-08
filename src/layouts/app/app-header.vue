@@ -28,11 +28,11 @@ const links = [
   {
     label: 'Yearly Reports',
     path: '/yearly-report'
-  },
-  {
-    label: 'My Invoice',
-    path: '/invoices'
   }
+  // {
+  //   label: 'My Invoice',
+  //   path: '/invoices'
+  // }
 ]
 </script>
 

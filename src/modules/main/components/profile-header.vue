@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
-import type { ThinkActionUser } from '../../types/think-action'
 import { useUserStore } from '@/stores/user'
 import { getFile } from '@/lib/connection'
 
@@ -12,6 +11,7 @@ type DefaultProps = {
   supportingCount: number
   bio: string
   avatar: string
+  goalsPerformance: number
   [key: string]: any
 }
 
@@ -19,7 +19,8 @@ const user = withDefaults(defineProps<DefaultProps>(), {
   avatar: '/profile.png',
   is_user: false,
   supporterCount: 0,
-  supportingCount: 0
+  supportingCount: 0,
+  goalsPerformance: 0
 })
 
 const userStore = useUserStore()
@@ -64,7 +65,9 @@ const id = computed(() => {
       <!-- goals performance, supporter, supporting -->
       <div class="flex justify-between space-x-3 px-3 md:px-4">
         <div>
-          <p class="text-lg">{{ user.goals_performance + '%' }}</p>
+          <p class="text-lg">
+            {{ (Number.isNaN(user.goalsPerformance) ? 0 : user.goalsPerformance) + '%' }}
+          </p>
           <p>Goals Perf.</p>
         </div>
         <router-link :to="{ path: '/user/' + id + '/supporter' }">

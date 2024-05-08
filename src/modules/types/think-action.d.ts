@@ -1,5 +1,5 @@
 export type ThinkActionUser = {
-  [x: string]: number | undefined
+  [x: string]: any | number | undefined
   photo?: string
   id?: string
   _id?: string

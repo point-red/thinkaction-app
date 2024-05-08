@@ -62,6 +62,11 @@ const supportUser = async function () {
 // onMounted(() => {
 //   isSupporting.value = userStore.isSupporting((props.user as any)._id)
 // })
+const goalsPerformance = computed(() => {
+  const length = props.user?.categoryResolution?.length ?? 1
+  const matched = props.user?.categoryResolution?.filter((c: any) => c.isComplete)?.length
+  return Math.round((matched / length) * 10000) / 100
+})
 </script>
 
 <template>
@@ -73,6 +78,7 @@ const supportUser = async function () {
       :username="props.user.username"
       :avatar="props.user.photo"
       :bio="props.user.bio!"
+      :goals-performance="goalsPerformance"
       :is_private="!props.user.isPublic!"
       :is-supporting="props.user.isSupporting"
       @support="supportUser"

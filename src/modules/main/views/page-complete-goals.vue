@@ -3,67 +3,78 @@ import { ref, onMounted, computed } from 'vue'
 import { BaseInput, BaseCheckbox, BaseSelect } from '@/components/index'
 import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
+import { usePostStore } from '@/stores/post'
 
-const privateTypes = [
-  { id: 'public', label: 'Everyone' },
+const list = [
+  { id: 'everyone', label: 'Everyone' },
   { id: 'supporter', label: 'Supporter' },
   { id: 'private', label: 'Private' }
 ]
+
+const postStore = usePostStore()
 const userStore = useUserStore()
+const resolutions = ref<any>([])
 
 const router = useRouter()
-const categories = ref<any>([])
 const goals = ref<any>([])
 
-onMounted(() => {
-  userStore.getResolutionCategories().then((data) => {
-    categories.value = data
-  })
-  userStore.getCurrentGoals().then((data: any) => {
-    goals.value = data.filter(
-      (d: any) =>
-        d.goal_type !== 'complete' &&
-        !data.some((s: any) => s.meta.goal_id === d._id && s.goal_type === 'resolution')
-    )
-  })
+onMounted(async () => {
+  const user = await userStore.getUserById(userStore.currentUser._id)
+  goals.value = await postStore.getPosts()
+  resolutions.value = (user.categoryResolution ?? []).filter((u: any) =>
+    goals.value.some((g: any) => g.categoryResolutionId === u._id)
+  )
 })
 
 const computedGoals = computed(() => {
   return goals.value
-    .filter((g: any) => (form.value.category?._id ? g.category === form.value.category?._id : ''))
-    .map((a: any) => {
-      return {
-        id: a._id,
-        label: a.caption
-      }
-    })
+    .filter((g: any) => g.categoryResolutionId === form.value.category?.id)
+    ?.map((g: any) => ({
+      id: g._id,
+      label: g.caption,
+      dueDate: g.dueDate
+    }))
 })
 
-const checked = ref(false)
+const checked = ref<any>(false)
 
 const form = ref<any>({
   caption: '',
   category: {},
   goal: {},
-  visibility: '',
-  files: []
+  shareWith: {},
+  photos: []
 })
 
-const submit = function () {
+const submit = async function () {
   let category: any = form.value.category
   let goal: any = form.value.goal
-  let visibility: any = form.value.visibility
-  let values: any = {}
-  if (category._id && goal._id && visibility._id) {
-    values.category = category._id
-    values.goal_id = goal._id
-    values.caption = form.value.caption
-    values.visibility = visibility?._id
-    values.is_completed = checked.value
-    values.files = form.value.files
-    userStore.addCompleteGoal(values)
+  let shareWith: any = form.value.shareWith
+  let values = form.value
+  let isAllFilled = category?.id && goal?.id && shareWith?.id && (form.value.category as any)?.id // @ts-ignore-all
+
+  // @ts-ignore
+
+  const formData = new FormData()
+  formData.append('caption', values.caption)
+  formData.append('weeklyGoalId', (form.value.goal as any)?.id)
+  formData.append('categoryResolutionId', (form.value.category as any)?.id)
+  formData.append('shareWith', values.shareWith?.id)
+  formData.append('dueDate', new Date((form.value.goal as any)?.dueDate).toISOString())
+  formData.append('updatedDate', new Date().toISOString())
+  formData.append('isComplete', checked.value)
+  values.photos?.forEach((photo: any) => {
+    formData.append('photo[]', photo)
+  })
+
+  if (isAllFilled) {
+    await userStore.addCompleteGoal(formData)
+    postStore.resetPosts()
     router.push('/')
   }
+}
+const onImageChange = function (event: any) {
+  form.value.photos = [...event.target.files] ?? []
 }
 </script>
 
@@ -79,17 +90,17 @@ const submit = function () {
       <!-- Select Resolution's Category -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Select Category</span>
       <BaseSelect
-        :is-error="!(form.category as any)?._id"
+        :is-error="!(form.category as any)?.id"
         error-message="Choose a category"
         v-model="form.category"
-        :list="categories.map((category: string) => ({ id: category, label: category }))"
+        :list="resolutions.map((r: any) => ({ id: r?._id, label: r.name }))"
         class="mb-8"
       ></BaseSelect>
 
       <!-- Select Goals Achieved -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Goals Achieved</span>
       <BaseSelect
-        :is-error="!(form.goal as any)?._id"
+        :is-error="!(form.goal as any)?.id"
         error-message="Choose a goal"
         v-model="form.goal"
         :list="computedGoals"
@@ -110,8 +121,13 @@ const submit = function () {
       <span class="font-semibold text-[#3D8AF7] block mb-2"
         >Share the photo of your vision here</span
       >
-      <label class="btn btn-primary bg-[#3D8AF7] mb-8 block w-[150px]">
-        <input type="file" class="pointer-events-none absolute opacity-0" />
+      <label class="btn btn-primary bg-[#3D8AF7] mb-8">
+        <input
+          type="file"
+          @change="onImageChange"
+          multiple
+          class="pointer-events-none absolute opacity-0"
+        />
         <div class="flex items-center space-x-2">
           <i class="block i-far-arrow-up-from-bracket"></i>
           <span>Choose File</span>
@@ -119,15 +135,17 @@ const submit = function () {
       </label>
 
       <!-- Checkbox to Complete the Goal -->
-      <component :is="BaseCheckbox" v-model="checked" label="Complete Goals" class="mb-8" />
+      <div class="w-full">
+        <component :is="BaseCheckbox" v-model="checked" label="Complete Goals" class="mb-8" />
+      </div>
 
       <!-- share with -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Share With</span>
       <BaseSelect
-        :is-error="!(form.visibility as any)?._id"
-        error-message="Choose a visibility"
-        v-model="form.visibility"
-        :list="privateTypes"
+        :is-error="!(form.shareWith as any)?.id"
+        error-message="Choose a shareWith"
+        v-model="form.shareWith"
+        :list="list"
         border="full"
       ></BaseSelect>
 

@@ -88,6 +88,33 @@ class GoalModel {
     return items
   }
 
+  static getWeeks(year = new Date().getFullYear()) {
+    const weeks = []
+    let firstDay = dayjs().year(year).month(0).startOf('year')
+    const lastDay = dayjs().year(year).month(11).endOf('year')
+    while (lastDay.year() !== firstDay.year()) {
+      lastDay.subtract(1, 'day')
+    }
+
+    while (
+      (firstDay.month() < lastDay.month() ||
+        (firstDay.date() < lastDay.date() && firstDay.month() === lastDay.month())) &&
+      firstDay.year() === lastDay.year()
+    ) {
+      let endOfWeek = firstDay.clone().endOf('week')
+      if (endOfWeek.year() !== year) {
+        endOfWeek = lastDay.clone()
+      }
+      weeks.push({
+        start: firstDay.toDate(),
+        end: endOfWeek.toDate()
+      })
+      firstDay = endOfWeek.clone().add(1, 'days')
+    }
+
+    return weeks
+  }
+
   static async generateYearlyReport(userStore: any, year = new Date().getFullYear()) {
     const goals = await userStore.getCurrentGoals()
     // goals = goals.filter((g: any) => g.goal_type === 'completed')

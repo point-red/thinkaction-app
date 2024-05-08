@@ -95,8 +95,8 @@ const menus = [
       <router-link class="block" :to="{ path: '/monthly-report' }">Monthly Report</router-link>
       <hr />
       <router-link class="block" :to="{ path: '/yearly-report' }">Yearly Report</router-link>
-      <hr />
-      <router-link class="block" :to="{ path: '/my-invoice' }">My Invoice</router-link>
+      <!-- <hr />
+      <router-link class="block" :to="{ path: '/my-invoice' }">My Invoice</router-link> -->
     </div>
 
     <!-- BUTTON NAVIGATION -->

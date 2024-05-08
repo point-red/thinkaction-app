@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { BaseInput } from '@/components/index'
 import UserSneakpeak from '../components/user-sneakpeak.vue'
 import client from '@/lib/connection'
@@ -11,6 +11,15 @@ const route = useRoute()
 
 const form = ref({
   key: ''
+})
+
+onMounted(async () => {
+  const {
+    data: { data }
+  } = await client().get(
+    `/users/${route.params.id}/supporting?username=${form.value.key}&page=1&limit=10`
+  )
+  supporters.value = data
 })
 
 watchDebounced(

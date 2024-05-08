@@ -69,7 +69,7 @@ watch(postStore.posts, async () => {
           :comment-count="post.commentCount"
           :date_time="post.date_time"
           :created_at="post.created_at"
-          :goal_type="post.goal_type"
+          :goal_type="post.type"
         ></UserPost>
       </div>
     </div>

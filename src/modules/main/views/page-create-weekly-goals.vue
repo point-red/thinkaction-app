@@ -4,57 +4,71 @@ import { BaseDatepicker, BaseTextarea, BaseSelect, BaseInput } from '@/component
 import { useUserStore } from '@/stores/user'
 import router from '@/router'
 import dayjs from 'dayjs'
+import { usePostStore } from '@/stores/post'
 
 const list = [
-  { id: 'public', label: 'Everyone' },
+  { id: 'everyone', label: 'Everyone' },
   { id: 'supporter', label: 'Supporter' },
   { id: 'private', label: 'Private' }
 ]
 
+const postStore = usePostStore()
 const userStore = useUserStore()
 const resolutions = ref<any>([])
 
 const selected = ref({
-  visibility: { id: 'public', label: 'Everyone' },
+  visibility: { id: 'everyone', label: 'Everyone' },
   resolution: {},
   category: {}
 })
 
 const form = ref<any>({
   caption: '',
-  category: '',
-  resolution: { goal_id: '' },
-  date_time: '',
-  visibility: 'public',
-  files: []
+  categoryResolutionId: '',
+  resolution: {} as any,
+  dueDate: '',
+  shareWith: 'public',
+  photo: []
 })
 
 onMounted(async () => {
-  resolutions.value = await userStore.getResolutions()
+  const user = await userStore.getUserById(userStore.currentUser._id)
+  resolutions.value = user.categoryResolution ?? []
 })
 
 const onUpdateVisiblity = function (params: any) {
-  if (!params._id) {
-    form.value.visibility = ''
+  if (!params.id) {
+    form.value.shareWith = ''
     return
   }
   const { id } = params
-  form.value.visibility = id
+  form.value.shareWith = id
 }
 
 const onUpdateResolution = async function (params: any) {
-  form.value.resolution = resolutions.value.find((r: any) => r._id === params._id)
+  form.value.resolution = resolutions.value.find((r: any) => r._id === params.id)
 }
-
-const submit = function () {
+const onImageChange = function (event: any) {
+  form.value.photo = [...event.target.files] ?? []
+}
+const submit = async function () {
   let values = form.value
-  let isAllFilled = values.caption && values.visibility && (selected.value.resolution as any)?._id // @ts-ignore-all
+  let isAllFilled = values.caption && values.shareWith && (form.value.resolution as any)?._id // @ts-ignore-all
+
+  // @ts-ignore
+
+  const formData = new FormData()
+  formData.append('caption', values.caption)
+  formData.append('categoryResolutionId', (form.value.resolution as any)?._id)
+  formData.append('shareWith', values.shareWith)
+  formData.append('dueDate', new Date(values.dueDate.split('-').reverse().join('-')).toISOString())
+  values.photos?.forEach((photo: any) => {
+    formData.append('photo[]', photo)
+  })
 
   if (isAllFilled) {
-    // @ts-ignore
-    values.category = values.resolution.category
-    values.resolution.goal_id = values.resolution?._id
-    userStore.addWeeklyGoal(values)
+    await userStore.addWeeklyGoal(formData)
+    postStore.resetPosts()
     router.push('/')
   }
 }
@@ -76,11 +90,11 @@ const submit = function () {
         v-model="selected.resolution"
         @update:modelValue="onUpdateResolution"
         errorMessage="Choose a category"
-        :is-error="!(selected.resolution as any)._id"
+        :is-error="!(selected.resolution as any).id"
         :list="
-          resolutions.map(({ id, category }: any) => ({
-            id: id,
-            label: category,
+          resolutions.map(({ _id, name }: any) => ({
+            id: _id,
+            label: name,
           }))
         "
         border="full"
@@ -89,8 +103,8 @@ const submit = function () {
 
       <span class="font-semibold text-[#3D8AF7] block mb-2">Resolution</span>
       <BaseInput
-        :error="!form.resolution?.caption ? 'Select a category' : ''"
-        :model-value="form.resolution?.caption"
+        :error="!form.resolution?.resolution ? 'Select a category' : ''"
+        :model-value="form.resolution?.resolution"
         :disabled="true"
         class="mb-8"
       ></BaseInput>
@@ -107,8 +121,8 @@ const submit = function () {
       <!-- due date input -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Due Date</span>
       <BaseDatepicker
-        :error="!form.date_time || dayjs(form.date_time).isBefore(dayjs()) ? 'Input a date' : ''"
-        v-model="form.date_time"
+        :error="!form.dueDate || dayjs(form.dueDate).isBefore(dayjs()) ? 'Enter a valid date' : ''"
+        v-model="form.dueDate"
         border="full"
         class="mb-8"
       />
@@ -118,7 +132,12 @@ const submit = function () {
         >Share the photo of your vision here</span
       >
       <label class="btn btn-primary bg-[#3D8AF7] mb-8">
-        <input type="file" class="pointer-events-none absolute opacity-0" />
+        <input
+          type="file"
+          @change="onImageChange"
+          multiple
+          class="pointer-events-none absolute opacity-0"
+        />
         <div class="flex items-center space-x-2">
           <i class="block i-far-arrow-up-from-bracket"></i>
           <span>Choose File</span>
@@ -133,7 +152,7 @@ const submit = function () {
         v-model="selected.visibility"
         :list="list"
         border="full"
-        :isError="!(selected.visibility as any)?._id"
+        :isError="!(selected.visibility as any)?.id"
         errorMessage="Choose a visibilty"
       ></component>
 

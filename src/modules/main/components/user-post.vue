@@ -25,7 +25,8 @@ const props = withDefaults(defineProps<Props>(), {
   avatar: '/public/profile.png',
   likedByCurrent: false,
   likeCount: 0,
-  commentCount: 0
+  commentCount: 0,
+  goal_type: 'resolutions'
 })
 
 const store = usePostStore()
@@ -53,8 +54,18 @@ const openDeleteModal = function () {
   actionToggled.value = false
 }
 
+const getGoalType = (type: string) => {
+  return (
+    {
+      weeklyGoals: 'weekly',
+      resolutions: 'resolution'
+    }[type] ?? 'resolution'
+  )
+}
+
 const deletePost = function () {
   // store.deleteGoal(props.id as string)
+  store.deletePost(props.id as string)
   deleteModal.value = false
 }
 </script>
@@ -109,7 +120,7 @@ const deletePost = function () {
           "
           class="ml-auto mb-auto relative"
         >
-          <button @click="toggleAction">
+          <button v-if="currentUser._id === props.user_id" @click="toggleAction">
             <i class="block w-[25px] h-[25px] i-fas-ellipsis-vertical bg-gray-500"></i>
           </button>
           <div
@@ -118,7 +129,7 @@ const deletePost = function () {
           >
             <template v-if="currentUser._id === props.user_id">
               <router-link
-                :to="{ path: 'edit-' + props.goal_type + '/' + props.id }"
+                :to="{ path: 'edit-' + getGoalType(props.goal_type) + '/' + props.id }"
                 class="px-4 md:py-2 py-1.5 hover:bg-slate-100 text-left"
                 >Edit</router-link
               >

@@ -14,6 +14,23 @@ const store = useUserStore()
 
 let categorized = ref<any>([])
 let Categories = ref<any>([])
+const reports = ref<any>([])
+
+const getMonthlyReport = async (month = dayjs().month()) => {
+  const monthlyReports = await store.getMonthlyReports(dayjs().year(), month)
+  reports.value = Object.keys(monthlyReports)
+    .filter((y) => y.startsWith('week'))
+    .reduce(
+      (prev, key) => [
+        {
+          week: 'Week ' + key.replace('week', ''),
+          report: monthlyReports[key]
+        },
+        ...prev
+      ],
+      [] as any
+    )
+}
 
 onMounted(async () => {
   let months = []
@@ -27,12 +44,11 @@ onMounted(async () => {
   }
   monthList.value = months
   Categories.value = await store.getResolutionCategories()
-  categorized.value = await GoalModel.generateMonthlyReport(store, new Date().getMonth())
+  await getMonthlyReport()
 })
 
 watch(month, async (currentValue) => {
-  if (currentValue._id)
-    categorized.value = await GoalModel.generateMonthlyReport(store, currentValue._id)
+  if (currentValue.id) await getMonthlyReport(currentValue.id)
 })
 </script>
 
@@ -60,15 +76,25 @@ watch(month, async (currentValue) => {
         </thead>
         <tbody>
           <tr
-            v-for="({ week, categories }, index) in categorized"
+            v-for="({ week, report }, index) in reports"
             :key="week.start"
             class="basic-table-row h-28"
           >
             <td class="basic-table-body text-sm min-w-[5rem] align-middle">Week {{ index + 1 }}</td>
-            <td v-for="{ id } in categories" :key="id" :class="'basic-table-body rounded-lg p-4'">
+            <td
+              v-for="category in Categories"
+              :key="category"
+              :class="'basic-table-body rounded-lg p-4'"
+            >
               <div
                 class="w-20 h-20 flex rounded-lg"
-                :class="( categories.find((c: any) => c._id === id)?.goals?.is_completed === undefined? 'bg-gray-300':( categories.find((c: any) => c._id === id)?.goals?.is_completed ? 'bg-sky-300' : 'bg-pink-300'))"
+                :class="
+                  report[category] === undefined
+                    ? 'bg-gray-300'
+                    : report[category]
+                    ? 'bg-sky-300'
+                    : 'bg-pink-300'
+                "
               ></div>
             </td>
           </tr>

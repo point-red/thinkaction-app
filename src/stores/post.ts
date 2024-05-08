@@ -16,6 +16,18 @@ export const usePostStore = defineStore('post-store', {
       }
       return this.$state.posts[id]
     },
+    async resetPosts() {
+      this.results = []
+      this.posts = {}
+    },
+    async deletePost(id: string) {
+      await client().delete(`/posts/${id}`)
+      if (this.$state.posts[id]) {
+        delete this.$state.posts[id]
+      }
+      this.resetPosts()
+      return true
+    },
     async getPostById(id: string) {
       if (this.$state.posts[id]) {
         return this.$state.posts[id]
