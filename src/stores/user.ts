@@ -1,8 +1,9 @@
 import { Goals } from '@/modules/data/goals'
-import { Users, UserRelations, uuid } from '@/modules/data/users'
+import { Users, UserRelations } from '@/modules/data/users'
 import { defineStore } from 'pinia'
 import dayjs from 'dayjs'
 import client from '@/lib/connection'
+import { googleLogout } from 'vue3-google-login'
 
 export const useUserStore = defineStore('user-store', {
   state: () => ({
@@ -20,6 +21,23 @@ export const useUserStore = defineStore('user-store', {
     comments: [] as any
   }),
   actions: {
+    async oauthLogin(credentials: any) {
+      try {
+        const { data } = await client().post(`/auth/oauth-callback`, credentials)
+        if (data.status === 'success') {
+          this.token = data.token
+          localStorage.setItem('token', data.token)
+          const {
+            data: { user }
+          } = data
+          this.currentUser = user
+          localStorage.setItem('auth.user', JSON.stringify(user))
+        }
+        return true
+      } catch (e) {
+        return false
+      }
+    },
     async login(form: any) {
       try {
         const { data } = await client().post(`/users/login`, form)
@@ -36,6 +54,11 @@ export const useUserStore = defineStore('user-store', {
       } catch (e) {
         return false
       }
+    },
+    async logout() {
+      localStorage.clear()
+      this.currentUser = {}
+      googleLogout()
     },
     async updateProfile(form: any) {
       try {
@@ -214,7 +237,11 @@ export const useUserStore = defineStore('user-store', {
     editWeeklyGoal: async function (params: any, id: string) {
       const {
         data: { data: post }
-      } = await client().patch('/posts/' + id + '/weeklyGoals', params)
+      } = await client().patch('/posts/' + id + '/weeklyGoals', params, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
 
       // @ts-ignore
       this.$state.weeklyResolutions.push({

@@ -1,26 +1,51 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import UserPost from '../components/user-post.vue'
-import { useUserStore } from '@/stores/user'
 import { usePostStore } from '@/stores/post'
-import { useRouter } from 'vue-router'
 
-const userStore = useUserStore()
 const postStore = usePostStore()
-const posts = ref<any>([])
-const router = useRouter()
+const posts = ref(Object.values(postStore.posts))
+const currentPage = ref(1)
+const POST_LIMIT = 3
+const isLoading = ref(false)
+
+const loadPosts = async (force = false) => {
+  isLoading.value = true
+  const loadedPosts = await postStore.getPosts(
+    {
+      params: {
+        limit: POST_LIMIT,
+        page: currentPage.value
+      }
+    },
+    force
+  )
+  if (!loadedPosts.length) {
+    currentPage.value -= 1
+  }
+  isLoading.value = false
+}
 
 onMounted(async () => {
-  if (!localStorage.getItem('token')) {
-    router.push('/login')
-    return
-  }
-  posts.value = await postStore.getPosts()
+  await loadPosts(true)
+  document.getElementsByTagName('main')?.[0]?.addEventListener('scroll', handleScroll)
 })
 
-watch(postStore.posts, async () => {
-  posts.value = await postStore.getPosts()
+onUnmounted(() => {
+  document.getElementsByTagName('main')?.[0]?.removeEventListener('scroll', handleScroll)
 })
+
+watch(postStore.posts, async (val) => {
+  posts.value = Object.values(val)
+})
+
+function handleScroll(e: any) {
+  const bottomOfWindow = e.target.scrollTop >= e.target.offsetHeight - 50
+  if (bottomOfWindow) {
+    currentPage.value += 1
+    if (!isLoading.value) loadPosts()
+  }
+}
 </script>
 
 <template>
@@ -72,6 +97,12 @@ watch(postStore.posts, async () => {
           :goal_type="post.type"
         ></UserPost>
       </div>
+    </div>
+    <div
+      v-if="isLoading"
+      class="py-4 flex items-center justify-center text-center absolute bottom-10 w-full z-[100]"
+    >
+      <div>Loading...</div>
     </div>
   </div>
 </template>

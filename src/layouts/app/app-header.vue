@@ -2,9 +2,10 @@
 import { ref } from 'vue'
 import { BaseInput, BasePopper } from '@/components/index'
 import { appName } from '@/config/app'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 
+const router = useRouter()
 const form = ref({
   key: ''
 })
@@ -28,12 +29,17 @@ const links = [
   {
     label: 'Yearly Reports',
     path: '/yearly-report'
+  },
+  {
+    label: 'Logout',
+    path: '/logout'
   }
-  // {
-  //   label: 'My Invoice',
-  //   path: '/invoices'
-  // }
 ]
+
+const logout = async () => {
+  await userStore.logout()
+  router.push('/login')
+}
 </script>
 
 <template>
@@ -106,15 +112,23 @@ const links = [
               v-if="isDropdownOpen"
               class="md:flex hidden absolute bg-white shadow-md rounded-md top-full right-0 w-fit min-w-[150px] flex-col"
             >
-              <router-link
-                @click.enter="isDropdownOpen = false"
-                v-for="(link, index) in links"
-                :key="index"
-                :to="{ path: link.path }"
-                class="text-sm font-normal text-slate-700 cursor-pointer px-4 py-2 hover:bg-slate-100"
-              >
-                {{ link.label }}
-              </router-link>
+              <template v-for="(link, index) in links" :key="index">
+                <router-link
+                  v-if="link.label !== 'Logout'"
+                  @click.enter="isDropdownOpen = false"
+                  :to="{ path: link.path }"
+                  class="text-sm font-normal text-slate-700 cursor-pointer px-4 py-2 hover:bg-slate-100"
+                >
+                  {{ link.label }}
+                </router-link>
+                <button
+                  v-else
+                  @click="logout"
+                  class="text-sm font-normal text-slate-700 cursor-pointer px-4 py-2 hover:bg-slate-100"
+                >
+                  Logout
+                </button>
+              </template>
             </div>
           </div>
         </div>

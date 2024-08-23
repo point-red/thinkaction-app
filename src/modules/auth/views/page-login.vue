@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { BaseInput } from '@/components/index'
-import { uuid } from '@/modules/data/users'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 
@@ -22,6 +21,17 @@ const login = async function () {
     return
   }
 }
+
+const callback = async (response: any) => {
+  // This callback will be triggered when the user selects or login to
+  // his Google account from the popup
+  await userStore.oauthLogin(response)
+  router.push('/')
+}
+
+onMounted(async () => {
+  await userStore.logout()
+})
 </script>
 
 <template>
@@ -42,6 +52,7 @@ const login = async function () {
           type="email"
           placeholder="johndoe@example.com"
           helper=""
+          autocomplete
           class="text-left"
         ></component>
         <component
@@ -50,6 +61,7 @@ const login = async function () {
           label="Password"
           type="password"
           error=""
+          autocomplete
           class="text-left"
         >
         </component>
@@ -59,10 +71,21 @@ const login = async function () {
 
     <p class="text-slate text-center my-4 font-semibold">or use one of your social profiles</p>
 
-    <button @click="login" class="btn w-full md:w-[300px] m-auto bg-[#F960D9] font-bold text-white">
+    <div class="md:mx-auto flex flex-col">
+      <GoogleLogin :callback="callback" prompt>
+        <button
+          type="button"
+          class="btn w-full md:w-[300px] m-auto bg-[#F960D9] font-bold text-white"
+        >
+          <img class="w-[30px] lg:w-[30px] pr-2" src="@/assets/images/google.png" />
+          Google
+        </button>
+      </GoogleLogin>
+    </div>
+    <!-- <button @click="login" class="btn w-full md:w-[300px] m-auto bg-[#F960D9] font-bold text-white">
       <img class="w-[30px] lg:w-[30px] pr-2" src="@/assets/images/google.png" />
       Google
-    </button>
+    </button> -->
 
     <div class="flex justify-between my-4 md:my-14 font-bold">
       <a href="" class="text-slate font-semibold">Forgot password?</a>

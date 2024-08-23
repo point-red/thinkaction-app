@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { RouterLink, useRoute } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 
 let visibility = ref(false)
 
 let showDetailAccount = ref(false)
+const userStore = useUserStore()
+const router = useRouter()
 
 const toggle = (e: any) => {
   e.stopPropagation()
@@ -59,8 +62,12 @@ const menus = [
     click: toggleDetailAccountVisibility
   }
 ]
-</script>
 
+const logout = async () => {
+  await userStore.logout()
+  router.push('/login')
+}
+</script>
 <template>
   <div>
     <!-- SLIDER - CREATE GOALS -->
@@ -95,8 +102,8 @@ const menus = [
       <router-link class="block" :to="{ path: '/monthly-report' }">Monthly Report</router-link>
       <hr />
       <router-link class="block" :to="{ path: '/yearly-report' }">Yearly Report</router-link>
-      <!-- <hr />
-      <router-link class="block" :to="{ path: '/my-invoice' }">My Invoice</router-link> -->
+      <hr />
+      <button class="text-center" @click="logout">Logout</button>
     </div>
 
     <!-- BUTTON NAVIGATION -->

@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 
 import MainApp from './main-app.vue'
 import router from './router'
+import vue3GoogleLogin from 'vue3-google-login'
 
 // unocss
 import '@unocss/reset/tailwind.css'
@@ -56,5 +57,8 @@ app.use(router)
 app.use(hljsVuePlugin)
 app.use(Notifications)
 app.use(createPinia())
+app.use(vue3GoogleLogin, {
+  clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID
+})
 
 app.mount('#app')

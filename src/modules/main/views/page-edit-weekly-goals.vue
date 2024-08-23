@@ -90,7 +90,7 @@ const submit = async function () {
   formData.append('categoryResolutionId', (form.value.resolution as any)?._id)
   formData.append('shareWith', values.shareWith)
   formData.append('dueDate', new Date(values.dueDate.split('-').reverse().join('-')).toISOString())
-  values.photos?.forEach((photo: any) => {
+  values.photo?.forEach((photo: any) => {
     formData.append('photo[]', photo)
   })
 

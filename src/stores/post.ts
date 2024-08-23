@@ -38,17 +38,23 @@ export const usePostStore = defineStore('post-store', {
       this.$state.posts[id] = post
       return post
     },
-    async getPosts(filter = {}) {
-      const result = this.results.find(
-        (p: any) => JSON.stringify(p.filter) === JSON.stringify(filter)
-      )
+    async getPosts(filter = {}, forceReload = false) {
       const self = this
-      if (result) {
-        return result.data.map((p: string) => self.posts[p])
+      if (forceReload) {
+        // self.results = []
+        // self.posts = {} as any
+      } else {
+        const result = this.results.find(
+          (p: any) => JSON.stringify(p.filter) === JSON.stringify(filter)
+        )
+        const self = this
+        if (result) {
+          return result.data.map((p: string) => self.posts[p])
+        }
       }
       const {
         data: { data: posts }
-      } = await client().get('/posts')
+      } = await client().get('/posts', filter)
 
       this.results = createResultOption(
         this.results,
