@@ -20,7 +20,7 @@ const client = function () {
       if (error.response.status === 401) {
         localStorage.removeItem('token')
         localStorage.removeItem('auth.user')
-        window.location.href = '/'
+        window.location.href = '/login'
       }
       return Promise.reject(error)
     }
@@ -33,7 +33,7 @@ export const getFile = (path: string) => {
   if (path.startsWith('http')) {
     return path
   }
-  return import.meta.env.VITE_BASE_API_URL + path
+  return import.meta.env.VITE_ASSET_API_URL + path
 }
 
 export default client

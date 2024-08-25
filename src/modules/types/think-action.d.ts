@@ -38,6 +38,9 @@ export type ThinkActionComment = {
 export type ThinkActionPost = {
   _id: string
   userId: string
+  name: string
+  date_time: string
+  created_at: string
   categoryResolutionId: string
   type: string
   caption: string
