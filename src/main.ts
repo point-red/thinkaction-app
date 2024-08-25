@@ -2,7 +2,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 
 import MainApp from './main-app.vue'
-import router from './router'
+import router from '@/router'
 import vue3GoogleLogin from 'vue3-google-login'
 
 // unocss
