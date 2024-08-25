@@ -1,5 +1,6 @@
 {
   "extends": "@tsconfig/node18/tsconfig.json",
+  "exclude": ["dist", "node_modules"],
   "include": ["vite.config.*", "vitest.config.*", "cypress.config.*", "playwright.config.*"],
   "compilerOptions": {
     "composite": true,
