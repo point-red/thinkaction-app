@@ -32,8 +32,9 @@ export const useUserStore = defineStore('user-store', {
           } = data
           this.currentUser = user
           localStorage.setItem('auth.user', JSON.stringify(user))
+          return true
         }
-        return true
+        return false
       } catch (e) {
         return false
       }
