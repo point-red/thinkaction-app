@@ -25,8 +25,10 @@ const login = async function () {
 const callback = async (response: any) => {
   // This callback will be triggered when the user selects or login to
   // his Google account from the popup
-  await userStore.oauthLogin(response)
-  router.push('/')
+  const loggedIn = await userStore.oauthLogin(response)
+  if (loggedIn) {
+    router.push('/')
+  }
 }
 
 onMounted(async () => {
