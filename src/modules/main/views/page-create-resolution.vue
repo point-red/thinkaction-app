@@ -3,7 +3,9 @@ import { ref } from 'vue'
 import { BaseInput, BaseDatepicker, BaseTextarea, BaseSelect } from '@/components/index'
 import { useUserStore } from '@/stores/user'
 import dayjs from 'dayjs'
-import router from '@/router'
+import ImageUpload from '@/modules/main/components/image-upload.vue'
+import { usePostStore } from '@/stores/post'
+import { useRouter } from 'vue-router'
 
 const list = [
   { id: 'everyone', label: 'Everyone' },
@@ -14,6 +16,9 @@ const list = [
 const selected = ref({
   visibility: ''
 })
+
+const postStore = usePostStore()
+const router = useRouter()
 
 const form = ref({
   categoryName: '',
@@ -32,8 +37,8 @@ const onUpdateVisiblity = function (params: any) {
   form.value.shareWith = id
 }
 
-const onImageChange = function (event: any) {
-  form.value.photos = [...event.target.files] ?? []
+const onImageChange = function (photos: any) {
+  form.value.photos = photos
 }
 
 const userStore = useUserStore()
@@ -53,6 +58,7 @@ const save = async function () {
 
   if (isAllFilled) {
     await userStore.addResolutionGoal(formData)
+    postStore.resetPosts()
     router.push('/')
   }
 }
@@ -101,18 +107,7 @@ const save = async function () {
       <span class="font-semibold text-[#3D8AF7] block mb-2"
         >Share the photo of your vision here</span
       >
-      <label class="btn btn-primary bg-[#3D8AF7] mb-8">
-        <input
-          type="file"
-          @change="onImageChange"
-          multiple
-          class="pointer-events-none absolute opacity-0"
-        />
-        <div class="flex items-center space-x-2">
-          <i class="block i-far-arrow-up-from-bracket"></i>
-          <span>Choose File</span>
-        </div>
-      </label>
+      <ImageUpload @change="onImageChange" :previousImages="[]" />
 
       <!-- share with -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Share With</span>

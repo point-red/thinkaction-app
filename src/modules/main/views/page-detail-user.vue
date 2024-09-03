@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import UserDetails from '@/modules/main/components/users/user-details.vue'
-import { Categories } from '@/modules/data/categories'
 import type { ThinkActionGoal } from '@/modules/types/think-action'
 import { useUserStore } from '@/stores/user'
 import { useRoute } from 'vue-router'

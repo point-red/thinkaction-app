@@ -1,11 +1,27 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { BaseInput } from '@/components/index'
+import { useUserStore } from '@/stores/user'
+import { useRouter } from 'vue-router'
 
 const state = ref({
+  current_password: '',
   confirm_password: '',
-  password: ''
+  password: '',
+  error: ''
 })
+
+const router = useRouter()
+
+const userStore = useUserStore()
+const needsPassword = computed(() => userStore.currentUser?.needsPassword)
+
+const getCurrentPasswordErrorMessage = function () {
+  if (state.value.current_password.length < 8) {
+    return 'Current password must be filled'
+  }
+  return ''
+}
 
 const getPasswordErrorMessage = function () {
   if (state.value.password.length < 8) {
@@ -22,6 +38,28 @@ const getConfirmErrorMessage = function () {
   return state.value.confirm_password === state.value.password
     ? ''
     : 'Confirm Password should be equal to password'
+}
+
+const isDisabled = computed(() => {
+  if (!needsPassword.value && state.value.current_password.length < 8) {
+    return true
+  }
+  return state.value.password.length < 8 || state.value.confirm_password !== state.value.password
+})
+
+const savePassword = async () => {
+  state.value.error = ''
+  if (isDisabled.value) {
+    return
+  }
+  const done = await userStore.updatePassword(state.value.password, state.value.current_password)
+  if (done === true) {
+    router.push('/profile')
+  } else if (typeof done === 'string') {
+    state.value.error = done
+  } else {
+    state.value.error = 'Some error occurred.'
+  }
 }
 </script>
 
@@ -45,24 +83,39 @@ const getConfirmErrorMessage = function () {
     </div>
 
     <div class="flex flex-col md:px-0 px-3">
-      <!-- input - full_name -->
-      <span class="font-semibold text-[#3D8AF7] block mb-2 mt-8">New Password</span>
+      <div class="mb-8" />
+      <template v-if="!needsPassword">
+        <span class="font-semibold text-[#3D8AF7] block mb-2">Current Password</span>
+        <BaseInput
+          :error="getCurrentPasswordErrorMessage()"
+          v-model="state.current_password"
+          class="mb-8"
+        ></BaseInput>
+      </template>
+
+      <span class="font-semibold text-[#3D8AF7] block mb-2">New Password</span>
       <BaseInput
         :error="getPasswordErrorMessage()"
         v-model="state.password"
         class="mb-8"
       ></BaseInput>
 
-      <!-- input - username -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Password Conformation</span>
       <BaseInput
         :error="getConfirmErrorMessage()"
         v-model="state.confirm_password"
         class="mb-8"
       ></BaseInput>
+      <span class="text-sm mt-1 text-red-400" v-if="state.error">{{ state.error }}</span>
 
       <div class="flex flex-col justify-center gap-y-2 my-8">
-        <button class="btn btn-lg btn-primary bg-[#3D8AF7]">Save</button>
+        <button
+          @click="savePassword"
+          :disabled="isDisabled"
+          class="btn btn-lg btn-primary bg-[#3D8AF7]"
+        >
+          Save
+        </button>
         <router-link :to="'/profile'" class="btn btn-lg btn-primary bg-[#de2a2a]"
           >Cancel</router-link
         >

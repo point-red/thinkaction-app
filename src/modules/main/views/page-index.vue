@@ -1,15 +1,21 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import UserPost from '../components/user-post.vue'
 import { usePostStore } from '@/stores/post'
 
 const postStore = usePostStore()
 const posts = ref(Object.values(postStore.posts))
 const currentPage = ref(1)
-const POST_LIMIT = 3
+const POST_LIMIT = 7
 const isLoading = ref(false)
+const total = computed(() => {
+  return postStore.total
+})
 
 const loadPosts = async (force = false) => {
+  if ((total.value !== -1 || !force) && total.value < POST_LIMIT * (currentPage.value - 1)) {
+    return
+  }
   isLoading.value = true
   const loadedPosts = await postStore.getPosts(
     {
@@ -40,10 +46,12 @@ watch(postStore.posts, async (val) => {
 })
 
 function handleScroll(e: any) {
-  const bottomOfWindow = e.target.scrollTop >= e.target.offsetHeight - 50
+  const bottomOfWindow = e.target.scrollTop + e.target.clientHeight >= e.target.scrollHeight - 30
   if (bottomOfWindow) {
-    currentPage.value += 1
-    if (!isLoading.value) loadPosts()
+    if (!isLoading.value) {
+      currentPage.value += 1
+      loadPosts()
+    }
   }
 }
 </script>
@@ -93,7 +101,7 @@ function handleScroll(e: any) {
           :like-count="post.likeCount"
           :comment-count="post.commentCount"
           :date_time="post.date_time"
-          :created_at="post.created_at"
+          :created_at="post.createdDate"
           :goal_type="post.type"
         ></UserPost>
       </div>

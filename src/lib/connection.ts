@@ -30,6 +30,9 @@ const client = function () {
 }
 
 export const getFile = (path: string) => {
+  if (!path) {
+    return ''
+  }
   if (path.startsWith('http')) {
     return path
   }

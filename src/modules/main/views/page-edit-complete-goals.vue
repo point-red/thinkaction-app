@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { BaseInput, BaseCheckbox, BaseSelect } from '@/components/index'
 import { useUserStore } from '@/stores/user'
 import { useRouter, useRoute } from 'vue-router'
+import { usePostStore } from '@/stores/post'
 
 const privateTypes = [
   { id: 'public', label: 'Everyone' },
@@ -10,6 +11,7 @@ const privateTypes = [
   { id: 'private', label: 'Private' }
 ]
 const userStore = useUserStore()
+const postStore = usePostStore()
 const router = useRouter()
 const route = useRoute()
 
@@ -17,6 +19,7 @@ const id = route.params._id
 const categories = ref<any>([])
 const goals = ref<any>([])
 const currentGoal = ref<any>(null)
+const removedPhotos = ref<string[]>([])
 
 onMounted(async () => {
   categories.value = await userStore.getResolutionCategories()
@@ -52,7 +55,11 @@ const computedGoals = computed(() => {
     })
 })
 
-const checked = ref(false)
+const onImageChange = function (photos: any) {
+  form.value.photos = photos
+}
+
+const checked = ref<any>(false)
 
 const form = ref<any>({
   caption: '',
@@ -62,21 +69,41 @@ const form = ref<any>({
   files: []
 })
 
-const submit = function () {
+const submit = async function () {
   let category: any = form.value.category
   let goal: any = form.value.goal
   let visibility: any = form.value.visibility
-  let values: any = {}
-  if (category._id && goal._id && visibility._id && currentGoal) {
-    values.category = category._id
-    values.goal_id = goal._id
-    values.caption = form.value.caption
-    values.visibility = visibility?._id
-    values.is_completed = checked.value
-    values.files = form.value.files
-    userStore.editCompleteGoal(values, (currentGoal.value as any)._id)
+  let values = form.value
+  const isAllFilled = category._id && goal._id && visibility._id && currentGoal
+  if (!isAllFilled) {
+    return
+  }
+
+  const formData = new FormData()
+  formData.append('caption', values.caption)
+  formData.append('weeklyGoalId', (form.value.goal as any)?.id)
+  formData.append('categoryResolutionId', (form.value.category as any)?.id)
+  formData.append('shareWith', values.shareWith?.id)
+  formData.append('dueDate', new Date((form.value.goal as any)?.dueDate).toISOString())
+  formData.append('updatedDate', new Date().toISOString())
+  formData.append('isComplete', checked.value)
+  values.photos?.forEach((photo: any) => {
+    formData.append('photo[]', photo)
+  })
+
+  removedPhotos.value.forEach((url: string) => {
+    formData.append('removedImages[]', url)
+  })
+
+  if (isAllFilled) {
+    await userStore.editCompleteGoal(formData, (currentGoal.value as any)._id)
+    postStore.resetPosts()
     router.push('/')
   }
+}
+
+const removePrev = (photoUrl: string) => {
+  removedPhotos.value.push(photoUrl)
 }
 </script>
 
@@ -123,13 +150,11 @@ const submit = function () {
       <span class="font-semibold text-[#3D8AF7] block mb-2"
         >Share the photo of your vision here</span
       >
-      <label class="btn btn-primary bg-[#3D8AF7] mb-8 block w-[150px]">
-        <input type="file" class="pointer-events-none absolute opacity-0" />
-        <div class="flex items-center space-x-2">
-          <i class="block i-far-arrow-up-from-bracket"></i>
-          <span>Choose File</span>
-        </div>
-      </label>
+      <ImageUpload
+        @change="onImageChange"
+        :previousImages="currentGoal.photo"
+        @remove="removePrev"
+      />
 
       <!-- Checkbox to Complete the Goal -->
       <component :is="BaseCheckbox" v-model="checked" label="Complete Goals" class="mb-8" />

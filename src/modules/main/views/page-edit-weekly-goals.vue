@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { BaseDatepicker, BaseTextarea, BaseSelect, BaseInput } from '@/components/index'
+import ImageUpload from '@/modules/main/components/image-upload.vue'
 import { useUserStore } from '@/stores/user'
 import { useRoute, useRouter } from 'vue-router'
 import dayjs from 'dayjs'
@@ -36,6 +37,7 @@ const form = ref<any>({
 const id = route.params.id as string
 // const categories = ref<any>([])
 const currentGoal = ref<any>(null)
+const removedPhotos = ref<string[]>([])
 
 onMounted(async () => {
   let goal = await postStore.getPostById(id as string)
@@ -75,8 +77,8 @@ const onUpdateResolution = async function (params: any) {
   form.value.resolution = resolutions.value.find((r: any) => r._id === params.id)
 }
 
-const onImageChange = function (event: any) {
-  form.value.photo = [...event.target.files] ?? []
+const onImageChange = function (photos: any) {
+  form.value.photo = photos
 }
 
 const submit = async function () {
@@ -94,14 +96,21 @@ const submit = async function () {
     formData.append('photo[]', photo)
   })
 
+  removedPhotos.value.forEach((url: string) => {
+    formData.append('removedImages[]', url)
+  })
+
   if (isAllFilled) {
     await userStore.editWeeklyGoal(formData, currentGoal.value._id)
     postStore.resetPosts()
     router.push('/')
   }
 }
-</script>
 
+const removePrev = (photoUrl: string) => {
+  removedPhotos.value.push(photoUrl)
+}
+</script>
 <template>
   <div v-if="currentGoal" class="main-content-container">
     <p class="text-lg font-semibold">Edit Your Weekly Goals</p>
@@ -159,18 +168,11 @@ const submit = async function () {
       <span class="font-semibold text-[#3D8AF7] block mb-2"
         >Share the photo of your vision here</span
       >
-      <label class="btn btn-primary bg-[#3D8AF7] mb-8">
-        <input
-          type="file"
-          @change="onImageChange"
-          multiple
-          class="pointer-events-none absolute opacity-0"
-        />
-        <div class="flex items-center space-x-2">
-          <i class="block i-far-arrow-up-from-bracket"></i>
-          <span>Choose File</span>
-        </div>
-      </label>
+      <ImageUpload
+        @change="onImageChange"
+        :previousImages="currentGoal.photo"
+        @remove="removePrev"
+      />
 
       <!-- share with -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Share With</span>

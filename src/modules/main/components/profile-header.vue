@@ -12,6 +12,8 @@ type DefaultProps = {
   bio: string
   avatar: string
   goalsPerformance: number
+  full_name?: string
+  isRequesting: boolean
   [key: string]: any
 }
 
@@ -20,7 +22,8 @@ const user = withDefaults(defineProps<DefaultProps>(), {
   is_user: false,
   supporterCount: 0,
   supportingCount: 0,
-  goalsPerformance: 0
+  goalsPerformance: 0,
+  fullname: ''
 })
 
 const userStore = useUserStore()
@@ -45,7 +48,14 @@ const id = computed(() => {
       </div>
       <template v-if="!user.is_user">
         <button
-          v-if="user.isSupporting"
+          v-if="user.isRequesting"
+          @click="emit('support')"
+          class="btn bg-slate-400 w-fit mx-auto font-semibold text-white hidden md:block"
+        >
+          Requesting
+        </button>
+        <button
+          v-else-if="user.isSupporting"
           @click="emit('support')"
           class="btn bg-slate-400 w-fit mx-auto font-semibold text-white hidden md:block"
         >

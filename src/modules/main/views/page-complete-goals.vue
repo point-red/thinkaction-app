@@ -4,6 +4,7 @@ import { BaseInput, BaseCheckbox, BaseSelect } from '@/components/index'
 import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
 import { usePostStore } from '@/stores/post'
+import ImageUpload from '@/modules/main/components/image-upload.vue'
 
 const list = [
   { id: 'everyone', label: 'Everyone' },
@@ -73,8 +74,8 @@ const submit = async function () {
     router.push('/')
   }
 }
-const onImageChange = function (event: any) {
-  form.value.photos = [...event.target.files] ?? []
+const onImageChange = function (photos: any) {
+  form.value.photos = photos
 }
 </script>
 
@@ -121,18 +122,7 @@ const onImageChange = function (event: any) {
       <span class="font-semibold text-[#3D8AF7] block mb-2"
         >Share the photo of your vision here</span
       >
-      <label class="btn btn-primary bg-[#3D8AF7] mb-8">
-        <input
-          type="file"
-          @change="onImageChange"
-          multiple
-          class="pointer-events-none absolute opacity-0"
-        />
-        <div class="flex items-center space-x-2">
-          <i class="block i-far-arrow-up-from-bracket"></i>
-          <span>Choose File</span>
-        </div>
-      </label>
+      <ImageUpload @change="onImageChange" :previousImages="[]" />
 
       <!-- Checkbox to Complete the Goal -->
       <div class="w-full">

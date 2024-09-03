@@ -2,9 +2,10 @@
 import { onMounted, ref } from 'vue'
 import { BaseDatepicker, BaseTextarea, BaseSelect, BaseInput } from '@/components/index'
 import { useUserStore } from '@/stores/user'
-import router from '@/router'
+import { useRouter } from 'vue-router'
 import dayjs from 'dayjs'
 import { usePostStore } from '@/stores/post'
+import ImageUpload from '@/modules/main/components/image-upload.vue'
 
 const list = [
   { id: 'everyone', label: 'Everyone' },
@@ -15,6 +16,7 @@ const list = [
 const postStore = usePostStore()
 const userStore = useUserStore()
 const resolutions = ref<any>([])
+const router = useRouter()
 
 const selected = ref({
   visibility: { id: 'everyone', label: 'Everyone' },
@@ -27,7 +29,7 @@ const form = ref<any>({
   categoryResolutionId: '',
   resolution: {} as any,
   dueDate: '',
-  shareWith: 'public',
+  shareWith: 'everyone',
   photo: []
 })
 
@@ -48,9 +50,11 @@ const onUpdateVisiblity = function (params: any) {
 const onUpdateResolution = async function (params: any) {
   form.value.resolution = resolutions.value.find((r: any) => r._id === params.id)
 }
-const onImageChange = function (event: any) {
-  form.value.photo = [...event.target.files] ?? []
+
+const onImageChange = function (photos: any) {
+  form.value.photo = photos
 }
+
 const submit = async function () {
   let values = form.value
   let isAllFilled = values.caption && values.shareWith && (form.value.resolution as any)?._id // @ts-ignore-all
@@ -131,18 +135,7 @@ const submit = async function () {
       <span class="font-semibold text-[#3D8AF7] block mb-2"
         >Share the photo of your vision here</span
       >
-      <label class="btn btn-primary bg-[#3D8AF7] mb-8">
-        <input
-          type="file"
-          @change="onImageChange"
-          multiple
-          class="pointer-events-none absolute opacity-0"
-        />
-        <div class="flex items-center space-x-2">
-          <i class="block i-far-arrow-up-from-bracket"></i>
-          <span>Choose File</span>
-        </div>
-      </label>
+      <ImageUpload @change="onImageChange" :previousImages="[]" />
 
       <!-- share with -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Share With</span>

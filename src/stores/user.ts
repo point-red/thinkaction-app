@@ -74,6 +74,21 @@ export const useUserStore = defineStore('user-store', {
         return false
       }
     },
+    async updatePassword(passwordNew: string, passwordCurrent: string) {
+      try {
+        const { data } = await client().patch('/users/updateMyPassword', {
+          passwordNew,
+          passwordCurrent
+        })
+        if (data.status === 'success' && this.currentUser) {
+          this.currentUser.needsPassword = false
+          return true
+        }
+        return false
+      } catch (e: any) {
+        return e.response.data.errors
+      }
+    },
     getUserById: async function (_id: string) {
       try {
         const { data } = await client().get(`/users/${_id}`)
@@ -152,10 +167,13 @@ export const useUserStore = defineStore('user-store', {
       } = await client().post(`/users/${isSupporting ? 'un' : ''}support`, {
         userId: id
       })
-      return {
-        ...data,
-        isSupporting: !isSupporting
+
+      if (data.type === 'request') {
+        data.isRequesting = !isSupporting
+      } else {
+        data.isSupporting = !isSupporting
       }
+      return data
     },
     findUserById: function (id: string) {
       return this.$state.users.find((user) => user._id === id)
@@ -205,7 +223,7 @@ export const useUserStore = defineStore('user-store', {
         data: { data: post }
       } = await client().post('/posts/resolutions', params)
       // @ts-ignore
-      this.$state.userGoals.push(post)
+      this.$state.userGoals.unshift(post)
     },
     editResolutionGoal: async function (params: any, id: string) {
       // TODO: Add api here:

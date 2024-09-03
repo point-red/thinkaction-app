@@ -2,10 +2,10 @@
 import { onMounted, ref } from 'vue'
 import { BaseInput, BaseDatepicker, BaseTextarea, BaseSelect } from '@/components/index'
 import { useUserStore } from '@/stores/user'
-import router from '@/router'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import dayjs from 'dayjs'
 import { usePostStore } from '@/stores/post'
+import ImageUpload from '@/modules/main/components/image-upload.vue'
 
 const list = [
   { id: 'everyone', label: 'Everyone' },
@@ -13,9 +13,11 @@ const list = [
   { id: 'private', label: 'Private' }
 ]
 
+const router = useRouter()
 const route = useRoute()
 const postStore = usePostStore()
 const currentGoal = ref<any>(null)
+const removedPhotos = ref<string[]>([])
 const id = route.params.id as string
 const selected = ref({
   visibility: '' as any
@@ -38,8 +40,12 @@ const onUpdateVisiblity = function (params: any) {
   form.value.shareWith = id
 }
 
-const onImageChange = function (event: any) {
-  form.value.photos = [...event.target.files] ?? []
+const onImageChange = function (photos: any) {
+  form.value.photos = photos
+}
+
+const removePrev = (photoUrl: string) => {
+  removedPhotos.value.push(photoUrl)
 }
 
 const userStore = useUserStore()
@@ -55,6 +61,10 @@ const save = async function () {
   formData.append('dueDate', new Date(values.dueDate.split('-').reverse().join('-')).toISOString())
   values.photos?.forEach((photo: any) => {
     formData.append('photo[]', photo)
+  })
+
+  removedPhotos.value.forEach((url: string) => {
+    formData.append('removedImages[]', url)
   })
 
   if (isAllFilled) {
@@ -127,18 +137,11 @@ onMounted(async () => {
       <span class="font-semibold text-[#3D8AF7] block mb-2"
         >Share the photo of your vision here</span
       >
-      <label class="btn btn-primary bg-[#3D8AF7] mb-8">
-        <input
-          type="file"
-          @change="onImageChange"
-          multiple
-          class="pointer-events-none absolute opacity-0"
-        />
-        <div class="flex items-center space-x-2">
-          <i class="block i-far-arrow-up-from-bracket"></i>
-          <span>Choose File</span>
-        </div>
-      </label>
+      <ImageUpload
+        @change="onImageChange"
+        :previousImages="currentGoal.photo"
+        @remove="removePrev"
+      />
 
       <!-- share with -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Share With</span>

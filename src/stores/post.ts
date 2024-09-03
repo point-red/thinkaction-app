@@ -7,7 +7,8 @@ import { createResultOption } from '@/lib/transform'
 export const usePostStore = defineStore('post-store', {
   state: () => ({
     results: [] as any,
-    posts: {} as { [key: string]: ThinkActionPost }
+    posts: {} as { [key: string]: ThinkActionPost },
+    total: -1
   }),
   actions: {
     addComment(id: string) {
@@ -53,8 +54,10 @@ export const usePostStore = defineStore('post-store', {
         }
       }
       const {
-        data: { data: posts }
+        data: { data: posts, total }
       } = await client().get('/posts', filter)
+
+      this.$state.total = total
 
       this.results = createResultOption(
         this.results,
@@ -71,19 +74,19 @@ export const usePostStore = defineStore('post-store', {
       if (this.$state.posts[goalId].likedByCurrent) {
         const {
           data: {
-            data: { likeCount }
+            data: { likeCount, likedByCurrent }
           }
         } = await client().post('/posts/unlike', { postId: goalId })
         this.$state.posts[goalId].likeCount = likeCount
-        this.$state.posts[goalId].likedByCurrent = false
+        this.$state.posts[goalId].likedByCurrent = likedByCurrent
       } else {
         const {
           data: {
-            data: { likeCount }
+            data: { likeCount, likedByCurrent }
           }
         } = await client().post('/posts/like', { postId: goalId })
         this.$state.posts[goalId].likeCount = likeCount
-        this.$state.posts[goalId].likedByCurrent = true
+        this.$state.posts[goalId].likedByCurrent = likedByCurrent
       }
     }
   }

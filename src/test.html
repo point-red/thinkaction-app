@@ -1,0 +1,33 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script>
+    function start() {
+    gapi.auth2.init({
+        'apiKey': 'AIzaSyDENlcDx546I4WXdI29QotV5w_5E_V4EaI',
+        'discoveryDocs': ['https://people.googleapis.com/$discovery/rest'],
+        'clientId': '344285404791-mbpda43bifu70v08f1muna991djtn64v.apps.googleusercontent.com',
+        'scope': 'profile',
+    }).then(function() {
+        // 3. Initialize and make the API request.
+        return gapi.client.people.people.get({
+        'resourceName': 'people/me',
+        'requestMask.includeField': 'person.names'
+        });
+    }).then(function(response) {
+        console.log(response.result);
+    }, function(reason) {
+        console.log('Error: ', JSON.stringify(reason));
+    });
+    };
+    // 1. Load the JavaScript client library.
+    gapi.load('client', start);
+    </script>
+</head>
+<body>
+    <button></button>
+</body>
+</html>

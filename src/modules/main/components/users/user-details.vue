@@ -52,7 +52,7 @@ const computedCategories = computed(() => {
 const supportUser = async function () {
   const data = await userStore.toggleSupport(
     (props.user as any)._id,
-    (props.user as any).isSupporting
+    (props.user as any).isRequesting || (props.user as any).isSupporting
   )
   emit('update', {
     ...props.user,
@@ -81,6 +81,7 @@ const goalsPerformance = computed(() => {
       :goals-performance="goalsPerformance"
       :is_private="!props.user.isPublic!"
       :is-supporting="props.user.isSupporting"
+      :is-requesting="props.user.isRequesting"
       @support="supportUser"
       :goals_performance="props.user.goals_performance!"
       :supporting-count="props.user.supportingCount!"

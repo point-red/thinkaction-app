@@ -3,7 +3,7 @@ import dayjs from 'dayjs'
 import type { ThinkActionUser, ThinkActionCategory } from '@/modules/types/think-action'
 import { usePostStore } from '@/stores/post'
 import { useUserStore } from '@/stores/user'
-import { computed, onMounted, ref } from 'vue'
+import { computed, watch, onMounted, ref } from 'vue'
 import { getFile } from '@/lib/connection'
 
 export interface Props {
@@ -39,12 +39,18 @@ const currentUser = computed(() => userStore.currentUser)
 const likePost = async function () {
   let id = props.id
   await store.likePost(id as string)
-  isLiked.value = !isLiked.value
 }
 
 onMounted(() => {
   isLiked.value = props.likedByCurrent
 })
+
+watch(
+  () => props.likedByCurrent,
+  (val) => {
+    isLiked.value = val
+  }
+)
 const toggleAction = function () {
   actionToggled.value = true
 }
