@@ -20,7 +20,7 @@ const postStore = usePostStore()
 const resolutions = ref<any>([])
 
 const selected = ref({
-  visibility: { id: 'public', label: 'Everyone' },
+  visibility: { id: 'everyone', label: 'Everyone' },
   resolution: {},
   category: {}
 })
@@ -30,7 +30,7 @@ const form = ref<any>({
   categoryResolutionId: '',
   resolution: {} as any,
   dueDate: '',
-  shareWith: 'public',
+  shareWith: 'everyone',
   photo: []
 })
 
@@ -55,6 +55,8 @@ onMounted(async () => {
         label: resolution.name
       }
     : {}
+
+  selected.value.visibility = list.find((l) => l.id === goal.shareWith) ?? list[0]
   form.value.caption = goal?.caption
   form.value.shareWith = goal?.shareWith
   form.value.dueDate = dayjs(goal?.dueDate)?.format?.('DD-MM-YYYY')

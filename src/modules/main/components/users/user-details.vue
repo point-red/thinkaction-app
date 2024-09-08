@@ -153,13 +153,20 @@ function handleScroll(e: any) {
     <div v-if="!props.is_current_user">
       <!-- SUPPORTING BUTTON -->
       <button
+        v-if="props.user.isRequesting"
         @click="supportUser"
-        v-if="!props.user.isSupporting"
+        class="btn bg-slate-400 w-full font-semibold text-white md:hidden"
+      >
+        Requesting
+      </button>
+      <button
+        @click="supportUser"
+        v-else-if="!props.user.isSupporting"
         class="btn bg-[#3D8AF7] w-full font-semibold text-white md:hidden"
       >
         Support
       </button>
-      <template v-if="props.user.isSupporting">
+      <template v-else>
         <button
           @click="supportUser"
           class="btn bg-slate-300 text-sky-500 w-full font-semibold text-white md:hidden"
@@ -174,7 +181,7 @@ function handleScroll(e: any) {
     </router-link>
 
     <!-- RESOLUTIONS -->
-    <div>
+    <div v-if="computedCategories?.length">
       <hr class="border" />
       <BaseResolutionCategory
         :selected_category_id="selectedCategory"
@@ -196,9 +203,9 @@ function handleScroll(e: any) {
           :category="post.name!"
           :caption="post.caption"
           :photos="post.photo"
-          :is_liked="post.likedByCurrent"
-          :cheers_count="post.likeCount"
-          :comments_count="post.commentCount"
+          :liked-by-current="post.likedByCurrent"
+          :like-count="post.likeCount"
+          :comment-count="post.commentCount"
           :date_time="post.date_time"
           :created_at="post.createdDate"
         ></BaseUserPost>

@@ -36,7 +36,7 @@ export const useCommentStore = defineStore('comment-store', {
       } = await client().post(url, preparedComment)
 
       if (options.commentId) {
-        this.comments[postId][comment._id] = comment.parentComment
+        this.comments[postId][options.commentId] = comment.parentComment
         return
       }
 
@@ -47,12 +47,12 @@ export const useCommentStore = defineStore('comment-store', {
 
       this.results[postId] = createResultOption(this.results[postId], options, comment._id)
     },
-    async getComments(postId: string, filter: any = {}) {
+    async getComments(postId: string, filter: any = {}, force = false) {
       const result = this.results[postId]?.find(
         (p: any) => JSON.stringify(p.filter) === JSON.stringify(filter)
       )
       const self = this
-      if (result && !filter.commentId) {
+      if (result && !filter.commentId && !force) {
         return result.data.map((p: string) => self.comments[postId][p])
       }
       const {

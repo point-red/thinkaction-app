@@ -77,7 +77,7 @@ const deletePost = function () {
 </script>
 
 <template>
-  <div class="shadow-sm bg-white p-3 rounded-lg border mb-5">
+  <div class="shadow-sm bg-white p-3 rounded-lg border mb-5 md:max-w-[600px] md:mx-auto">
     <div
       v-if="deleteModal"
       class="z-100 fixed w-screen h-screen top-0 left-0 bg-black/20 flex items-center justify-center"

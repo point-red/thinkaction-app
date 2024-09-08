@@ -4,9 +4,11 @@ import { BaseInput } from '@/components/index'
 import UserSneakPeak from '../components/user-sneakpeak.vue'
 import { watchDebounced } from '@vueuse/core'
 import client from '@/lib/connection'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const form = ref({
-  key: ''
+  key: (route.query?.q as string) ?? ''
 })
 
 const users = ref<any>([])
@@ -43,6 +45,15 @@ watchDebounced(
   () => form.value.key,
   async () => {
     await searchUsers()
+  }
+)
+
+watchDebounced(
+  () => route.query.q,
+  async (val) => {
+    if (val) {
+      form.value.key = val as string
+    }
   }
 )
 </script>

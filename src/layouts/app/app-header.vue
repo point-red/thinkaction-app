@@ -40,6 +40,12 @@ const logout = async () => {
   await userStore.logout()
   router.push('/login')
 }
+
+const submitForm = () => {
+  const value = form.value.key
+  form.value.key = ''
+  router.push('/find?q=' + value)
+}
 </script>
 
 <template>
@@ -64,12 +70,15 @@ const logout = async () => {
         <div>
           <!-- screen: lg -->
           <div class="invisible md:visible flex items-center space-x-5">
-            <component
-              :is="BaseInput"
-              v-model="form.key"
-              placeholder="Cari pengguna"
-              class="border-2 border-slate rounded-lg"
-            ></component>
+            <form @submit.prevent="submitForm">
+              <component
+                :is="BaseInput"
+                v-model="form.key"
+                placeholder="Cari pengguna"
+                class="border-2 border-slate rounded-lg"
+              ></component>
+              <button type="submit" @click="submitForm" class="hidden"></button>
+            </form>
 
             <router-link class="font-medium" :to="{ path: '/' }">
               <span>Home</span>

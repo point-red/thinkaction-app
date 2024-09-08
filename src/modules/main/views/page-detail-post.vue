@@ -21,14 +21,14 @@ const sendReply = async function ({ comment }: any, commentId?: string) {
   text.value = ''
   await commentStore.postComment(postId as string, comment, commentId ? { commentId } : {})
   if (!commentId) {
-    comments.value = await commentStore.getComments(postId as string)
+    comments.value = await commentStore.getComments(postId as string, {}, true)
   }
   post.value = postStore.addComment(postId as string)
 }
 
 onMounted(async () => {
   post.value = await postStore.getPostById(postId as string)
-  comments.value = await commentStore.getComments(postId as string)
+  comments.value = await commentStore.getComments(postId as string, {}, true)
 })
 
 const getUserInfo = (comment: any) => {
@@ -51,7 +51,7 @@ const getUserInfo = (comment: any) => {
       :like-count="post.likeCount"
       :comment-count="post.commentCount"
       :date_time="post.date_time"
-      :created_at="post.created_at"
+      :created_at="post.createdDate"
     ></UserPost>
     <div class="flex flex-row gap-1 items-end">
       <div class="flex-grow">
@@ -79,6 +79,7 @@ const getUserInfo = (comment: any) => {
       <PostComment
         :id="comment._id"
         :full_name="getUserInfo(comment).fullname ?? getUserInfo(comment).username"
+        :user-id="getUserInfo(comment)._id"
         :avatar="getUserInfo(comment).photo"
         :date_time="comment.createdDate"
         :post-id="(postId as string)"

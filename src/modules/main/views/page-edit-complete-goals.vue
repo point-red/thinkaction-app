@@ -6,7 +6,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { usePostStore } from '@/stores/post'
 
 const privateTypes = [
-  { id: 'public', label: 'Everyone' },
+  { id: 'everyone', label: 'Everyone' },
   { id: 'supporter', label: 'Supporter' },
   { id: 'private', label: 'Private' }
 ]

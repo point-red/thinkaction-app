@@ -67,7 +67,7 @@ watch(
     </label>
     <div class="flex flex-row items-center gap-2 flex-wrap">
       <div class="relative w-fit h-fit" v-for="(image, index) in prev" :key="index">
-        <img :src="getFile(image)" class="rounded-lg w-32 h-32" />
+        <img :src="getFile(image)" class="rounded-lg object-cover w-32 h-32" />
         <button
           @click="() => onRemove('previous', index)"
           class="absolute top-1 right-1 block w-6 h-6 rounded-lg bg-red-500 text-white font-medium text-lg flex items-center justify-center"
@@ -76,7 +76,7 @@ watch(
         </button>
       </div>
       <div class="relative w-fit h-fit" v-for="(image, index) in imageSources" :key="index">
-        <img :src="image" class="rounded-lg w-32 h-32" />
+        <img :src="image" class="rounded-lg object-cover w-32 h-32" />
         <button
           @click="() => onRemove('current', index)"
           class="absolute top-1 right-1 block w-6 h-6 rounded-lg bg-red-500 text-white font-medium text-lg flex items-center justify-center"
