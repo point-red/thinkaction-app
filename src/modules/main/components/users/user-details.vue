@@ -1,22 +1,17 @@
 <script lang="ts"></script>
 <script setup lang="ts">
-import type {
-  ThinkActionUser,
-  ThinkActionCategory,
-  ThinkActionGoal
-} from '../../../types/think-action'
-import { computed, ref } from 'vue'
+import type { ThinkActionUser } from '../../../types/think-action'
+import { computed, ref, onMounted, watch, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import BaseProfileHeader from '../profile-header.vue'
 import BaseResolutionCategory from '../profile-resolution-categories.vue'
 import BaseUserPost from '../user-post.vue'
 import { useUserStore } from '@/stores/user'
+import { usePostStore } from '@/stores/post'
 
 type Props = {
   is_current_user?: boolean
   user: ThinkActionUser | null
-  posts: ThinkActionGoal[]
-  categories?: ThinkActionCategory[]
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -24,6 +19,41 @@ const props = withDefaults(defineProps<Props>(), {
   user: null
 })
 
+const postStore = usePostStore()
+const posts = ref<any>([])
+const currentPage = ref(1)
+const POST_LIMIT = 7
+const isLoading = ref(false)
+const total = ref(-1)
+
+const loadPosts = async (force = false) => {
+  if (!(total.value === -1 || total.value > (currentPage.value - 1) * POST_LIMIT) && !force) {
+    return
+  }
+  isLoading.value = true
+  const { posts: loadedPosts, total: currentTotal } = await postStore.getPosts(
+    {
+      params: {
+        limit: POST_LIMIT,
+        page: currentPage.value,
+        userId: props.user?._id,
+        ...(selectedCategory.value ? { categoryResolutionId: selectedCategory.value } : {})
+      }
+    },
+    force,
+    false
+  )
+  if (!loadedPosts?.length) {
+    currentPage.value -= 1
+  }
+  if (force) {
+    posts.value = loadedPosts
+  } else {
+    posts.value.push(...loadedPosts)
+  }
+  total.value = currentTotal
+  isLoading.value = false
+}
 const userStore = useUserStore()
 
 const emit = defineEmits(['update'])
@@ -32,21 +62,19 @@ const selectedCategory = ref('')
 
 const selectCategory = function (id: string) {
   selectedCategory.value = id
+  currentPage.value = 1
+  total.value = -1
+  posts.value = []
+  loadPosts()
 }
 
-const userPosts = computed(() => {
-  if (selectedCategory.value === '') {
-    return props.posts
-  }
-  return props.posts.filter((p: ThinkActionGoal) => {
-    return p.name === selectedCategory.value
-  })
-})
-
 const computedCategories = computed(() => {
-  return props.posts
-    .reduce((p, u) => (p.includes(u.name as string) ? p : [...p, u.name as string]), [''])
-    .slice(1)
+  return (
+    props.user?.categoryResolution?.map((c: any) => ({
+      label: c.name,
+      id: c._id
+    })) ?? []
+  )
 })
 // TODO: Add async functions
 const supportUser = async function () {
@@ -67,6 +95,39 @@ const goalsPerformance = computed(() => {
   const matched = props.user?.categoryResolution?.filter((c: any) => c.isComplete)?.length
   return Math.round((matched / length) * 10000) / 100
 })
+
+onMounted(() => {
+  document.getElementsByTagName('main')?.[0]?.addEventListener('scroll', handleScroll)
+  if (!props.user?._id) {
+    return
+  }
+  loadPosts()
+})
+
+onUnmounted(() => {
+  document.getElementsByTagName('main')?.[0]?.removeEventListener('scroll', handleScroll)
+})
+
+watch(
+  () => props.user,
+  (val) => {
+    currentPage.value = 1
+    if (!val?._id) {
+      return
+    }
+    loadPosts()
+  }
+)
+
+function handleScroll(e: any) {
+  const bottomOfWindow = e.target.scrollTop + e.target.clientHeight >= e.target.scrollHeight - 30
+  if (bottomOfWindow) {
+    if (!isLoading.value) {
+      currentPage.value += 1
+      loadPosts()
+    }
+  }
+}
 </script>
 
 <template>
@@ -125,22 +186,28 @@ const goalsPerformance = computed(() => {
 
     <div class="space-y-2">
       <!-- USER POSTS -->
-      <div v-for="post in userPosts" :key="post._id">
+      <div v-for="post in posts" :key="post._id">
         <BaseUserPost
           :goal_type="post.name"
           :key="post._id"
           :id="post._id"
-          :user_id="user?._id!"
-          :user="user!"
+          :user_id="post?.userId!"
+          :user="post.userInfo!"
           :category="post.name!"
-          :caption="post.resolution"
+          :caption="post.caption"
           :photos="post.photo"
-          :is_liked="post.is_liked_by_user"
-          :cheers_count="post.cheers_count"
-          :comments_count="post.comments_count"
+          :is_liked="post.likedByCurrent"
+          :cheers_count="post.likeCount"
+          :comments_count="post.commentCount"
           :date_time="post.date_time"
           :created_at="post.createdDate"
         ></BaseUserPost>
+      </div>
+      <div
+        v-if="isLoading"
+        class="py-4 flex items-center justify-center text-center absolute bottom-10 w-full z-[100]"
+      >
+        <div>Loading...</div>
       </div>
     </div>
   </div>

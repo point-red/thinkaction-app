@@ -16,17 +16,17 @@ const emit = defineEmits(['select'])
       </button>
       <button v-else class="btn text-xs btn-outline-info" @click="emit('select', '')">All</button>
       <div
-        v-for="(c, index) in [...(props.resolution_categories as any)]?.sort((a, b) => a.localeCompare(b))"
+        v-for="(c, index) in [...(props.resolution_categories as any)]?.sort((a, b) => a.label.localeCompare(b.label))"
         :key="index"
       >
         <button
-          v-if="c === props.selected_category_id"
+          v-if="c.id === props.selected_category_id"
           class="btn text-xs btn-info overflow-hidden"
         >
-          {{ c }}
+          {{ c.label }}
         </button>
-        <button v-else class="btn text-xs btn-outline-info" @click="emit('select', c)">
-          {{ c }}
+        <button v-else class="btn text-xs btn-outline-info" @click="emit('select', c.id)">
+          {{ c.label }}
         </button>
       </div>
     </div>

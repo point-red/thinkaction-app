@@ -17,7 +17,7 @@ export const usePostStore = defineStore('post-store', {
       }
       return this.$state.posts[id]
     },
-    async resetPosts() {
+    resetPosts() {
       this.results = []
       this.posts = {}
     },
@@ -39,9 +39,9 @@ export const usePostStore = defineStore('post-store', {
       this.$state.posts[id] = post
       return post
     },
-    async getPosts(filter = {}, forceReload = false) {
+    async getPosts(filter = {}, forceReload = false, countTotal = true) {
       const self = this
-      if (forceReload) {
+      if (forceReload || !countTotal) {
         // self.results = []
         // self.posts = {} as any
       } else {
@@ -57,7 +57,9 @@ export const usePostStore = defineStore('post-store', {
         data: { data: posts, total }
       } = await client().get('/posts', filter)
 
-      this.$state.total = total
+      if (countTotal) {
+        this.$state.total = total
+      }
 
       this.results = createResultOption(
         this.results,
@@ -68,6 +70,12 @@ export const usePostStore = defineStore('post-store', {
       posts.forEach((post: any) => {
         self.posts[post._id] = post
       })
+      if (!countTotal) {
+        return {
+          posts,
+          total
+        }
+      }
       return posts
     },
     likePost: async function (goalId: string) {
