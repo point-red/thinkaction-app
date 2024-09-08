@@ -6,8 +6,10 @@ export interface Props {
   fullname: string
   username: string
   avatar: string
-  // supporter: Array<User>
+  supporter: any[]
 }
+
+const emit = defineEmits(['add'])
 
 const props = withDefaults(defineProps<Props>(), {
   avatar: '/public/profile.png'
@@ -15,7 +17,7 @@ const props = withDefaults(defineProps<Props>(), {
 </script>
 
 <template>
-  <div class="flex mb-5">
+  <div @click="() => emit('add', props.id)" class="flex mb-5 text-sm">
     <img
       :src="props.avatar ? getFile(props.avatar) : '/public/profile.png'"
       class="w-[60px] h-[60px] object-cover inline-block mr-2 rounded-full"
@@ -23,10 +25,10 @@ const props = withDefaults(defineProps<Props>(), {
     />
     <div>
       <p class="font-semibold">{{ props.username }}</p>
-      <p class="">{{ props.fullname }}</p>
-      <div class="flex">
-        <!-- <p class="">Supported by {{ props.supporter[0].username + ' ' + '+' }}</p> -->
-        <!-- <p>{{ props.supporter.length - 1 }} more</p> -->
+      <p class="text-base font-medium">{{ props.fullname }}</p>
+      <div v-if="props.supporter?.length" class="flex text-xs">
+        <p class="">Supported by {{ props.supporter?.[0]?.username + ' ' + '+' }}</p>
+        <p>{{ props.supporter?.length - 1 }} more</p>
       </div>
     </div>
   </div>
