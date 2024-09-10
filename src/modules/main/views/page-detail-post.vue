@@ -1,21 +1,19 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import UserPost from '../components/user-post.vue'
 import PostComment from '../components/post-comment.vue'
-import { useUserStore } from '@/stores/user'
 import { useRoute } from 'vue-router'
 import { BaseTextarea } from '@/components'
 import { usePostStore } from '@/stores/post'
 import { useCommentStore } from '@/stores/comment'
-import { watch } from 'fs'
 
 const { id: postId } = useRoute().params
-const store = useUserStore()
 const commentStore = useCommentStore()
 const postStore = usePostStore()
 const post = ref<any>(null)
 const comments = ref<any>([])
 const text = ref('')
+const refetchCounts = ref({})
 
 const sendReply = async function ({ comment }: any, commentId?: string) {
   text.value = ''
@@ -24,6 +22,7 @@ const sendReply = async function ({ comment }: any, commentId?: string) {
     comments.value = await commentStore.getComments(postId as string, {}, true)
   }
   post.value = postStore.addComment(postId as string)
+  refetchCounts.value[commentId] = (refetchCounts.value[commentId] ?? 0) + 1
 }
 
 onMounted(async () => {
@@ -33,6 +32,13 @@ onMounted(async () => {
 
 const getUserInfo = (comment: any) => {
   return comment?.userInfo?.[0] ?? comment?.userInfo ?? {}
+}
+
+const deleteComment = (id?: string) => {
+  if (id) {
+    comments.value = comments.value.filter((c) => c._id !== id)
+  }
+  post.value = postStore.removeComment(postId as string)
 }
 </script>
 
@@ -53,7 +59,7 @@ const getUserInfo = (comment: any) => {
       :date_time="post.date_time"
       :created_at="post.createdDate"
     ></UserPost>
-    <div class="flex flex-row gap-1 items-end">
+    <div class="flex flex-row gap-1 items-end md:max-w-[600px] md:mx-auto">
       <div class="flex-grow">
         <component
           :is="BaseTextarea"
@@ -74,19 +80,22 @@ const getUserInfo = (comment: any) => {
     <div
       v-for="comment in comments"
       :key="comment._id"
-      class="bg-white border border-slate-200 rounded-lg"
+      class="bg-white border border-slate-200 rounded-lg md:max-w-[600px] md:mx-auto"
     >
       <PostComment
         :id="comment._id"
         :full_name="getUserInfo(comment).fullname ?? getUserInfo(comment).username"
         :user-id="getUserInfo(comment)._id"
         :avatar="getUserInfo(comment).photo"
+        :post-user-id="(post.userId as string)"
         :date_time="comment.createdDate"
         :post-id="(postId as string)"
         :reply-count="comment.replyCount"
         :comment="comment.message"
         :replies="comment.replies ?? []"
+        :refetch-count="refetchCounts[comment._id] ?? 0"
         @reply="sendReply($event, comment._id)"
+        @delete="deleteComment"
       ></PostComment>
     </div>
   </div>

@@ -50,11 +50,30 @@ export const useUserStore = defineStore('user-store', {
           } = data
           this.currentUser = user
           localStorage.setItem('auth.user', JSON.stringify(user))
+          return true
         }
-        return true
-      } catch (e) {
-        return false
+      } catch (e: any) {
+        return { errors: e.response?.data?.errors ?? 'an error occurred' }
       }
+      return false
+    },
+    async register(form: any) {
+      try {
+        const { data } = await client().post(`/users/register`, form)
+        if (data.status === 'success') {
+          this.token = data.token
+          localStorage.setItem('token', data.token)
+          const {
+            data: { user }
+          } = data
+          this.currentUser = user
+          localStorage.setItem('auth.user', JSON.stringify(user))
+          return true
+        }
+      } catch (e: any) {
+        return { errors: e.response?.data?.errors ?? 'an error occurred' }
+      }
+      return false
     },
     async logout() {
       localStorage.clear()

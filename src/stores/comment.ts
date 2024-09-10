@@ -47,6 +47,12 @@ export const useCommentStore = defineStore('comment-store', {
 
       this.results[postId] = createResultOption(this.results[postId], options, comment._id)
     },
+    async deleteComment(postId: string, id: string) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const _data = await client().delete(`/comments/${id}`)
+      this.results[postId] = {}
+      this.comments[postId] = {}
+    },
     async getComments(postId: string, filter: any = {}, force = false) {
       const result = this.results[postId]?.find(
         (p: any) => JSON.stringify(p.filter) === JSON.stringify(filter)

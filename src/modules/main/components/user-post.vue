@@ -185,7 +185,6 @@ const deletePost = function () {
           <i class="i-fas-comments h-25px w-25px mr-2"></i>{{ props.commentCount }}
         </router-link>
       </div>
-      <div></div>
     </div>
   </div>
 </template>

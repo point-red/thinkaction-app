@@ -8,16 +8,25 @@ const router = useRouter()
 const userStore = useUserStore()
 const form = ref({
   email: '',
+  username: '',
+  fullname: '',
   password: '',
+  confirm_password: '',
   errors: ''
 })
 
-const login = async function () {
-  if (!form.value.email || !form.value.password) {
+const register = async function () {
+  if (!form.value.email || !form.value.password || !form.value.fullname) {
+    return
+  }
+  if (form.value.confirm_password !== form.value.password) {
+    return
+  }
+  if (form.value.password.length < 8) {
     return
   }
   form.value.errors = ''
-  const loggedIn = await userStore.login(form.value)
+  const loggedIn = await userStore.register(form.value)
   if (loggedIn === true) {
     router.push('/')
     return
@@ -27,7 +36,7 @@ const login = async function () {
 }
 
 const callback = async (response: any) => {
-  // This callback will be triggered when the user selects or login to
+  // This callback will be triggered when the user selects or register to
   // his Google account from the popup
   const loggedIn = await userStore.oauthLogin(response)
   if (loggedIn) {
@@ -45,12 +54,32 @@ onMounted(async () => {
     <img class="w-[100px] lg:w-[150px] m-auto mb-8" src="/logo.png" alt="" />
 
     <div class="mb-8 text-left">
-      <h2 class="font-bold text-xl lg:text-[28px] lg:mb-4">Sign In</h2>
+      <h2 class="font-bold text-xl lg:text-[28px] lg:mb-4">Sign Up</h2>
       <p class="text-[grey]">Hi there! Nice to see you again</p>
     </div>
 
-    <form @submit.prevent="login" method="post" class="space-y-5 text-center">
+    <form @submit.prevent="register" method="post" class="space-y-5 text-center">
       <div class="space-y-2">
+        <component
+          :is="BaseInput"
+          v-model="form.fullname"
+          label="Full Name"
+          type="text"
+          placeholder="ex. John Doe"
+          helper=""
+          autocomplete
+          class="text-left"
+        ></component>
+        <component
+          :is="BaseInput"
+          v-model="form.username"
+          label="Username"
+          type="text"
+          placeholder="Choose a unique username"
+          helper=""
+          autocomplete
+          class="text-left"
+        ></component>
         <component
           :is="BaseInput"
           v-model="form.email"
@@ -66,14 +95,32 @@ onMounted(async () => {
           v-model="form.password"
           label="Password"
           type="password"
-          error=""
+          :error="
+            form.password.length && form.password.length < 8
+              ? 'Password must have at least 8 characters'
+              : ''
+          "
+          autocomplete
+          class="text-left"
+        >
+        </component>
+        <component
+          :is="BaseInput"
+          v-model="form.confirm_password"
+          label="Confirm Password"
+          type="password"
+          :error="
+            form.confirm_password !== form.password && form.password.length
+              ? 'Confirm password doesn\'t match'
+              : ''
+          "
           autocomplete
           class="text-left"
         >
         </component>
       </div>
       <div class="text-red-500">{{ form.errors }}</div>
-      <button class="btn w-full md:w-[300px] bg-[#3D8AF7] font-bold text-white">Sign In</button>
+      <button class="btn w-full md:w-[300px] bg-[#3D8AF7] font-bold text-white">Sign Up</button>
     </form>
 
     <p class="text-slate text-center my-4 font-semibold">or use one of your social profiles</p>
@@ -89,14 +136,14 @@ onMounted(async () => {
         </button>
       </GoogleLogin>
     </div>
-    <!-- <button @click="login" class="btn w-full md:w-[300px] m-auto bg-[#F960D9] font-bold text-white">
+    <!-- <button @click="register" class="btn w-full md:w-[300px] m-auto bg-[#F960D9] font-bold text-white">
       <img class="w-[30px] lg:w-[30px] pr-2" src="@/assets/images/google.png" />
       Google
     </button> -->
 
     <div class="flex justify-between my-4 md:my-14 font-bold">
-      <a href="" class="text-slate font-semibold">Forgot password?</a>
-      <router-link to="/register" class="text-[#ff5959]">Sign Up</router-link>
+      <p class="text-slate font-semibold">Already have an account?</p>
+      <router-link to="/login" class="text-[#ff5959]">Sign In</router-link>
     </div>
   </div>
 </template>

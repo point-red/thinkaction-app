@@ -17,6 +17,12 @@ export const usePostStore = defineStore('post-store', {
       }
       return this.$state.posts[id]
     },
+    removeComment(id: string) {
+      if (this.$state.posts[id]) {
+        this.$state.posts[id].commentCount -= 1
+      }
+      return this.$state.posts[id]
+    },
     resetPosts() {
       this.results = []
       this.posts = {}

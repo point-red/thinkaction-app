@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { BaseTextarea } from '@/components/index'
+import CommentAction from '@/modules/main/components/comment-action.vue'
 import { getFile } from '@/lib/connection'
 import { useCommentStore } from '@/stores/comment'
 
@@ -13,7 +14,9 @@ export interface Props {
   comment?: string
   replyCount?: number
   postId: string
+  postUserId: string
   userId: string
+  refetchCount: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -21,7 +24,7 @@ const props = withDefaults(defineProps<Props>(), {
   replyCount: 0
 })
 
-const emit = defineEmits(['reply'])
+const emit = defineEmits(['reply', 'delete'])
 const replies = ref<any>([])
 const commentStore = useCommentStore()
 
@@ -40,9 +43,6 @@ const sendComment = async function () {
     showTextarea.value = false
     showReplies.value = true
     text.value = ''
-    repliesFetched.value = false
-    count.value += 1
-    await fetchReplies()
   }
 }
 
@@ -64,6 +64,24 @@ const toggleReplies = async () => {
 const allCount = computed(() => {
   return count.value + props.replyCount
 })
+
+const refreshComments = (id: string, type: string) => {
+  if (type === 'comment') {
+    emit('delete', id)
+  } else if (type === 'reply') {
+    count.value -= 1
+    replies.value = replies.value.filter((r) => r._id !== id)
+    emit('delete')
+  }
+}
+
+watch(
+  () => props.refetchCount,
+  async () => {
+    repliesFetched.value = false
+    await fetchReplies()
+  }
+)
 </script>
 
 <template>
@@ -71,19 +89,27 @@ const allCount = computed(() => {
     <!-- PARENT -->
     <div>
       <!-- user info -->
-      <div class="flex gap-2 items-center mb-2">
-        <router-link :to="{ path: '/user/' + props.userId }">
-          <img
-            :src="props.avatar ? getFile(props.avatar) : '/profile.png'"
-            alt="user-photo"
-            class="object-cover w-10 h-10 bg-slate-300 rounded-[1000px]"
-          />
-        </router-link>
-        <div>
-          <p class="font-semibold text-sm">{{ props.full_name }}</p>
-          <!-- <p>{{ dayjs(props.date_time).format('DD/MM/YYYY HH:mm') }}</p> -->
-          <time class="text-xs">{{ dayjs(props.date_time).fromNow() }}</time>
+      <div class="flex flex-row items-center w-full">
+        <div class="flex gap-2 items-center mb-2">
+          <router-link :to="{ path: '/user/' + props.userId }">
+            <img
+              :src="props.avatar ? getFile(props.avatar) : '/profile.png'"
+              alt="user-photo"
+              class="object-cover w-10 h-10 bg-slate-300 rounded-[1000px]"
+            />
+          </router-link>
+          <div>
+            <p class="font-semibold text-sm">{{ props.full_name }}</p>
+            <!-- <p>{{ dayjs(props.date_time).format('DD/MM/YYYY HH:mm') }}</p> -->
+            <time class="text-xs">{{ dayjs(props.date_time).fromNow() }}</time>
+          </div>
         </div>
+        <CommentAction
+          :id="props.id"
+          :post-user-id="postUserId"
+          :user-id="userId"
+          @delete="() => refreshComments(props.id, 'comment')"
+        />
       </div>
 
       <!-- caption -->
@@ -107,20 +133,30 @@ const allCount = computed(() => {
     <div v-for="reply in replies" :key="reply._id" class="ml-10 mb-4">
       <div v-if="showReplies">
         <!-- user info -->
-        <div class="flex items-center gap-2 mb-2">
-          <router-link :to="{ path: '/user/' + getUserInfo(reply)?._id }">
-            <img
-              :src="getUserInfo(reply)?.photo ? getFile(getUserInfo(reply)?.photo) : '/profile.png'"
-              alt="user-photo"
-              class="w-10 h-10 object-cover bg-slate-300 rounded-[1000px]"
-            />
-          </router-link>
-          <div>
-            <p class="font-semibold text-sm">
-              {{ getUserInfo(reply).fullname ?? getUserInfo(reply).username }}
-            </p>
-            <time class="text-xs">{{ dayjs(reply.createdDate).fromNow() }}</time>
+        <div class="flex flex-row items-center">
+          <div class="flex items-center gap-2 mb-2">
+            <router-link :to="{ path: '/user/' + getUserInfo(reply)?._id }">
+              <img
+                :src="
+                  getUserInfo(reply)?.photo ? getFile(getUserInfo(reply)?.photo) : '/profile.png'
+                "
+                alt="user-photo"
+                class="w-10 h-10 object-cover bg-slate-300 rounded-[1000px]"
+              />
+            </router-link>
+            <div>
+              <p class="font-semibold text-sm">
+                {{ getUserInfo(reply).fullname ?? getUserInfo(reply).username }}
+              </p>
+              <time class="text-xs">{{ dayjs(reply.createdDate).fromNow() }}</time>
+            </div>
           </div>
+          <CommentAction
+            :id="reply?._id"
+            :post-user-id="postUserId"
+            :user-id="reply?.userId"
+            @delete="() => refreshComments(reply?._id, 'reply')"
+          />
         </div>
 
         <!-- caption -->
