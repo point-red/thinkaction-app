@@ -70,7 +70,7 @@ const refreshComments = (id: string, type: string) => {
     emit('delete', id)
   } else if (type === 'reply') {
     count.value -= 1
-    replies.value = replies.value.filter((r) => r._id !== id)
+    replies.value = replies.value.filter((r: any) => r._id !== id)
     emit('delete')
   }
 }
@@ -105,10 +105,11 @@ watch(
           </div>
         </div>
         <CommentAction
-          :id="props.id"
+          :id="props.id!"
           :post-user-id="postUserId"
           :user-id="userId"
-          @delete="() => refreshComments(props.id, 'comment')"
+          :post-id="postId"
+          @delete="() => refreshComments(props.id!, 'comment')"
         />
       </div>
 
@@ -155,6 +156,7 @@ watch(
             :id="reply?._id"
             :post-user-id="postUserId"
             :user-id="reply?.userId"
+            :post-id="postId"
             @delete="() => refreshComments(reply?._id, 'reply')"
           />
         </div>

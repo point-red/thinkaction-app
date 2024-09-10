@@ -6,7 +6,7 @@ import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
 const userStore = useUserStore()
-const form = ref({
+const form = ref<any>({
   email: '',
   password: '',
   errors: ''

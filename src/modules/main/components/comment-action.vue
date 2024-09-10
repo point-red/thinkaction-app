@@ -6,6 +6,7 @@ import { useCommentStore } from '@/stores/comment'
 interface IProps {
   id: string
   postUserId: string
+  postId: string
   userId: string
 }
 
@@ -43,7 +44,7 @@ const toggleAction = () => {
         <h3 class="text-lg">Are you sure to delete this comment?</h3>
         <div class="flex flex-row gap-2">
           <button
-            @click="() => deleteComment(props.id)"
+            @click="() => deleteComment()"
             class="px-3 py-2 rounded-lg text-white bg-red-500 gover:bg-red-600 flex-grow"
           >
             Delete
