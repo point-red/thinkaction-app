@@ -50,12 +50,12 @@ export const useUserStore = defineStore('user-store', {
           } = data
           this.currentUser = user
           localStorage.setItem('auth.user', JSON.stringify(user))
-          return true
+          return true as any
         }
       } catch (e: any) {
-        return { errors: e.response?.data?.errors ?? 'an error occurred' }
+        return { errors: e.response?.data?.errors ?? 'an error occurred' } as any
       }
-      return false
+      return false as any
     },
     async register(form: any) {
       try {
