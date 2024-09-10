@@ -39,7 +39,7 @@ export const useUserStore = defineStore('user-store', {
         return false
       }
     },
-    async login(form: any) {
+    async login(form: any): Promise<any> {
       try {
         const { data } = await client().post(`/users/login`, form)
         if (data.status === 'success') {
@@ -50,14 +50,14 @@ export const useUserStore = defineStore('user-store', {
           } = data
           this.currentUser = user
           localStorage.setItem('auth.user', JSON.stringify(user))
-          return true as any
+          return true
         }
       } catch (e: any) {
-        return { errors: e.response?.data?.errors ?? 'an error occurred' } as any
+        return { errors: e.response?.data?.errors ?? 'an error occurred' }
       }
-      return false as any
+      return false
     },
-    async register(form: any) {
+    async register(form: any): Promise<any> {
       try {
         const { data } = await client().post(`/users/register`, form)
         if (data.status === 'success') {
@@ -73,7 +73,7 @@ export const useUserStore = defineStore('user-store', {
       } catch (e: any) {
         return { errors: e.response?.data?.errors ?? 'an error occurred' }
       }
-      return false
+      return null
     },
     async logout() {
       localStorage.clear()

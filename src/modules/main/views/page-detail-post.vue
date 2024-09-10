@@ -13,16 +13,17 @@ const postStore = usePostStore()
 const post = ref<any>(null)
 const comments = ref<any>([])
 const text = ref('')
-const refetchCounts = ref({})
+const refetchCounts = ref<Record<string, any>>({})
 
 const sendReply = async function ({ comment }: any, commentId?: string) {
   text.value = ''
   await commentStore.postComment(postId as string, comment, commentId ? { commentId } : {})
   if (!commentId) {
     comments.value = await commentStore.getComments(postId as string, {}, true)
+  } else {
+    refetchCounts.value[commentId] = (refetchCounts.value[commentId] ?? 0) + 1
   }
   post.value = postStore.addComment(postId as string)
-  refetchCounts.value[commentId] = (refetchCounts.value[commentId] ?? 0) + 1
 }
 
 onMounted(async () => {
@@ -36,7 +37,7 @@ const getUserInfo = (comment: any) => {
 
 const deleteComment = (id?: string) => {
   if (id) {
-    comments.value = comments.value.filter((c) => c._id !== id)
+    comments.value = comments.value.filter((c: any) => c._id !== id)
   }
   post.value = postStore.removeComment(postId as string)
 }
