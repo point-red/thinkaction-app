@@ -135,7 +135,7 @@ const deletePost = function () {
           >
             <template v-if="currentUser._id === props.user_id">
               <router-link
-                :to="{ path: 'edit-' + getGoalType(props.goal_type) + '/' + props.id }"
+                :to="{ path: '/edit-' + getGoalType(props.goal_type) + '/' + props.id }"
                 class="px-4 md:py-2 py-1.5 hover:bg-slate-100 text-left"
                 >Edit</router-link
               >

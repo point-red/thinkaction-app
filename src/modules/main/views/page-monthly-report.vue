@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
-import { GoalModel } from '@/lib/models/GoalModel'
 import { useUserStore } from '@/stores/user'
 import { BaseSelect } from '@/components'
 import dayjs from 'dayjs'
@@ -12,24 +11,16 @@ const month = ref<any>({
 })
 const store = useUserStore()
 
-let categorized = ref<any>([])
-let Categories = ref<any>([])
+let categories = ref<any>([])
 const reports = ref<any>([])
 
 const getMonthlyReport = async (month = dayjs().month()) => {
-  const monthlyReports = await store.getMonthlyReports(dayjs().year(), month)
-  reports.value = Object.keys(monthlyReports)
-    .filter((y) => y.startsWith('week'))
-    .reduce(
-      (prev, key) => [
-        {
-          week: 'Week ' + key.replace('week', ''),
-          report: monthlyReports[key]
-        },
-        ...prev
-      ],
-      [] as any
-    )
+  reports.value = await store.getMonthlyReports(dayjs().year(), month)
+  categories.value = new Set(
+    Object.values(reports.value)
+      .map((r: any) => Object.keys(r))
+      .flat()
+  )
 }
 
 onMounted(async () => {
@@ -43,7 +34,6 @@ onMounted(async () => {
     firstMonth += 1
   }
   monthList.value = months
-  Categories.value = await store.getResolutionCategories()
   await getMonthlyReport()
 })
 
@@ -66,7 +56,7 @@ watch(month, async (currentValue) => {
           <tr class="basic-table-row">
             <th class="basic-table-head"></th>
             <th
-              v-for="category in Categories"
+              v-for="category in categories"
               :key="category"
               class="basic-table-head text-xs w-28 max-w-[7rem] min-w-[7rem] text-center"
             >
@@ -75,14 +65,10 @@ watch(month, async (currentValue) => {
           </tr>
         </thead>
         <tbody>
-          <tr
-            v-for="({ week, report }, index) in reports"
-            :key="week.start"
-            class="basic-table-row h-28"
-          >
-            <td class="basic-table-body text-sm min-w-[5rem] align-middle">Week {{ index + 1 }}</td>
+          <tr v-for="(report, week) in reports" :key="week" class="basic-table-row h-28">
+            <td class="basic-table-body text-sm min-w-[5rem] align-middle">{{ week }}</td>
             <td
-              v-for="category in Categories"
+              v-for="category in categories"
               :key="category"
               :class="'basic-table-body rounded-lg p-4'"
             >

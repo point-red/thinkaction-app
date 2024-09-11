@@ -47,13 +47,20 @@ const form = ref<any>({
   photos: []
 })
 
+const showErrors = ref(false)
+
 const submit = async function () {
   let category: any = form.value.category
   let goal: any = form.value.goal
   let shareWith: any = form.value.shareWith
   let values = form.value
   let isAllFilled = category?.id && goal?.id && shareWith?.id && (form.value.category as any)?.id // @ts-ignore-all
+  showErrors.value = false
 
+  if (!isAllFilled) {
+    showErrors.value = true
+    return
+  }
   // @ts-ignore
 
   const formData = new FormData()
@@ -68,11 +75,9 @@ const submit = async function () {
     formData.append('photo[]', photo)
   })
 
-  if (isAllFilled) {
-    await userStore.addCompleteGoal(formData)
-    postStore.resetPosts()
-    router.push('/')
-  }
+  await userStore.addCompleteGoal(formData)
+  postStore.resetPosts()
+  router.push('/')
 }
 const onImageChange = function (photos: any) {
   form.value.photos = photos
@@ -91,7 +96,7 @@ const onImageChange = function (photos: any) {
       <!-- Select Resolution's Category -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Select Category</span>
       <BaseSelect
-        :is-error="!(form.category as any)?.id"
+        :is-error="showErrors && !(form.category as any)?.id"
         error-message="Choose a category"
         v-model="form.category"
         :list="resolutions.map((r: any) => ({ id: r?._id, label: r.name }))"
@@ -101,7 +106,7 @@ const onImageChange = function (photos: any) {
       <!-- Select Goals Achieved -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Goals Achieved</span>
       <BaseSelect
-        :is-error="!(form.goal as any)?.id"
+        :is-error="showErrors && !(form.goal as any)?.id"
         error-message="Choose a goal"
         v-model="form.goal"
         :list="computedGoals"
@@ -112,7 +117,7 @@ const onImageChange = function (photos: any) {
       <!-- Caption -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Caption</span>
       <BaseInput
-        :error="!form.caption ? 'Enter a caption' : ''"
+        :error="showErrors && !form.caption ? 'Enter a caption' : ''"
         v-model="form.caption"
         border="full"
         class="mb-8"
@@ -132,7 +137,7 @@ const onImageChange = function (photos: any) {
       <!-- share with -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Share With</span>
       <BaseSelect
-        :is-error="!(form.shareWith as any)?.id"
+        :is-error="showErrors && !(form.shareWith as any)?.id"
         error-message="Choose a shareWith"
         v-model="form.shareWith"
         :list="list"

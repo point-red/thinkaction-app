@@ -19,6 +19,7 @@ const selected = ref({
 
 const postStore = usePostStore()
 const router = useRouter()
+const showErrors = ref(false)
 
 const form = ref({
   categoryName: '',
@@ -43,9 +44,14 @@ const onImageChange = function (photos: any) {
 
 const userStore = useUserStore()
 const save = async function () {
+  showErrors.value = false
   let values = form.value
   // @ts-ignore
   let isAllFilled = values.categoryName && values.caption && values.shareWith && values.dueDate
+
+  if (!isAllFilled) {
+    showErrors.value = true
+  }
 
   const formData = new FormData()
   formData.append('caption', values.caption)
@@ -78,7 +84,7 @@ const save = async function () {
       <span class="font-semibold text-[#3D8AF7] block mb-2">Category</span>
       <BaseInput
         v-model="form.categoryName"
-        :error="!(form.categoryName as any)? 'Enter a category name': ''"
+        :error="showErrors && !(form.categoryName as any)? 'Enter a category name': ''"
         placeholder="Input your category"
         class="mb-8"
       ></BaseInput>
@@ -86,7 +92,11 @@ const save = async function () {
       <!-- due date input -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Due Date</span>
       <BaseDatepicker
-        :error="!form.dueDate || dayjs(form.dueDate).isBefore(dayjs()) ? 'Enter a valid date' : ''"
+        :error="
+          showErrors && (!form.dueDate || dayjs(form.dueDate).isBefore(dayjs()))
+            ? 'Enter a valid date'
+            : ''
+        "
         v-model="form.dueDate"
         border="full"
         class="mb-8"
@@ -96,7 +106,7 @@ const save = async function () {
       <span class="font-semibold text-[#3D8AF7] block mb-2">Resolution</span>
       <component
         :is="BaseTextarea"
-        :error="!form.caption ? 'Enter a caption' : ''"
+        :error="showErrors && !form.caption ? 'Enter a caption' : ''"
         placeholder="Make sure you include numbers in them ex: lose 5kg by end of year "
         v-model="form.caption"
         border="simple"
@@ -116,7 +126,7 @@ const save = async function () {
         v-model="selected.visibility"
         :list="list"
         border="full"
-        :isError="!(selected.visibility as any)?.id"
+        :isError="showErrors && !(selected.visibility as any)?.id"
         errorMessage="Choose a visibilty"
       ></BaseSelect>
 

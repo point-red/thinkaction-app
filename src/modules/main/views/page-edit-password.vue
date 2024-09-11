@@ -15,8 +15,12 @@ const router = useRouter()
 
 const userStore = useUserStore()
 const needsPassword = computed(() => userStore.currentUser?.needsPassword)
+const showErrors = ref(false)
 
 const getCurrentPasswordErrorMessage = function () {
+  if (!showErrors.value) {
+    return ''
+  }
   if (state.value.current_password.length < 8) {
     return 'Current password must be filled'
   }
@@ -24,6 +28,9 @@ const getCurrentPasswordErrorMessage = function () {
 }
 
 const getPasswordErrorMessage = function () {
+  if (!showErrors.value) {
+    return ''
+  }
   if (state.value.password.length < 8) {
     return 'Password is too short'
   }
@@ -31,6 +38,9 @@ const getPasswordErrorMessage = function () {
 }
 
 const getConfirmErrorMessage = function () {
+  if (!showErrors.value) {
+    return ''
+  }
   if (getPasswordErrorMessage().length) {
     return ''
   }
@@ -49,7 +59,9 @@ const isDisabled = computed(() => {
 
 const savePassword = async () => {
   state.value.error = ''
+  showErrors.value = false
   if (isDisabled.value) {
+    showErrors.value = true
     return
   }
   const done = await userStore.updatePassword(state.value.password, state.value.current_password)
@@ -109,13 +121,7 @@ const savePassword = async () => {
       <span class="text-sm mt-1 text-red-400" v-if="state.error">{{ state.error }}</span>
 
       <div class="flex flex-col justify-center gap-y-2 my-8">
-        <button
-          @click="savePassword"
-          :disabled="isDisabled"
-          class="btn btn-lg btn-primary bg-[#3D8AF7]"
-        >
-          Save
-        </button>
+        <button @click="savePassword" class="btn btn-lg btn-primary bg-[#3D8AF7]">Save</button>
         <router-link :to="'/profile'" class="btn btn-lg btn-primary bg-[#de2a2a]"
           >Cancel</router-link
         >

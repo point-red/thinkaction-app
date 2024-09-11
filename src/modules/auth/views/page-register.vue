@@ -14,15 +14,20 @@ const form = ref<any>({
   confirm_password: '',
   errors: ''
 })
+const showErrors = ref(false)
 
 const register = async function () {
+  showErrors.value = false
   if (!form.value.email || !form.value.password || !form.value.fullname) {
+    showErrors.value = true
     return
   }
   if (form.value.confirm_password !== form.value.password) {
+    showErrors.value = true
     return
   }
   if (form.value.password.length < 8) {
+    showErrors.value = true
     return
   }
   form.value.errors = ''
@@ -64,6 +69,7 @@ onMounted(async () => {
           :is="BaseInput"
           v-model="form.fullname"
           label="Full Name"
+          :error="showErrors && !form.fullname ? 'fullname is required' : ''"
           type="text"
           placeholder="ex. John Doe"
           helper=""
@@ -73,6 +79,7 @@ onMounted(async () => {
         <component
           :is="BaseInput"
           v-model="form.username"
+          :error="showErrors && !form.username ? 'username is required' : ''"
           label="Username"
           type="text"
           placeholder="Choose a unique username"
@@ -83,6 +90,7 @@ onMounted(async () => {
         <component
           :is="BaseInput"
           v-model="form.email"
+          :error="showErrors && !form.email ? 'email is required' : ''"
           label="Email"
           type="email"
           placeholder="johndoe@example.com"
@@ -96,9 +104,7 @@ onMounted(async () => {
           label="Password"
           type="password"
           :error="
-            form.password.length && form.password.length < 8
-              ? 'Password must have at least 8 characters'
-              : ''
+            showErrors && form.password.length < 8 ? 'Password must have at least 8 characters' : ''
           "
           autocomplete
           class="text-left"
@@ -110,7 +116,7 @@ onMounted(async () => {
           label="Confirm Password"
           type="password"
           :error="
-            form.confirm_password !== form.password && form.password.length
+            showErrors && form.confirm_password !== form.password
               ? 'Confirm password doesn\'t match'
               : ''
           "

@@ -17,6 +17,7 @@ const postStore = usePostStore()
 const userStore = useUserStore()
 const resolutions = ref<any>([])
 const router = useRouter()
+const showErrors = ref(false)
 
 const selected = ref({
   visibility: { id: 'everyone', label: 'Everyone' },
@@ -58,8 +59,11 @@ const onImageChange = function (photos: any) {
 const submit = async function () {
   let values = form.value
   let isAllFilled = values.caption && values.shareWith && (form.value.resolution as any)?._id // @ts-ignore-all
-
+  showErrors.value = false
   // @ts-ignore
+  if (!isAllFilled) {
+    showErrors.value = true
+  }
 
   const formData = new FormData()
   formData.append('caption', values.caption)
@@ -94,7 +98,7 @@ const submit = async function () {
         v-model="selected.resolution"
         @update:modelValue="onUpdateResolution"
         errorMessage="Choose a category"
-        :is-error="!(selected.resolution as any).id"
+        :is-error="showErrors && !(selected.resolution as any).id"
         :list="
           resolutions.map(({ _id, name }: any) => ({
             id: _id,
@@ -107,7 +111,7 @@ const submit = async function () {
 
       <span class="font-semibold text-[#3D8AF7] block mb-2">Resolution</span>
       <BaseInput
-        :error="!form.resolution?.resolution ? 'Select a category' : ''"
+        :error="showErrors && !form.resolution?.resolution ? 'Select a category' : ''"
         :model-value="form.resolution?.resolution"
         :disabled="true"
         class="mb-8"
@@ -116,7 +120,7 @@ const submit = async function () {
       <!-- Weekly Goals -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Weekly Goals</span>
       <BaseTextarea
-        :error="!form.caption ? 'Input a caption' : ''"
+        :error="showErrors && !form.caption ? 'Input a caption' : ''"
         v-model="form.caption"
         border="simple"
         class="mb-8"
@@ -125,7 +129,11 @@ const submit = async function () {
       <!-- due date input -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Due Date</span>
       <BaseDatepicker
-        :error="!form.dueDate || dayjs(form.dueDate).isBefore(dayjs()) ? 'Enter a valid date' : ''"
+        :error="
+          showErrors && (!form.dueDate || dayjs(form.dueDate).isBefore(dayjs()))
+            ? 'Enter a valid date'
+            : ''
+        "
         v-model="form.dueDate"
         border="full"
         class="mb-8"
@@ -145,7 +153,7 @@ const submit = async function () {
         v-model="selected.visibility"
         :list="list"
         border="full"
-        :isError="!(selected.visibility as any)?.id"
+        :isError="showErrors && !(selected.visibility as any)?.id"
         errorMessage="Choose a visibilty"
       ></component>
 

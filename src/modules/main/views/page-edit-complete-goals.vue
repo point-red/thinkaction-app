@@ -68,6 +68,7 @@ const form = ref<any>({
   visibility: '',
   files: []
 })
+const showErrors = ref(false)
 
 const submit = async function () {
   let category: any = form.value.category
@@ -75,7 +76,10 @@ const submit = async function () {
   let visibility: any = form.value.visibility
   let values = form.value
   const isAllFilled = category._id && goal._id && visibility._id && currentGoal
+
+  showErrors.value = false
   if (!isAllFilled) {
+    showErrors.value = true
     return
   }
 
@@ -119,7 +123,7 @@ const removePrev = (photoUrl: string) => {
       <!-- Select Resolution's Category -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Select Category</span>
       <BaseSelect
-        :is-error="!(form.category as any)?._id"
+        :is-error="showErrors && !(form.category as any)?._id"
         error-message="Choose a category"
         v-model="form.category"
         :list="categories.map((category: string) => ({ id: category, label: category }))"
@@ -129,7 +133,7 @@ const removePrev = (photoUrl: string) => {
       <!-- Select Goals Achieved -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Goals Achieved</span>
       <BaseSelect
-        :is-error="!(form.goal as any)?._id"
+        :is-error="showErrors && !(form.goal as any)?._id"
         error-message="Choose a goal"
         v-model="form.goal"
         :list="computedGoals"
@@ -140,7 +144,7 @@ const removePrev = (photoUrl: string) => {
       <!-- Caption -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Caption</span>
       <BaseInput
-        :error="!form.caption ? 'Enter a caption' : ''"
+        :error="showErrors && !form.caption ? 'Enter a caption' : ''"
         v-model="form.caption"
         border="full"
         class="mb-8"
@@ -162,7 +166,7 @@ const removePrev = (photoUrl: string) => {
       <!-- share with -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Share With</span>
       <BaseSelect
-        :is-error="!(form.visibility as any)?._id"
+        :is-error="showErrors && !(form.visibility as any)?._id"
         error-message="Choose a visibility"
         v-model="form.visibility"
         :list="privateTypes"

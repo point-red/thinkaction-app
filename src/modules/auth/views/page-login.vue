@@ -11,9 +11,12 @@ const form = ref<any>({
   password: '',
   errors: ''
 })
+const showErrors = ref(false)
 
 const login = async function () {
+  showErrors.value = false
   if (!form.value.email || !form.value.password) {
+    showErrors.value = true
     return
   }
   form.value.errors = ''
@@ -54,6 +57,7 @@ onMounted(async () => {
         <component
           :is="BaseInput"
           v-model="form.email"
+          :error="showErrors && !form.email ? 'email is required' : ''"
           label="Email"
           type="email"
           placeholder="johndoe@example.com"
@@ -64,9 +68,9 @@ onMounted(async () => {
         <component
           :is="BaseInput"
           v-model="form.password"
+          :error="showErrors && !form.password ? 'password is required' : ''"
           label="Password"
           type="password"
-          error=""
           autocomplete
           class="text-left"
         >

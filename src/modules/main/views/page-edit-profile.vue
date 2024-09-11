@@ -11,6 +11,7 @@ const user = computed(() => {
   return userStore.currentUser
 })
 const uploadedPicture = ref<any>(null)
+const showErrors = ref(false)
 
 const list = [
   { id: 1, label: 'Private' },
@@ -28,9 +29,21 @@ const editProfilePicture = (event: any) => {
 }
 
 const updateProfile = () => {
+  const isAllFilled =
+    (preferredLanguage.value as any)?.id &&
+    user.value.username &&
+    user.value.fullname &&
+    user.value.email
+
+  showErrors.value = false
+  if (!isAllFilled) {
+    showErrors.value = true
+  }
+
   const multipartFormData = new FormData()
   multipartFormData.append('fullname', user.value.fullname)
   multipartFormData.append('username', user.value.username)
+  multipartFormData.append('email', user.value.email)
   multipartFormData.append('bio', user.value.bio)
   multipartFormData.append('photo', user.value.photo)
   multipartFormData.append('isPublic', user.value.isPublic)
@@ -88,7 +101,7 @@ const preferredLanguage = ref({ id: 1, label: 'English' })
       <!-- input - full_name -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Full Name</span>
       <BaseInput
-        :error="!user.fullname ? 'Enter your full name' : ''"
+        :error="showErrors && !user.fullname ? 'Enter your full name' : ''"
         v-model="user.fullname"
         class="mb-8"
       ></BaseInput>
@@ -96,7 +109,7 @@ const preferredLanguage = ref({ id: 1, label: 'English' })
       <!-- input - username -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Username</span>
       <BaseInput
-        :error="!user.username ? 'Enter your username' : ''"
+        :error="showErrors && !user.username ? 'Enter your username' : ''"
         v-model="user.username"
         class="mb-8"
       ></BaseInput>
@@ -104,7 +117,7 @@ const preferredLanguage = ref({ id: 1, label: 'English' })
       <!-- input - email -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Email</span>
       <BaseInput
-        :error="!user.email ? 'Enter your email' : ''"
+        :error="showErrors && !user.email ? 'Enter your email' : ''"
         v-model="user.email"
         class="mb-8"
       ></BaseInput>
@@ -126,7 +139,7 @@ const preferredLanguage = ref({ id: 1, label: 'English' })
       <!-- share with -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Language</span>
       <BaseSelect
-        :is-error="!(preferredLanguage as any)?.id"
+        :is-error="showErrors && !(preferredLanguage as any)?.id"
         errorMessage="Choose a main language"
         v-model="preferredLanguage"
         :list="languages"
