@@ -5,6 +5,7 @@ import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
 import { usePostStore } from '@/stores/post'
 import ImageUpload from '@/modules/main/components/image-upload.vue'
+import UserName from '@/modules/main/components/users/user-name.vue'
 
 const list = [
   { id: 'everyone', label: 'Everyone' },
@@ -48,6 +49,7 @@ const form = ref<any>({
 })
 
 const showErrors = ref(false)
+const globalErrors = ref('')
 
 const submit = async function () {
   let category: any = form.value.category
@@ -56,6 +58,7 @@ const submit = async function () {
   let values = form.value
   let isAllFilled = category?.id && goal?.id && shareWith?.id && (form.value.category as any)?.id // @ts-ignore-all
   showErrors.value = false
+  globalErrors.value = ''
 
   if (!isAllFilled) {
     showErrors.value = true
@@ -75,9 +78,13 @@ const submit = async function () {
     formData.append('photo[]', photo)
   })
 
-  await userStore.addCompleteGoal(formData)
-  postStore.resetPosts()
-  router.push('/')
+  try {
+    await userStore.addCompleteGoal(formData)
+    postStore.resetPosts()
+    router.push('/')
+  } catch (e: any) {
+    globalErrors.value = e.response?.data?.errors
+  }
 }
 const onImageChange = function (photos: any) {
   form.value.photos = photos
@@ -143,6 +150,10 @@ const onImageChange = function (photos: any) {
         :list="list"
         border="full"
       ></BaseSelect>
+
+      <p class="text-xs mt-1 ml-2 text-red-5" v-if="globalErrors">
+        {{ globalErrors }}
+      </p>
 
       <!-- button -->
       <div class="flex justify-center space-x-2 mt-8">

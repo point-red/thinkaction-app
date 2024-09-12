@@ -6,6 +6,7 @@ import { useRouter } from 'vue-router'
 import dayjs from 'dayjs'
 import { usePostStore } from '@/stores/post'
 import ImageUpload from '@/modules/main/components/image-upload.vue'
+import UserName from '@/modules/main/components/users/user-name.vue'
 
 const list = [
   { id: 'everyone', label: 'Everyone' },
@@ -18,6 +19,8 @@ const userStore = useUserStore()
 const resolutions = ref<any>([])
 const router = useRouter()
 const showErrors = ref(false)
+const globalErrors = ref('')
+const weekNumber = ref(0)
 
 const selected = ref({
   visibility: { id: 'everyone', label: 'Everyone' },
@@ -34,9 +37,22 @@ const form = ref<any>({
   photo: []
 })
 
+function getWeekNumber() {
+  const now = new Date()
+  const startOfYear = new Date(now.getFullYear(), 0, 1)
+  const pastDaysOfYear = (now.getTime() - startOfYear.getTime()) / 86400000
+
+  // Get the first day of the year
+  const startDay = startOfYear.getDay()
+
+  // Add past days and adjust based on the start of the year to calculate the week
+  return Math.ceil((pastDaysOfYear + startDay + 1) / 7)
+}
+
 onMounted(async () => {
   const user = await userStore.getUserById(userStore.currentUser._id)
   resolutions.value = user.categoryResolution ?? []
+  weekNumber.value = getWeekNumber()
 })
 
 const onUpdateVisiblity = function (params: any) {
@@ -60,6 +76,7 @@ const submit = async function () {
   let values = form.value
   let isAllFilled = values.caption && values.shareWith && (form.value.resolution as any)?._id // @ts-ignore-all
   showErrors.value = false
+  globalErrors.value = ''
   // @ts-ignore
   if (!isAllFilled) {
     showErrors.value = true
@@ -75,9 +92,13 @@ const submit = async function () {
   })
 
   if (isAllFilled) {
-    await userStore.addWeeklyGoal(formData)
-    postStore.resetPosts()
-    router.push('/')
+    try {
+      await userStore.addWeeklyGoal(formData)
+      postStore.resetPosts()
+      router.push('/')
+    } catch (e: any) {
+      globalErrors.value = e.response?.data?.errors
+    }
   }
 }
 </script>
@@ -89,7 +110,7 @@ const submit = async function () {
 
     <div>
       <p class="font-semibold text-lg text-[#3D8AF7] text-center mb-8">
-        Hi Fitri, you are now in week 8, let's set a goal!
+        Hi <UserName />, you are now in week {{ weekNumber }}, let's set a goal!
       </p>
 
       <!-- Select Resolution -->
@@ -156,6 +177,10 @@ const submit = async function () {
         :isError="showErrors && !(selected.visibility as any)?.id"
         errorMessage="Choose a visibilty"
       ></component>
+
+      <p class="text-xs mt-1 ml-2 text-red-5" v-if="globalErrors">
+        {{ globalErrors }}
+      </p>
 
       <!-- button -->
       <div class="flex justify-center space-x-2 mt-8">

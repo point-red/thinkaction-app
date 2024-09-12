@@ -5,6 +5,7 @@ import { useUserStore } from '@/stores/user'
 import dayjs from 'dayjs'
 import ImageUpload from '@/modules/main/components/image-upload.vue'
 import { usePostStore } from '@/stores/post'
+import UserName from '@/modules/main/components/users/user-name.vue'
 import { useRouter } from 'vue-router'
 
 const list = [
@@ -20,6 +21,7 @@ const selected = ref({
 const postStore = usePostStore()
 const router = useRouter()
 const showErrors = ref(false)
+const globalErrors = ref('')
 
 const form = ref({
   categoryName: '',
@@ -45,6 +47,7 @@ const onImageChange = function (photos: any) {
 const userStore = useUserStore()
 const save = async function () {
   showErrors.value = false
+  globalErrors.value = ''
   let values = form.value
   // @ts-ignore
   let isAllFilled = values.categoryName && values.caption && values.shareWith && values.dueDate
@@ -63,9 +66,13 @@ const save = async function () {
   })
 
   if (isAllFilled) {
-    await userStore.addResolutionGoal(formData)
-    postStore.resetPosts()
-    router.push('/')
+    try {
+      await userStore.addResolutionGoal(formData)
+      postStore.resetPosts()
+      router.push('/')
+    } catch (e: any) {
+      globalErrors.value = e.response?.data?.errors
+    }
   }
 }
 </script>
@@ -77,7 +84,7 @@ const save = async function () {
 
     <div>
       <p class="font-semibold text-lg text-[#3D8AF7] text-center mb-5">
-        Hi Fitri, let's start by setting up your resolutions!
+        Hi <UserName />, let's start by setting up your resolutions!
       </p>
 
       <!-- category input -->
@@ -131,6 +138,10 @@ const save = async function () {
       ></BaseSelect>
 
       <!-- button -->
+      <p class="text-xs mt-1 ml-2 text-red-5" v-if="globalErrors">
+        {{ globalErrors }}
+      </p>
+
       <div class="flex justify-center space-x-2 mt-8">
         <button @click="save()" class="btn btn-primary bg-[#3D8AF7] px-7">SAVE</button>
         <button @click="router.back()" class="btn btn-danger">CANCEL</button>

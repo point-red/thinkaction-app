@@ -20,6 +20,7 @@ const categories = ref<any>([])
 const goals = ref<any>([])
 const currentGoal = ref<any>(null)
 const removedPhotos = ref<string[]>([])
+const globalErrors = ref('')
 
 onMounted(async () => {
   categories.value = await userStore.getResolutionCategories()
@@ -78,6 +79,7 @@ const submit = async function () {
   const isAllFilled = category._id && goal._id && visibility._id && currentGoal
 
   showErrors.value = false
+  globalErrors.value = ''
   if (!isAllFilled) {
     showErrors.value = true
     return
@@ -100,9 +102,13 @@ const submit = async function () {
   })
 
   if (isAllFilled) {
-    await userStore.editCompleteGoal(formData, (currentGoal.value as any)._id)
-    postStore.resetPosts()
-    router.push('/')
+    try {
+      await userStore.editCompleteGoal(formData, (currentGoal.value as any)._id)
+      postStore.resetPosts()
+      router.push('/')
+    } catch (e: any) {
+      globalErrors.value = e.response?.data?.errors
+    }
   }
 }
 
@@ -172,6 +178,10 @@ const removePrev = (photoUrl: string) => {
         :list="privateTypes"
         border="full"
       ></BaseSelect>
+
+      <p class="text-xs mt-1 ml-2 text-red-5" v-if="globalErrors">
+        {{ globalErrors }}
+      </p>
 
       <!-- button -->
       <div class="flex justify-center space-x-2 mt-8">

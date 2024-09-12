@@ -60,7 +60,7 @@ watch(month, async (currentValue) => {
               :key="category"
               class="basic-table-head text-xs w-28 max-w-[7rem] min-w-[7rem] text-center"
             >
-              {{ category }}
+              <p class="max-w-full whitespace-pre-wrap">{{ category }}</p>
             </th>
           </tr>
         </thead>

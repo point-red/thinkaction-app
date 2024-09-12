@@ -6,6 +6,7 @@ import { useRoute, useRouter } from 'vue-router'
 import dayjs from 'dayjs'
 import { usePostStore } from '@/stores/post'
 import ImageUpload from '@/modules/main/components/image-upload.vue'
+import UserName from '@/modules/main/components/users/user-name.vue'
 
 const list = [
   { id: 'everyone', label: 'Everyone' },
@@ -31,6 +32,7 @@ const form = ref({
   photos: [] as any
 })
 const showErrors = ref(false)
+const globalErrors = ref('')
 
 const onUpdateVisiblity = function (params: any) {
   if (!params.id) {
@@ -55,6 +57,7 @@ const save = async function () {
   // @ts-ignore
   let isAllFilled = values.categoryName && values.caption && values.shareWith && values.dueDate
   showErrors.value = false
+  globalErrors.value = ''
 
   if (!isAllFilled) {
     showErrors.value = true
@@ -74,9 +77,13 @@ const save = async function () {
     formData.append('removedImages[]', url)
   })
 
-  await userStore.editResolutionGoal(formData, id)
-  postStore.resetPosts()
-  router.push('/')
+  try {
+    await userStore.editResolutionGoal(formData, id)
+    postStore.resetPosts()
+    router.push('/')
+  } catch (e: any) {
+    globalErrors.value = e.response?.data?.errors
+  }
 }
 
 onMounted(async () => {
@@ -106,7 +113,7 @@ onMounted(async () => {
 
     <div>
       <p class="font-semibold text-lg text-[#3D8AF7] text-center mb-5">
-        Hi Fitri, let's start by setting up your resolutions!
+        Hi <UserName />, let's start by setting up your resolutions!
       </p>
 
       <!-- category input -->
@@ -162,6 +169,10 @@ onMounted(async () => {
         :isError="showErrors && !(selected.visibility as any)?.id"
         errorMessage="Choose a visibilty"
       ></BaseSelect>
+
+      <p class="text-xs mt-1 ml-2 text-red-5" v-if="globalErrors">
+        {{ globalErrors }}
+      </p>
 
       <!-- button -->
       <div class="flex justify-center space-x-2 mt-8">
