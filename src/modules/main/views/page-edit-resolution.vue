@@ -33,6 +33,7 @@ const form = ref({
 })
 const showErrors = ref(false)
 const globalErrors = ref('')
+const isSending = ref(false)
 
 const onUpdateVisiblity = function (params: any) {
   if (!params.id) {
@@ -63,6 +64,7 @@ const save = async function () {
     showErrors.value = true
     return
   }
+  isSending.value = true
 
   const formData = new FormData()
   formData.append('caption', values.caption)
@@ -84,6 +86,7 @@ const save = async function () {
   } catch (e: any) {
     globalErrors.value = e.response?.data?.errors
   }
+  isSending.value = false
 }
 
 onMounted(async () => {
@@ -176,7 +179,9 @@ onMounted(async () => {
 
       <!-- button -->
       <div class="flex justify-center space-x-2 mt-8">
-        <button @click="save()" class="btn btn-primary bg-[#3D8AF7] px-7">SAVE</button>
+        <button @click="save()" :disabled="isSending" class="btn btn-primary bg-[#3D8AF7] px-7">
+          SAVE
+        </button>
         <button @click="router.back()" class="btn btn-danger">CANCEL</button>
       </div>
     </div>

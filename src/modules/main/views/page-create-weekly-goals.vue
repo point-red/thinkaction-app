@@ -4,9 +4,12 @@ import { BaseDatepicker, BaseTextarea, BaseSelect, BaseInput } from '@/component
 import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
 import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
 import { usePostStore } from '@/stores/post'
 import ImageUpload from '@/modules/main/components/image-upload.vue'
 import UserName from '@/modules/main/components/users/user-name.vue'
+
+dayjs.extend(customParseFormat)
 
 const list = [
   { id: 'everyone', label: 'Everyone' },
@@ -21,6 +24,7 @@ const router = useRouter()
 const showErrors = ref(false)
 const globalErrors = ref('')
 const weekNumber = ref(0)
+const isSending = ref(false)
 
 const selected = ref({
   visibility: { id: 'everyone', label: 'Everyone' },
@@ -82,12 +86,13 @@ const submit = async function () {
     showErrors.value = true
   }
 
+  isSending.value = true
   const formData = new FormData()
   formData.append('caption', values.caption)
   formData.append('categoryResolutionId', (form.value.resolution as any)?._id)
   formData.append('shareWith', values.shareWith)
-  formData.append('dueDate', new Date(values.dueDate.split('-').reverse().join('-')).toISOString())
-  values.photos?.forEach((photo: any) => {
+  formData.append('dueDate', dayjs(values.dueDate, 'DD-MM-YYYY').toISOString())
+  values.photo?.forEach((photo: any) => {
     formData.append('photo[]', photo)
   })
 
@@ -100,6 +105,7 @@ const submit = async function () {
       globalErrors.value = e.response?.data?.errors
     }
   }
+  isSending.value = false
 }
 </script>
 
@@ -151,7 +157,7 @@ const submit = async function () {
       <span class="font-semibold text-[#3D8AF7] block mb-2">Due Date</span>
       <BaseDatepicker
         :error="
-          showErrors && (!form.dueDate || dayjs(form.dueDate).isBefore(dayjs()))
+          showErrors && (!form.dueDate || dayjs(form.dueDate, 'DD-MM-YYYY').isBefore(dayjs()))
             ? 'Enter a valid date'
             : ''
         "
@@ -184,7 +190,9 @@ const submit = async function () {
 
       <!-- button -->
       <div class="flex justify-center space-x-2 mt-8">
-        <button @click="submit" class="btn btn-primary bg-[#3D8AF7] px-7">SAVE</button>
+        <button @click="submit" :disabled="isSending" class="btn btn-primary bg-[#3D8AF7] px-7">
+          SAVE
+        </button>
         <button @click="router.back()" class="btn btn-danger">CANCEL</button>
       </div>
     </div>

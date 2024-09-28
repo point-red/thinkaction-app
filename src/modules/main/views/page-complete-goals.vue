@@ -5,7 +5,6 @@ import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
 import { usePostStore } from '@/stores/post'
 import ImageUpload from '@/modules/main/components/image-upload.vue'
-import UserName from '@/modules/main/components/users/user-name.vue'
 
 const list = [
   { id: 'everyone', label: 'Everyone' },
@@ -19,6 +18,7 @@ const resolutions = ref<any>([])
 
 const router = useRouter()
 const goals = ref<any>([])
+const isSending = ref(false)
 
 onMounted(async () => {
   const user = await userStore.getUserById(userStore.currentUser._id)
@@ -65,7 +65,7 @@ const submit = async function () {
     return
   }
   // @ts-ignore
-
+  isSending.value = true
   const formData = new FormData()
   formData.append('caption', values.caption)
   formData.append('weeklyGoalId', (form.value.goal as any)?.id)
@@ -85,6 +85,8 @@ const submit = async function () {
   } catch (e: any) {
     globalErrors.value = e.response?.data?.errors
   }
+
+  isSending.value = false
 }
 const onImageChange = function (photos: any) {
   form.value.photos = photos
@@ -157,7 +159,9 @@ const onImageChange = function (photos: any) {
 
       <!-- button -->
       <div class="flex justify-center space-x-2 mt-8">
-        <button @click="submit" class="btn btn-primary bg-[#3D8AF7] px-7">SAVE</button>
+        <button @click="submit" :disabled="isSending" class="btn btn-primary bg-[#3D8AF7] px-7">
+          SAVE
+        </button>
         <button class="btn btn-danger">CANCEL</button>
       </div>
     </div>

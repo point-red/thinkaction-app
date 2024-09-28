@@ -21,6 +21,7 @@ const goals = ref<any>([])
 const currentGoal = ref<any>(null)
 const removedPhotos = ref<string[]>([])
 const globalErrors = ref('')
+const isSending = ref(false)
 
 onMounted(async () => {
   categories.value = await userStore.getResolutionCategories()
@@ -85,6 +86,7 @@ const submit = async function () {
     return
   }
 
+  isSending.value = true
   const formData = new FormData()
   formData.append('caption', values.caption)
   formData.append('weeklyGoalId', (form.value.goal as any)?.id)
@@ -110,6 +112,7 @@ const submit = async function () {
       globalErrors.value = e.response?.data?.errors
     }
   }
+  isSending.value = false
 }
 
 const removePrev = (photoUrl: string) => {
@@ -185,7 +188,9 @@ const removePrev = (photoUrl: string) => {
 
       <!-- button -->
       <div class="flex justify-center space-x-2 mt-8">
-        <button @click="submit" class="btn btn-primary bg-[#3D8AF7] px-7">SAVE</button>
+        <button @click="submit" :disabled="isSending" class="btn btn-primary bg-[#3D8AF7] px-7">
+          SAVE
+        </button>
         <button @click="router.back()" class="btn btn-danger">CANCEL</button>
       </div>
     </div>

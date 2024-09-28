@@ -42,6 +42,7 @@ const removedPhotos = ref<string[]>([])
 const showErrors = ref(false)
 const weekNumber = ref(0)
 const globalErrors = ref('')
+const isSending = ref(false)
 
 function getWeekNumber() {
   const now = new Date()
@@ -112,6 +113,7 @@ const submit = async function () {
     return
   }
   // @ts-ignore
+  isSending.value = true
 
   const formData = new FormData()
   formData.append('caption', values.caption)
@@ -133,6 +135,7 @@ const submit = async function () {
   } catch (e: any) {
     globalErrors.value = e.response?.data?.errors
   }
+  isSending.value = false
 }
 
 const removePrev = (photoUrl: string) => {
@@ -224,7 +227,9 @@ const removePrev = (photoUrl: string) => {
 
       <!-- button -->
       <div class="flex justify-center space-x-2 mt-8">
-        <button @click="submit" class="btn btn-primary bg-[#3D8AF7] px-7">SAVE</button>
+        <button @click="submit" :disabled="isSending" class="btn btn-primary bg-[#3D8AF7] px-7">
+          SAVE
+        </button>
         <button @click="router.back()" class="btn btn-danger">CANCEL</button>
       </div>
     </div>

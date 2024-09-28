@@ -3,10 +3,13 @@ import { ref } from 'vue'
 import { BaseInput, BaseDatepicker, BaseTextarea, BaseSelect } from '@/components/index'
 import { useUserStore } from '@/stores/user'
 import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
 import ImageUpload from '@/modules/main/components/image-upload.vue'
 import { usePostStore } from '@/stores/post'
 import UserName from '@/modules/main/components/users/user-name.vue'
 import { useRouter } from 'vue-router'
+
+dayjs.extend(customParseFormat)
 
 const list = [
   { id: 'everyone', label: 'Everyone' },
@@ -22,6 +25,7 @@ const postStore = usePostStore()
 const router = useRouter()
 const showErrors = ref(false)
 const globalErrors = ref('')
+const isSending = ref(false)
 
 const form = ref({
   categoryName: '',
@@ -55,12 +59,12 @@ const save = async function () {
   if (!isAllFilled) {
     showErrors.value = true
   }
-
+  isSending.value = true
   const formData = new FormData()
   formData.append('caption', values.caption)
   formData.append('categoryName', values.categoryName)
   formData.append('shareWith', values.shareWith)
-  formData.append('dueDate', new Date(values.dueDate.split('-').reverse().join('-')).toISOString())
+  formData.append('dueDate', dayjs(values.dueDate, 'DD-MM-YYYY').toISOString())
   values.photos?.forEach((photo: any) => {
     formData.append('photo[]', photo)
   })
@@ -74,6 +78,7 @@ const save = async function () {
       globalErrors.value = e.response?.data?.errors
     }
   }
+  isSending.value = false
 }
 </script>
 
@@ -100,7 +105,7 @@ const save = async function () {
       <span class="font-semibold text-[#3D8AF7] block mb-2">Due Date</span>
       <BaseDatepicker
         :error="
-          showErrors && (!form.dueDate || dayjs(form.dueDate).isBefore(dayjs()))
+          showErrors && (!form.dueDate || dayjs(form.dueDate, 'DD-MM-YYYY').isBefore(dayjs()))
             ? 'Enter a valid date'
             : ''
         "
@@ -143,7 +148,9 @@ const save = async function () {
       </p>
 
       <div class="flex justify-center space-x-2 mt-8">
-        <button @click="save()" class="btn btn-primary bg-[#3D8AF7] px-7">SAVE</button>
+        <button @click="save()" :disabled="isSending" class="btn btn-primary bg-[#3D8AF7] px-7">
+          SAVE
+        </button>
         <button @click="router.back()" class="btn btn-danger">CANCEL</button>
       </div>
     </div>
