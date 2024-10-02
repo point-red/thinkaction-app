@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { BaseInput, BaseCheckbox, BaseSelect } from '@/components/index'
+import ImageUpload from '@/modules/main/components/image-upload.vue'
 import { useUserStore } from '@/stores/user'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { usePostStore } from '@/stores/post'
 
 const privateTypes = [
@@ -13,35 +14,39 @@ const privateTypes = [
 const userStore = useUserStore()
 const postStore = usePostStore()
 const router = useRouter()
-const route = useRoute()
 
-const id = route.params._id
-const categories = ref<any>([])
+const resolutions = ref<any>([])
 const goals = ref<any>([])
 const currentGoal = ref<any>(null)
 const removedPhotos = ref<string[]>([])
 const globalErrors = ref('')
 const isSending = ref(false)
+const user = ref(userStore.currentUser)
 
 onMounted(async () => {
-  categories.value = await userStore.getResolutionCategories()
-  const data = await userStore.getCurrentGoals()
-  goals.value = data.filter(
-    (d: any) =>
-      d.goal_type !== 'complete' &&
-      !data.some((s: any) => s.meta.goal_id === d.id && s.goal_type === 'resolution')
+  const id = router.currentRoute.value.params.id
+  user.value = await userStore.getUserById(userStore.currentUser._id)
+  const goal = await postStore.getPostById(id as string)
+  resolutions.value = (user.value.categoryResolution ?? []).filter(
+    (c: any) => c.postCount || goal.categoryResolutionId === c._id
   )
 
-  let goal = userStore.findGoalById(id as string)
   if (goal) {
+    const weeklyGoal = await postStore.getPostById(goal.weeklyGoalId as string)
     form.value = {
-      category: { id: goal.category, label: goal.category },
-      visibility: privateTypes.find((p) => p.id === (goal as any).visibility) ?? {},
+      visibility: privateTypes.find((p) => p.id === (goal as any).shareWith) ?? {},
       caption: goal.caption,
-      goal: { id: goal.id, label: goal.caption },
-      files: goal.photos
+      category: {
+        id: goal.categoryResolutionId,
+        label: resolutions.value.find((r: any) => r?._id === goal.categoryResolutionId)?.name
+      },
+      goal: {
+        id: goal.weeklyGoalId,
+        label: weeklyGoal?.caption
+      },
+      photos: goal.photos
     }
-    checked.value = !!(goal.meta as any).is_completed
+    checked.value = goal.isComplete
     currentGoal.value = goal
   }
 })
@@ -77,7 +82,7 @@ const submit = async function () {
   let goal: any = form.value.goal
   let visibility: any = form.value.visibility
   let values = form.value
-  const isAllFilled = category._id && goal._id && visibility._id && currentGoal
+  const isAllFilled = category.id && goal.id && visibility.id && currentGoal
 
   showErrors.value = false
   globalErrors.value = ''
@@ -91,8 +96,7 @@ const submit = async function () {
   formData.append('caption', values.caption)
   formData.append('weeklyGoalId', (form.value.goal as any)?.id)
   formData.append('categoryResolutionId', (form.value.category as any)?.id)
-  formData.append('shareWith', values.shareWith?.id)
-  formData.append('dueDate', new Date((form.value.goal as any)?.dueDate).toISOString())
+  formData.append('shareWith', values.visibility?.id)
   formData.append('updatedDate', new Date().toISOString())
   formData.append('isComplete', checked.value)
   values.photos?.forEach((photo: any) => {
@@ -119,7 +123,6 @@ const removePrev = (photoUrl: string) => {
   removedPhotos.value.push(photoUrl)
 }
 </script>
-
 <template>
   <div v-if="currentGoal" class="main-content-container">
     <p class="text-lg font-semibold">Update Your Complete Goal</p>
@@ -132,21 +135,24 @@ const removePrev = (photoUrl: string) => {
       <!-- Select Resolution's Category -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Select Category</span>
       <BaseSelect
-        :is-error="showErrors && !(form.category as any)?._id"
-        error-message="Choose a category"
+        :error-message="showErrors && !(form.category as any)?._id ? 'Choose a category': ''"
         v-model="form.category"
-        :list="categories.map((category: string) => ({ id: category, label: category }))"
+        :list="resolutions.map(({ _id, name }: any) => ({
+            id: _id,
+            label: name,
+        }))"
+        disabled
         class="mb-8"
       ></BaseSelect>
 
       <!-- Select Goals Achieved -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Goals Achieved</span>
       <BaseSelect
-        :is-error="showErrors && !(form.goal as any)?._id"
-        error-message="Choose a goal"
+        :error-message="showErrors && !(form.goal as any)?.id ? 'Choose a goal': ''"
         v-model="form.goal"
         :list="computedGoals"
         border="full"
+        disabled
         class="mb-8"
       ></BaseSelect>
 
@@ -175,8 +181,7 @@ const removePrev = (photoUrl: string) => {
       <!-- share with -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Share With</span>
       <BaseSelect
-        :is-error="showErrors && !(form.visibility as any)?._id"
-        error-message="Choose a visibility"
+        :error-message="showErrors && !(form.visibility as any)?._id ? 'Choose a visibility': ''"
         v-model="form.visibility"
         :list="privateTypes"
         border="full"

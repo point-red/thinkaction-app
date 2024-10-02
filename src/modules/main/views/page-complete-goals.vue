@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { BaseInput, BaseCheckbox, BaseSelect } from '@/components/index'
 import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
@@ -19,14 +19,24 @@ const resolutions = ref<any>([])
 const router = useRouter()
 const goals = ref<any>([])
 const isSending = ref(false)
+const user = ref(userStore.currentUser)
 
 onMounted(async () => {
-  const user = await userStore.getUserById(userStore.currentUser._id)
-  goals.value = await postStore.getPosts()
-  resolutions.value = (user.categoryResolution ?? []).filter((u: any) =>
-    goals.value.some((g: any) => g.categoryResolutionId === u._id)
-  )
+  user.value = await userStore.getUserById(userStore.currentUser._id)
+  resolutions.value = (user.value.categoryResolution ?? []).filter((c: any) => c.postCount)
 })
+
+const getWeeklyGoals = async (id: string) => {
+  const options = {
+    params: {
+      limit: 100,
+      page: 1,
+      userId: user.value._id,
+      categoryResolutionId: id
+    }
+  }
+  goals.value = (await postStore.getPosts(options)).filter((p: any) => p.type === 'weeklyGoals')
+}
 
 const computedGoals = computed(() => {
   return goals.value
@@ -71,7 +81,6 @@ const submit = async function () {
   formData.append('weeklyGoalId', (form.value.goal as any)?.id)
   formData.append('categoryResolutionId', (form.value.category as any)?.id)
   formData.append('shareWith', values.shareWith?.id)
-  formData.append('dueDate', new Date((form.value.goal as any)?.dueDate).toISOString())
   formData.append('updatedDate', new Date().toISOString())
   formData.append('isComplete', checked.value)
   values.photos?.forEach((photo: any) => {
@@ -91,6 +100,16 @@ const submit = async function () {
 const onImageChange = function (photos: any) {
   form.value.photos = photos
 }
+
+watch(
+  () => form.value.category,
+  (val) => {
+    if (val.id) {
+      getWeeklyGoals(val.id)
+      form.value.goal = {}
+    }
+  }
+)
 </script>
 
 <template>

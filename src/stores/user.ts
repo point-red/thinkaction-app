@@ -320,28 +320,7 @@ export const useUserStore = defineStore('user-store', {
       return await client().post('/posts/completeGoals', params)
     },
     async editCompleteGoal(params: any, id: string) {
-      const { is_completed, goal_id, caption, files, visibility, category } = params
-
-      const currentGoal = this.findGoalById(id)
-      if (!currentGoal) {
-        return
-      }
-
-      const goal = {
-        ...currentGoal,
-        category,
-        caption,
-        photos: files,
-        visibility, // public, supporter, private
-        date_time: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        goal_type: 'completed',
-        meta: {
-          goal_id: goal_id,
-          is_completed
-        }
-      }
-      this.$state.userGoals = this.$state.userGoals.map((g) => (g.id === id ? goal : g))
+      return await client().patch('/posts/' + id + '/completeGoals', params)
     }
   }
 })

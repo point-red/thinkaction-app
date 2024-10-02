@@ -195,7 +195,7 @@ function handleScroll(e: any) {
       <!-- USER POSTS -->
       <div v-for="post in posts" :key="post._id">
         <BaseUserPost
-          :goal_type="post.name"
+          :goal_type="post.type"
           :key="post._id"
           :id="post._id"
           :user_id="post?.userId!"

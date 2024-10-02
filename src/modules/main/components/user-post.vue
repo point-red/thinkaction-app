@@ -64,7 +64,8 @@ const getGoalType = (type: string) => {
   return (
     {
       weeklyGoals: 'weekly',
-      resolutions: 'resolution'
+      resolutions: 'resolution',
+      completeGoals: 'completed'
     }[type] ?? 'resolution'
   )
 }
