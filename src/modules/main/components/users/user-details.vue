@@ -1,4 +1,3 @@
-<script lang="ts"></script>
 <script setup lang="ts">
 import type { ThinkActionUser } from '../../../types/think-action'
 import { computed, ref, onMounted, watch, onUnmounted } from 'vue'
