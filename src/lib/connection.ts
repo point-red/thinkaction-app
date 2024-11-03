@@ -20,7 +20,6 @@ const client = function () {
       if (error.response.status === 401) {
         localStorage.removeItem('token')
         localStorage.removeItem('auth.user')
-        window.location.href = '/login'
       }
       return Promise.reject(error)
     }
