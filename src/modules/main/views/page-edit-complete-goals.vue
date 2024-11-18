@@ -125,7 +125,7 @@ const removePrev = (photoUrl: string) => {
 </script>
 <template>
   <div v-if="currentGoal" class="main-content-container">
-    <p class="text-lg font-semibold">Update Your Complete Goal</p>
+    <p class="text-lg font-semibold">Update Your Goal Completion</p>
     <hr />
     <div>
       <p class="font-semibold text-lg text-[#3D8AF7] text-center mb-8">
@@ -167,7 +167,7 @@ const removePrev = (photoUrl: string) => {
 
       <!-- upload photo -->
       <span class="font-semibold text-[#3D8AF7] block mb-2"
-        >Share the photo of your vision here</span
+        >Share the photo of your completion here</span
       >
       <ImageUpload
         @change="onImageChange"
@@ -176,12 +176,12 @@ const removePrev = (photoUrl: string) => {
       />
 
       <!-- Checkbox to Complete the Goal -->
-      <component :is="BaseCheckbox" v-model="checked" label="Complete Goals" class="mb-8" />
+      <component :is="BaseCheckbox" v-model="checked" label="Complete Goal" class="mb-8" />
 
       <!-- share with -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Share With</span>
       <BaseSelect
-        :error-message="showErrors && !(form.visibility as any)?._id ? 'Choose a visibility': ''"
+        :error-message="showErrors && !(form.visibility as any)?._id ? 'Choose who to share with': ''"
         v-model="form.visibility"
         :list="privateTypes"
         border="full"

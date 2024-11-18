@@ -181,7 +181,7 @@ const submit = async function () {
         :list="list"
         border="full"
         :isError="showErrors && !(selected.visibility as any)?.id"
-        errorMessage="Choose a visibilty"
+        error-message="Choose who to share with"
       ></component>
 
       <p class="text-xs mt-1 ml-2 text-red-5" v-if="globalErrors">

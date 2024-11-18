@@ -139,7 +139,7 @@ const save = async function () {
         :list="list"
         border="full"
         :isError="showErrors && !(selected.visibility as any)?.id"
-        errorMessage="Choose a visibilty"
+        error-message="Choose who to share with"
       ></BaseSelect>
 
       <!-- button -->
