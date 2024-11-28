@@ -114,7 +114,7 @@ watch(
 
 <template>
   <div class="main-content-container">
-    <p class="text-lg font-semibold">Create Your Complete Goals</p>
+    <p class="text-lg font-semibold">Create Your Goal Completion</p>
     <hr />
     <div>
       <p class="font-semibold text-lg text-[#3D8AF7] text-center mb-8">
@@ -153,20 +153,20 @@ watch(
 
       <!-- upload photo -->
       <span class="font-semibold text-[#3D8AF7] block mb-2"
-        >Share the photo of your vision here</span
+        >Share the photo of your completion here</span
       >
       <ImageUpload @change="onImageChange" :previousImages="[]" />
 
       <!-- Checkbox to Complete the Goal -->
       <div class="w-full">
-        <component :is="BaseCheckbox" v-model="checked" label="Complete Goals" class="mb-8" />
+        <component :is="BaseCheckbox" v-model="checked" label="Complete Goal" class="mb-8" />
       </div>
 
       <!-- share with -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Share With</span>
       <BaseSelect
         :is-error="showErrors && !(form.shareWith as any)?.id"
-        error-message="Choose a shareWith"
+        error-message="Choose who to share with"
         v-model="form.shareWith"
         :list="list"
         border="full"
