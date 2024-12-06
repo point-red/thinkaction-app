@@ -132,7 +132,7 @@ onMounted(async () => {
     <p class="text-slate text-center my-4 font-semibold">or use one of your social profiles</p>
 
     <div class="md:mx-auto flex flex-col">
-      <GoogleLogin :callback="callback" prompt>
+      <!-- <GoogleLogin :callback="callback" prompt>
         <button
           type="button"
           class="btn w-full md:w-[300px] m-auto bg-[#F960D9] font-bold text-white"
@@ -140,7 +140,7 @@ onMounted(async () => {
           <img class="w-[30px] lg:w-[30px] pr-2" src="@/assets/images/google.png" />
           Google
         </button>
-      </GoogleLogin>
+      </GoogleLogin> -->
     </div>
     <!-- <button @click="register" class="btn w-full md:w-[300px] m-auto bg-[#F960D9] font-bold text-white">
       <img class="w-[30px] lg:w-[30px] pr-2" src="@/assets/images/google.png" />
