@@ -17,18 +17,20 @@ const loadPosts = async (force = false) => {
     return
   }
   isLoading.value = true
-  const loadedPosts = await postStore.getPosts(
-    {
-      params: {
-        limit: POST_LIMIT,
-        page: currentPage.value
-      }
-    },
-    force
-  )
-  if (!loadedPosts.length) {
-    currentPage.value -= 1
-  }
+  try {
+    const loadedPosts = await postStore.getPosts(
+      {
+        params: {
+          limit: POST_LIMIT,
+          page: currentPage.value
+        }
+      },
+      force
+    )
+    if (!loadedPosts.length) {
+      currentPage.value -= 1
+    }
+  } catch (e) {}
   isLoading.value = false
 }
 
@@ -59,7 +61,12 @@ function handleScroll(e: any) {
 <template>
   <div class="main-content-container">
     <!-- jika post belum dibuat -->
-    <div v-if="posts.length < 1" class="flex justify-center lg:space-x-15">
+    <div class="flex flex-col space-y-5 mt-2" v-if="isLoading && posts.length < 1">
+      <div class="h-[100px] w-full bg-gray-200 rounded-lg animate-pulse" />
+      <div class="h-[100px] w-full bg-gray-200 rounded-lg animate-pulse" />
+      <div class="h-[100px] w-full bg-gray-200 rounded-lg animate-pulse" />
+    </div>
+    <div v-if="posts.length < 1 && !isLoading" class="flex justify-center lg:space-x-15">
       <div class="md:mt-[50px] lg:mt-[100px] space-y-5">
         <h1 class="font-extrabold">Welcome to ThinkAction</h1>
         <p>
