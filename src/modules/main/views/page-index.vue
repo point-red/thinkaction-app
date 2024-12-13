@@ -17,21 +17,25 @@ const loadPosts = async (force = false) => {
     return
   }
   isLoading.value = true
-  try {
-    const loadedPosts = await postStore.getPosts(
-      {
-        params: {
-          limit: POST_LIMIT,
-          page: currentPage.value
-        }
-      },
-      force
-    )
-    if (!loadedPosts.length) {
-      currentPage.value -= 1
+  setTimeout(async () => {
+    try {
+      const loadedPosts = await postStore.getPosts(
+        {
+          params: {
+            limit: POST_LIMIT,
+            page: currentPage.value
+          }
+        },
+        force
+      )
+      if (!loadedPosts.length) {
+        currentPage.value -= 1
+      }
+    } catch (e) {
+      //
     }
-  } catch (e) {}
-  isLoading.value = false
+    isLoading.value = false
+  }, 1000)
 }
 
 onMounted(async () => {
