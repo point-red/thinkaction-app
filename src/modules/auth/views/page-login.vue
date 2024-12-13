@@ -29,14 +29,14 @@ const login = async function () {
   }
 }
 
-const callback = async (response: any) => {
-  // This callback will be triggered when the user selects or login to
-  // his Google account from the popup
-  const loggedIn = await userStore.oauthLogin(response)
-  if (loggedIn) {
-    router.push('/')
-  }
-}
+// const callback = async (response: any) => {
+//   // This callback will be triggered when the user selects or login to
+//   // his Google account from the popup
+//   const loggedIn = await userStore.oauthLogin(response)
+//   if (loggedIn) {
+//     router.push('/')
+//   }
+// }
 
 onMounted(async () => {
   await userStore.logout()
