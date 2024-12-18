@@ -86,7 +86,6 @@ const submit = async function () {
     showErrors.value = true
   }
 
-  isSending.value = true
   const formData = new FormData()
   formData.append('caption', values.caption)
   formData.append('categoryResolutionId', (form.value.resolution as any)?._id)
@@ -97,6 +96,7 @@ const submit = async function () {
   })
 
   if (isAllFilled) {
+    isSending.value = true
     try {
       await userStore.addWeeklyGoal(formData)
       postStore.resetPosts()
@@ -104,8 +104,8 @@ const submit = async function () {
     } catch (e: any) {
       globalErrors.value = e.response?.data?.errors
     }
+    isSending.value = false
   }
-  isSending.value = false
 }
 </script>
 
