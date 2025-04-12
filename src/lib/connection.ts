@@ -9,7 +9,8 @@ const client = function () {
 
   const instance = axios.create({
     baseURL: import.meta.env.VITE_BASE_API_URL,
-    headers
+    headers,
+    withCredentials: true // Enable sending cookies and auth headers
   })
 
   instance.interceptors.response.use(
@@ -17,7 +18,7 @@ const client = function () {
       return response
     },
     function (error) {
-      if (error.response.status === 401) {
+      if (error.response?.status === 401) {
         localStorage.removeItem('token')
         localStorage.removeItem('auth.user')
       }
