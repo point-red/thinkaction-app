@@ -4,6 +4,19 @@ import AppPreloader from '@/components/app-preloader.vue'
 import AppHeader from './app-header.vue'
 import AppSidebar from './app-sidebar.vue'
 import AppFooter from './app-footer.vue'
+import { usePostStore } from '@/stores/post';
+import { onMounted } from 'vue';
+
+const postStore = usePostStore();
+
+onMounted(async () => {
+  await postStore.getPosts({
+    params: {
+      limit: 7,
+      page: 1,
+    },
+  }, true); // Force load the initial data
+});
 </script>
 
 <template>
