@@ -120,6 +120,12 @@ watch(
       <p class="font-semibold text-lg text-[#3D8AF7] text-center mb-8">
         Congratulations! You have achieved your weekly goals, let record them!
       </p>
+      
+      <!-- upload photo -->
+      <span class="font-semibold text-[#3D8AF7] block mb-2"
+        >Share the photo of your completion here</span
+      >
+      <ImageUpload @change="onImageChange" :previousImages="[]" />
 
       <!-- Select Resolution's Category -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Select Category</span>
@@ -151,11 +157,6 @@ watch(
         class="mb-8"
       ></BaseInput>
 
-      <!-- upload photo -->
-      <span class="font-semibold text-[#3D8AF7] block mb-2"
-        >Share the photo of your completion here</span
-      >
-      <ImageUpload @change="onImageChange" :previousImages="[]" />
 
       <!-- Checkbox to Complete the Goal -->
       <div class="w-full">

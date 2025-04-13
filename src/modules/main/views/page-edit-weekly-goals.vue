@@ -152,6 +152,16 @@ const removePrev = (photoUrl: string) => {
         Hi <UserName />, you are now in week {{ weekNumber }}, let's set a goal!
       </p>
 
+      <!-- upload photo -->
+      <span class="font-semibold text-[#3D8AF7] block mb-2"
+        >Share the photo of your vision here</span
+      >
+      <ImageUpload
+        @change="onImageChange"
+        :previousImages="currentGoal.photo"
+        @remove="removePrev"
+      />
+
       <!-- Select Resolution -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Select Category</span>
       <BaseSelect
@@ -197,16 +207,6 @@ const removePrev = (photoUrl: string) => {
         v-model="form.dueDate"
         border="full"
         class="mb-8"
-      />
-
-      <!-- upload photo -->
-      <span class="font-semibold text-[#3D8AF7] block mb-2"
-        >Share the photo of your vision here</span
-      >
-      <ImageUpload
-        @change="onImageChange"
-        :previousImages="currentGoal.photo"
-        @remove="removePrev"
       />
 
       <!-- share with -->

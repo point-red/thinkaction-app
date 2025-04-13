@@ -113,12 +113,18 @@ const save = async function () {
   <div class="main-content-container">
     <p class="text-lg font-semibold">Create Your Resolution</p>
     <hr />
-
+    
     <div>
       <p class="font-semibold text-lg text-[#3D8AF7] text-center mb-5">
         Hi <UserName />, let's start by setting up your resolutions!
       </p>
-
+      
+      <!-- upload photo -->
+      <span class="font-semibold text-[#3D8AF7] block mb-2"
+        >Share the photo of your vision here</span
+      >
+      <ImageUpload @change="onImageChange" :previousImages="[]" />
+      
       <!-- category input -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Category</span>
       <BaseAutocompleteCreate
@@ -157,11 +163,6 @@ const save = async function () {
         class="mb-8"
       ></component>
 
-      <!-- upload photo -->
-      <span class="font-semibold text-[#3D8AF7] block mb-2"
-        >Share the photo of your vision here</span
-      >
-      <ImageUpload @change="onImageChange" :previousImages="[]" />
 
       <!-- share with -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Share With</span>

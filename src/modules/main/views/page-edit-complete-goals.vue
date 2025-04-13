@@ -132,6 +132,16 @@ const removePrev = (photoUrl: string) => {
         Congratulations! You have achieved your weekly goals, let record them!
       </p>
 
+      <!-- upload photo -->
+      <span class="font-semibold text-[#3D8AF7] block mb-2"
+        >Share the photo of your completion here</span
+      >
+      <ImageUpload
+        @change="onImageChange"
+        :previousImages="currentGoal.photo"
+        @remove="removePrev"
+      />
+
       <!-- Select Resolution's Category -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Select Category</span>
       <BaseSelect
@@ -164,16 +174,6 @@ const removePrev = (photoUrl: string) => {
         border="full"
         class="mb-8"
       ></BaseInput>
-
-      <!-- upload photo -->
-      <span class="font-semibold text-[#3D8AF7] block mb-2"
-        >Share the photo of your completion here</span
-      >
-      <ImageUpload
-        @change="onImageChange"
-        :previousImages="currentGoal.photo"
-        @remove="removePrev"
-      />
 
       <!-- Checkbox to Complete the Goal -->
       <component :is="BaseCheckbox" v-model="checked" label="Complete Goal" class="mb-8" />

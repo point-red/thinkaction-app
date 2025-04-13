@@ -138,12 +138,22 @@ onMounted(async () => {
   <div v-if="currentGoal" class="main-content-container">
     <p class="text-lg font-semibold">Update Resolution</p>
     <hr />
-
+    
     <div>
       <p class="font-semibold text-lg text-[#3D8AF7] text-center mb-5">
         Hi <UserName />, let's start by setting up your resolutions!
       </p>
-
+      
+      <!-- upload photo -->
+      <span class="font-semibold text-[#3D8AF7] block mb-2"
+        >Share the photo of your vision here</span
+      >
+      <ImageUpload
+        @change="onImageChange"
+        :previousImages="currentGoal.photo"
+        @remove="removePrev"
+      />
+      
       <!-- category input -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Category</span>
       <BaseAutocompleteCreate
@@ -181,15 +191,6 @@ onMounted(async () => {
         class="mb-8"
       ></component>
 
-      <!-- upload photo -->
-      <span class="font-semibold text-[#3D8AF7] block mb-2"
-        >Share the photo of your vision here</span
-      >
-      <ImageUpload
-        @change="onImageChange"
-        :previousImages="currentGoal.photo"
-        @remove="removePrev"
-      />
 
       <!-- share with -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Share With</span>
