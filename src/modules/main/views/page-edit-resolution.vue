@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { BaseInput, BaseDatepicker, BaseTextarea, BaseSelect } from '@/components/index'
+import { computed, onMounted, ref } from 'vue'
+import { BaseInput, BaseDatepicker, BaseTextarea, BaseSelect, BaseAutocompleteCreate } from '@/components/index'
 import { useUserStore } from '@/stores/user'
 import { useRoute, useRouter } from 'vue-router'
 import dayjs from 'dayjs'
 import { usePostStore } from '@/stores/post'
 import ImageUpload from '@/modules/main/components/image-upload.vue'
 import UserName from '@/modules/main/components/users/user-name.vue'
+import type { ThinkActionCategory } from '@/modules/types/think-action'
+import { Categories } from '@/modules/data/categories'
 
 const list = [
   { id: 'everyone', label: 'Everyone' },
@@ -53,6 +55,14 @@ const removePrev = (photoUrl: string) => {
 }
 
 const userStore = useUserStore()
+const categoryResolutions = ref<ThinkActionCategory[]>([])
+const combinedCategories = computed(() => {
+  // Get unique categories by label
+  const existingLabels = new Set(categoryResolutions.value.map(cat => cat.label ))
+  const filteredDefaultCategories = Categories.filter(cat => !existingLabels.has(cat.label ))
+  
+  return [...categoryResolutions.value, ...filteredDefaultCategories]
+})
 const save = async function () {
   let values = form.value
   // @ts-ignore
@@ -89,7 +99,22 @@ const save = async function () {
   isSending.value = false
 }
 
+const onAutocompleteSelect = function(value: any) {
+  form.value.categoryName = value.label;
+}
+
+
 onMounted(async () => {
+  try {
+    const userData = await userStore.getUserById(userStore.currentUser._id)
+    categoryResolutions.value = userData.categoryResolution?.map((cat: any) => ({
+      id: cat._id,
+      label: cat.name
+    })) || []
+  } catch (error) {
+    console.error('Failed to fetch user data:', error)
+  }
+
   let goal = await postStore.getPostById(id as string)
   if (goal?._id) {
     form.value = {
@@ -121,12 +146,16 @@ onMounted(async () => {
 
       <!-- category input -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Category</span>
-      <BaseInput
+      <BaseAutocompleteCreate
         v-model="form.categoryName"
-        :error="showErrors && !(form.categoryName as any)? 'Enter a category name': ''"
-        placeholder="Input your category"
+        :list="combinedCategories"
+        placeholder="Select or create new category"
+        border="full"
+        :isError="showErrors && !form.categoryName"
+        error-message="Select a category"
         class="mb-8"
-      ></BaseInput>
+        @update:modelValue="onAutocompleteSelect"
+      ></BaseAutocompleteCreate>
 
       <!-- due date input -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Due Date</span>
