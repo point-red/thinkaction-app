@@ -34,7 +34,7 @@ onMounted(async () => {
       <main class="main-content">
         <router-view />
       </main>
-      <app-footer class="md:hidden"></app-footer>
+      <app-footer></app-footer>
     </div>
   </div>
 </template>
