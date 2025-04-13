@@ -13,14 +13,37 @@ const store = useUserStore()
 
 let categories = ref<any>([])
 const reports = ref<any>([])
+const weekdays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'] // Rearranged to Monday-Sunday
 
 const getMonthlyReport = async (month = dayjs().month()) => {
   reports.value = await store.getMonthlyReports(dayjs().year(), month)
-  categories.value = new Set(
+  // Extract unique categories from the data, or use default if none found
+  const extractedCategories = new Set(
     Object.values(reports.value)
       .map((r: any) => Object.keys(r))
       .flat()
   )
+  categories.value = Array.from(extractedCategories).length > 0 
+    ? Array.from(extractedCategories) 
+    : ['hahaa'] // Default category if none found
+}
+
+const getCellClass = (weekData: any, dayIndex: number) => {
+  if (!weekData || Object.keys(weekData).length === 0) return 'bg-gray-100'
+
+  for (const [category, timestamp] of Object.entries(weekData)) {
+    if (typeof timestamp === 'string') {
+      const date = dayjs(timestamp)
+      // Convert from dayjs days (Sun=0, Sat=6) to our display days (Mon=0, Sun=6)
+      const displayDay = date.day() === 0 ? 6 : date.day() - 1
+      
+      if (displayDay === dayIndex) {
+        return 'bg-green-500'
+      }
+    }
+  }
+  
+  return 'bg-gray-100'
 }
 
 onMounted(async () => {
@@ -44,48 +67,59 @@ watch(month, async (currentValue) => {
 
 <template>
   <div class="main-content-container">
-    <h3 class="font-semibold">Monthly Report</h3>
-    <hr />
-    <div class="flex justify-end">
-      <BaseSelect v-model="month" :list="monthList"> </BaseSelect>
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="font-semibold">Weekly Report</h3>
+      <BaseSelect v-model="month" :list="monthList" class="w-36"></BaseSelect>
     </div>
 
-    <div class="table-container">
-      <table class="table">
-        <thead>
-          <tr class="basic-table-row">
-            <th class="basic-table-head"></th>
-            <th
-              v-for="category in categories"
-              :key="category"
-              class="basic-table-head text-xs w-28 max-w-[7rem] min-w-[7rem] text-center"
-            >
-              <p class="max-w-full whitespace-pre-wrap">{{ category }}</p>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(report, week) in reports" :key="week" class="basic-table-row h-28">
-            <td class="basic-table-body text-sm min-w-[5rem] align-middle">{{ week }}</td>
-            <td
-              v-for="category in categories"
-              :key="category"
-              :class="'basic-table-body rounded-lg p-4'"
-            >
-              <div
-                class="w-20 h-20 flex rounded-lg"
-                :class="
-                  report[category] === undefined
-                    ? 'bg-gray-300'
-                    : report[category]
-                    ? 'bg-sky-300'
-                    : 'bg-pink-300'
-                "
-              ></div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="report-grid">
+      <!-- Days Header -->
+      <div class="grid-row mb-4">
+        <div class="week-label"></div>
+        <div v-for="day in weekdays" :key="day" class="day-label">{{ day }}</div>
+      </div>
+
+      <!-- Grid -->
+      <div v-for="weekNum in 5" :key="weekNum" class="grid-row">
+        <div class="week-label">Week {{ weekNum }}</div>
+        <div v-for="(day, dayIndex) in weekdays" :key="day" 
+          class="grid-cell" 
+          :class="[
+            'hover:opacity-80',
+            getCellClass(reports[`Week ${weekNum}`], dayIndex)
+          ]">
+        </div>
+      </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.report-grid {
+  @apply w-full max-w-[340px] mx-auto bg-white p-4 rounded-lg shadow-sm;
+}
+
+.grid-row {
+  @apply grid grid-cols-8 gap-1 mb-1;
+}
+
+.day-label {
+  @apply text-center text-xs font-medium text-gray-500;
+}
+
+.week-label {
+  @apply text-xs font-medium text-gray-500;
+}
+
+.grid-cell {
+  @apply w-6 h-6 rounded-[2px] transition-all duration-200 cursor-pointer;
+}
+
+/* Custom green shades to match the image exactly */
+.bg-green-100 { background-color: #e6f5e6; }
+.bg-green-200 { background-color: #c2e5c2; }
+.bg-green-300 { background-color: #99d699; }
+.bg-green-400 { background-color: #70c770; }
+.bg-green-500 { background-color: #47b847; }
+.bg-green-600 { background-color: #1ea81e; }
+</style>
