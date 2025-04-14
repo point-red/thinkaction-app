@@ -1,3 +1,8 @@
+<script setup lang="ts">
+import { useRouter } from 'vue-router'
+const router = useRouter()
+</script>
+
 <template>
   <main class="h-100vh w-full flex flex-col">
     <div class="mx-auto h-full max-w-xl flex flex-col items-center justify-center text-center">
@@ -11,7 +16,7 @@
       <p class="pt-2 text-slate-500 dark:text-slate-200">This page you are looking not available</p>
 
       <div class="pt-5">
-        <button @click="$router.push('/')" class="btn btn-primary">Back To Home</button>
+        <button @click="router.push('/')" class="btn btn-primary">Back To Home</button>
       </div>
     </div>
   </main>

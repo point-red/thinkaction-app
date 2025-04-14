@@ -26,8 +26,8 @@ onMounted(async () => {
   }
 
   const result = await userStore.verifyResetToken(token)
-  if (!result.success) {
-    form.value.error = result.message
+  if (!result?.success) {
+    form.value.error = result?.message || 'Invalid reset token'
     return
   }
   tokenValid.value = true
@@ -55,14 +55,19 @@ const resetPassword = async () => {
   loading.value = true
   try {
     const result = await userStore.resetPassword(route.params.token as string, form.value.password)
-    if (result.success) {
-      form.value.message = result.message
+    if (result?.success) {
+      form.value.message = result?.message || 'Password reset successful'
+      form.value.error = ''
       setTimeout(() => {
         router.push('/login')
       }, 2000)
     } else {
-      form.value.error = result.message
+      form.value.message = ''
+      form.value.error = result?.message || 'Failed to reset password'
     }
+  } catch (error: any) {
+    form.value.error = error?.message || 'An error occurred'
+    form.value.message = ''
   } finally {
     loading.value = false
   }

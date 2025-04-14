@@ -8,7 +8,6 @@ import ImageUpload from '@/modules/main/components/image-upload.vue'
 import { usePostStore } from '@/stores/post'
 import UserName from '@/modules/main/components/users/user-name.vue'
 import { useRouter } from 'vue-router'
-import AutoComplete from 'primevue/autocomplete'
 import type { ThinkActionCategory } from '@/modules/types/think-action'
 import { Categories } from '@/modules/data/categories'
 

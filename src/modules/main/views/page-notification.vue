@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import dayjs from 'dayjs'
 import { useUserStore } from '@/stores/user'
 import { getFile } from '@/lib/connection'
 
 const notifications = ref<any>([])
 
+const router = useRouter()
 const userStore = useUserStore()
 onMounted(async () => {
   notifications.value = await userStore.getNotifications()
@@ -80,7 +82,7 @@ const toggleSupport = async (notification: any) => {
           </div>
           <div v-else-if="notif.toPostId" class="flex flex-row gap-1.5">
             <button
-              @click="() => $router.push('/post/' + notif.toPostId)"
+              @click="() => router.push('/post/' + notif.toPostId)"
               class="btn btn-xs px-3 py-1.5 font-medium bg-white border border-gray-300"
             >
               View Post
