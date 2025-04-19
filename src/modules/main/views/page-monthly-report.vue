@@ -1,93 +1,133 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch, computed } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { BaseSelect } from '@/components'
 import dayjs from 'dayjs'
+import isBetween from 'dayjs/plugin/isBetween'
+dayjs.extend(isBetween)
 
 const monthList = ref<any>([])
 const month = ref<any>({
   id: new Date().getMonth(),
-  label: dayjs(new Date(dayjs().year(), new Date().getMonth())).format('MMM YYYY')
+  label: dayjs(new Date(dayjs().year(), new Date().getMonth())).format('MMM')
 })
 const store = useUserStore()
 
-let categories = ref<any>([])
-const reports = ref<any>([])
-const weekdays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'] // Rearranged to Monday-Sunday
+let categories = ref<string[]>([])
+let reports = ref<any>(null)
 
-const getMonthlyReport = async (month = dayjs().month()) => {
-  reports.value = await store.getMonthlyReports(dayjs().year(), month)
-  // Extract unique categories from the data, or use default if none found
-  const extractedCategories = new Set(
-    Object.values(reports.value)
-      .map((r: any) => Object.keys(r))
-      .flat()
-  )
-  categories.value = Array.from(extractedCategories).length > 0 
-    ? Array.from(extractedCategories) 
-    : ['hahaa'] // Default category if none found
+const categoryInitial = computed(() => {
+  return categories.value.map(category => category.charAt(0).toUpperCase())
+})
+
+const getMonthlyReport = async (year = dayjs().year(), month = dayjs().month()) => {
+  reports.value = await store.getMonthlyReports(year, month)
+  console.log('Monthly reports:', reports.value);
+  // Extract unique categories from user store
+  if (store.currentUser && store.currentUser.categoryResolution) {
+    categories.value = [...new Set(store.currentUser.categoryResolution.map((cat: any) => cat.name))] as any[];
+    console.log('Monthly Report Categories:', categories.value);
+  } else {
+    categories.value = []; // Ensure categories is initialized even if no user data
+  }
 }
 
-const getCellClass = (weekData: any, dayIndex: number) => {
-  if (!weekData || Object.keys(weekData).length === 0) return 'bg-gray-100'
+const getCellClass = (weekNumber: number, categoryIndex: number) => {
+  if (!reports.value?.weeks) {
+    return 'bg-gray-100';
+  }
 
-  for (const [category, timestamp] of Object.entries(weekData)) {
-    if (typeof timestamp === 'string') {
-      const date = dayjs(timestamp)
-      // Convert from dayjs days (Sun=0, Sat=6) to our display days (Mon=0, Sun=6)
-      const displayDay = date.day() === 0 ? 6 : date.day() - 1
-      
-      if (displayDay === dayIndex) {
-        return 'bg-green-500'
-      }
+  const weekData = reports.value.weeks.find((week: any) => week.weekNumber === weekNumber);
+
+  if (!weekData) {
+    return 'bg-gray-100';
+  }
+
+  const targetCategoryName = categories.value[categoryIndex];
+  const categoryCount = weekData.categories?.filter(
+    (cat: any) => cat.name === targetCategoryName
+  ).length || 0;
+
+  if (categoryCount > 0) {
+    if (categoryCount >= 8) {
+      return 'bg-green-800';
+    } else if (categoryCount === 7) {
+      return 'bg-green-700';
+    } else if (categoryCount === 6) {
+      return 'bg-green-600';
+    } else if (categoryCount === 5) {
+      return 'bg-green-500';
+    } else if (categoryCount === 4) {
+      return 'bg-green-400';
+    } else if (categoryCount === 3) {
+      return 'bg-green-300';
+    } else if (categoryCount === 2) {
+      return 'bg-green-200';
+    } else if (categoryCount === 1) {
+      return 'bg-green-100';
     }
   }
-  
-  return 'bg-gray-100'
-}
+
+  return 'bg-gray-100';
+};
 
 onMounted(async () => {
   let months = []
-  let firstMonth = dayjs(new Date(dayjs().year(), 0, 1)).month()
-  while (firstMonth <= dayjs().month() && firstMonth < 11) {
+  for (let i = 0; i < 12; i++) {
     months.push({
-      id: firstMonth,
-      label: dayjs(new Date(dayjs().year(), firstMonth)).format('MMM YYYY')
+      id: i,
+      label: dayjs(new Date(dayjs().year(), i, 1)).format('MMM')
     })
-    firstMonth += 1
   }
   monthList.value = months
   await getMonthlyReport()
 })
 
 watch(month, async (currentValue) => {
-  if (currentValue.id) await getMonthlyReport(currentValue.id)
+  if (currentValue.id !== undefined) {
+    await getMonthlyReport(dayjs().year(), currentValue.id)
+  }
 })
+
+watch(() => store.currentUser, (newUser) => {
+  if (newUser && newUser.categoryResolution) {
+    categories.value = [...new Set(newUser.categoryResolution.map((cat: any) => cat.name))] as any[];
+  }
+}, { immediate: true, deep: true })
 </script>
 
 <template>
   <div class="main-content-container">
     <div class="flex justify-between items-center mb-4">
-      <h3 class="font-semibold">Weekly Report</h3>
+      <h3 class="font-semibold">Monthly Report</h3>
       <BaseSelect v-model="month" :list="monthList" class="w-36"></BaseSelect>
     </div>
 
-    <div class="report-grid">
-      <!-- Days Header -->
-      <div class="grid-row mb-4">
-        <div class="week-label"></div>
-        <div v-for="day in weekdays" :key="day" class="day-label">{{ day }}</div>
+    <div class="report-container">
+      <div class="sticky top-0 bg-white pt-2 pb-4 mb-2">
+        <div class="days-header" :class="`grid-cols-[${categories.length + 1}]`">
+          <div class="week-label"></div>
+          <div v-for="day in categoryInitial" :key="day" class="day-label">{{ day }}</div>
+        </div>
       </div>
 
-      <!-- Grid -->
-      <div v-for="weekNum in 5" :key="weekNum" class="grid-row">
-        <div class="week-label">Week {{ weekNum }}</div>
-        <div v-for="(day, dayIndex) in weekdays" :key="day" 
-          class="grid-cell" 
-          :class="[
-            'hover:opacity-80',
-            getCellClass(reports[`Week ${weekNum}`], dayIndex)
-          ]">
+      <div class="grid-container">
+        <div
+          v-for="weekData in reports?.weeks"
+          :key="weekData.weekNumber"
+          class="grid-row"
+          :class="`grid-cols-[${categories.length + 1}]`"
+        >
+          <div class="week-label">Week {{ weekData.weekNumber }}</div>
+          <div
+            v-for="(category, categoryIndex) in categories"
+            :key="category"
+            class="grid-cell"
+            :class="[
+              'hover:opacity-80',
+              getCellClass(weekData.weekNumber, categoryIndex)
+            ]"
+          ></div>
         </div>
       </div>
     </div>
@@ -95,8 +135,18 @@ watch(month, async (currentValue) => {
 </template>
 
 <style scoped>
-.report-grid {
-  @apply w-full max-w-[340px] mx-auto bg-white p-4 rounded-lg shadow-sm;
+.report-container {
+  @apply w-full max-w-[400px] mx-auto bg-white rounded-lg shadow-sm;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.days-header {
+  @apply grid grid-cols-8 gap-1 px-4;
+}
+
+.grid-container {
+  @apply px-4 pb-4;
 }
 
 .grid-row {
@@ -108,18 +158,21 @@ watch(month, async (currentValue) => {
 }
 
 .week-label {
-  @apply text-xs font-medium text-gray-500;
+  @apply text-xs font-medium text-gray-500 whitespace-nowrap;
 }
 
 .grid-cell {
-  @apply w-6 h-6 rounded-[2px] transition-all duration-200 cursor-pointer;
+  @apply w-6 h-6 rounded transition-all duration-200 cursor-pointer;
 }
 
-/* Custom green shades to match the image exactly */
-.bg-green-100 { background-color: #e6f5e6; }
-.bg-green-200 { background-color: #c2e5c2; }
-.bg-green-300 { background-color: #99d699; }
-.bg-green-400 { background-color: #70c770; }
-.bg-green-500 { background-color: #47b847; }
-.bg-green-600 { background-color: #1ea81e; }
+/* Custom green shades */
+.bg-gray-100 { background-color: #F7FAFC; }
+.bg-green-100 { background-color: #E6F4EA; } /* Lightest green */
+.bg-green-200 { background-color: #C8E6C9; }
+.bg-green-300 { background-color: #A5D6A7; }
+.bg-green-400 { background-color: #81C784; }
+.bg-green-500 { background-color: #66BB6A; }
+.bg-green-600 { background-color: #4CAF50; }
+.bg-green-700 { background-color: #388E3C; }
+.bg-green-800 { background-color: #1B5E20; } /* Darkest green */
 </style>

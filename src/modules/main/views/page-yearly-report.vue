@@ -1,46 +1,68 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch, computed } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { BaseSelect } from '@/components'
 import dayjs from 'dayjs'
 
 const store = useUserStore()
-const weekdays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'] // Rearranged to Monday-Sunday
-let categories = ref<string[]>(['hahaa']) // Default category
+
+const componentVersion = '1.2'; // Add version number
+let categories = ref<string[]>([])
 let yearList = ref<any>([])
-let reports = ref<any>([])
+let reports = ref<any>(null)
 const year = ref<any>({ id: dayjs().year(), label: `${dayjs().year()}` })
+
+const categoryInitial = computed(() => {
+  return categories.value.map(category => category.charAt(0).toUpperCase())
+})
 
 const getYearlyReport = async (year = dayjs().year()) => {
   reports.value = await store.getYearlyReports(year)
-  // Extract unique categories from the data
-  const extractedCategories = new Set(
-    Object.values(reports.value)
-      .map((r: any) => Object.keys(r))
-      .flat()
-  )
-  if (extractedCategories.size > 0) {
-    categories.value = Array.from(extractedCategories)
-  }
 }
 
-const getCellClass = (weekData: any, dayIndex: number) => {
-  if (!weekData || Object.keys(weekData).length === 0) return 'bg-gray-100'
+const getCellClass = (weekNumber: number, categoryIndex: number) => {
+  if (!reports.value?.weeks) {
+    return 'bg-gray-100';
+  }
 
-  for (const [category, timestamp] of Object.entries(weekData)) {
-    if (typeof timestamp === 'string') {
-      const date = dayjs(timestamp)
-      // Convert from dayjs days (Sun=0, Sat=6) to our display days (Mon=0, Sun=6)
-      const displayDay = date.day() === 0 ? 6 : date.day() - 1
-      
-      if (displayDay === dayIndex) {
-        return 'bg-green-500'
-      }
+  const weekData = reports.value.weeks.find((week: any) => week.weekNumber === weekNumber);
+
+  if (!weekData) {
+    return 'bg-gray-100';
+  }
+
+  const targetCategoryName = categories.value[categoryIndex];
+  console.log(`Week ${weekNumber}, Category Index ${categoryIndex}: Target Name - "${targetCategoryName}"`);
+  console.log('Week Data Categories:', weekData.categories);
+
+  const categoryCount = weekData.categories?.filter(
+    (cat: any) => cat.name === targetCategoryName
+  ).length || 0;
+
+  console.log(`Week ${weekNumber}, Category "${targetCategoryName}" Count: ${categoryCount}`);
+
+  if (categoryCount > 0) {
+    if (categoryCount >= 8) {
+      return 'bg-green-800';
+    } else if (categoryCount === 7) {
+      return 'bg-green-700';
+    } else if (categoryCount === 6) {
+      return 'bg-green-600';
+    } else if (categoryCount === 5) {
+      return 'bg-green-500';
+    } else if (categoryCount === 4) {
+      return 'bg-green-400';
+    } else if (categoryCount === 3) {
+      return 'bg-green-300';
+    } else if (categoryCount === 2) {
+      return 'bg-green-200';
+    } else if (categoryCount === 1) {
+      return 'bg-green-100';
     }
   }
-  
-  return 'bg-gray-100'
-}
+
+  return 'bg-gray-100';
+};
 
 onMounted(async () => {
   let years = []
@@ -48,13 +70,26 @@ onMounted(async () => {
   while (firstYear <= dayjs().year()) {
     years.push({
       id: firstYear,
-      label: dayjs(new Date(firstYear, 0)).format('YYYY')
+      label: dayjs(firstYear).format('YYYY')
     })
     firstYear += 1
   }
   yearList.value = years
+  if (store.currentUser && store.currentUser.categoryResolution) {
+    // Use a Set to get unique category names
+    categories.value = [...new Set(store.currentUser.categoryResolution.map((cat: any) => cat.name))] as any[];
+    console.log(`YearlyReport.vue (v${componentVersion}) - Unique Categories:`, categories.value);
+  }
   await getYearlyReport()
+  console.log('Initial reports:', reports.value);
 })
+
+watch(() => store.currentUser, (newUser) => {
+  if (newUser && newUser.categoryResolution) {
+    // Use a Set to get unique category names when user data changes
+    categories.value = [...new Set(newUser.categoryResolution.map((cat: any) => cat.name))] as any[];
+  }
+}, { immediate: true, deep: true })
 
 watch(year, async (currentValue) => {
   if (currentValue.id) await getYearlyReport(currentValue.id)
@@ -67,27 +102,32 @@ watch(year, async (currentValue) => {
       <h3 class="font-semibold">Yearly Report</h3>
       <BaseSelect v-model="year" :list="yearList" class="w-36"></BaseSelect>
     </div>
-    
+
     <div class="report-container">
-      <!-- Headers for days -->
       <div class="sticky top-0 bg-white pt-2 pb-4 mb-2">
-        <div class="days-header">
+        <div class="days-header" :class="`grid-cols-[${categories.length + 1}]`">
           <div class="week-label"></div>
-          <div v-for="day in weekdays" :key="day" class="day-label">{{ day }}</div>
+          <div v-for="day in categoryInitial" :key="day" class="day-label">{{ day }}</div>
         </div>
       </div>
 
-      <!-- Grid -->
       <div class="grid-container">
-        <div v-for="weekNum in 52" :key="weekNum" class="grid-row">
-          <div class="week-label">Week {{ weekNum }}</div>
-          <div v-for="(day, dayIndex) in weekdays" :key="day" 
-            class="grid-cell" 
+        <div
+          v-for="weekData in reports?.weeks"
+          :key="weekData.weekNumber"
+          class="grid-row"
+          :class="`grid-cols-[${categories.length + 1}]`"
+        >
+          <div class="week-label">Week {{ weekData.weekNumber }}</div>
+          <div
+            v-for="(category, categoryIndex) in categories"
+            :key="category"
+            class="grid-cell"
             :class="[
               'hover:opacity-80',
-              getCellClass(reports[`Week ${weekNum}`], dayIndex)
-            ]">
-          </div>
+              getCellClass(weekData.weekNumber, categoryIndex)
+            ]"
+          ></div>
         </div>
       </div>
     </div>
@@ -122,14 +162,17 @@ watch(year, async (currentValue) => {
 }
 
 .grid-cell {
-  @apply w-6 h-6 rounded-[2px] transition-all duration-200 cursor-pointer;
+  @apply w-6 h-6 rounded transition-all duration-200 cursor-pointer;
 }
 
 /* Custom green shades */
-.bg-green-100 { background-color: #e6f5e6; }
-.bg-green-200 { background-color: #c2e5c2; }
-.bg-green-300 { background-color: #99d699; }
-.bg-green-400 { background-color: #70c770; }
-.bg-green-500 { background-color: #47b847; }
-.bg-green-600 { background-color: #1ea81e; }
+.bg-gray-100 { background-color: #F7FAFC; }
+.bg-green-100 { background-color: #E6F4EA; } /* Lightest green */
+.bg-green-200 { background-color: #C8E6C9; }
+.bg-green-300 { background-color: #A5D6A7; }
+.bg-green-400 { background-color: #81C784; }
+.bg-green-500 { background-color: #66BB6A; }
+.bg-green-600 { background-color: #4CAF50; }
+.bg-green-700 { background-color: #388E3C; }
+.bg-green-800 { background-color: #1B5E20; } /* Darkest green */
 </style>
