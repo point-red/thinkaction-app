@@ -66,11 +66,12 @@ const getCellClass = (weekNumber: number, categoryIndex: number) => {
 
 onMounted(async () => {
   let years = []
-  let firstYear = dayjs(new Date(2019, 0, 1)).year()
-  while (firstYear <= dayjs().year()) {
-    years.push({
+  let firstYear = 2021
+  let lastYear = 2025
+  while (firstYear <= lastYear) {
+years.push({
       id: firstYear,
-      label: dayjs(firstYear).format('YYYY')
+      label: `${firstYear}`
     })
     firstYear += 1
   }
