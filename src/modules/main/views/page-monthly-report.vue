@@ -48,24 +48,12 @@ const getCellClass = (weekNumber: number, categoryIndex: number) => {
     (cat: any) => cat.name === targetCategoryName
   ).length || 0;
 
-  if (categoryCount > 0) {
-    if (categoryCount >= 8) {
-      return 'bg-green-800';
-    } else if (categoryCount === 7) {
-      return 'bg-green-700';
-    } else if (categoryCount === 6) {
-      return 'bg-green-600';
-    } else if (categoryCount === 5) {
-      return 'bg-green-500';
-    } else if (categoryCount === 4) {
-      return 'bg-green-400';
-    } else if (categoryCount === 3) {
-      return 'bg-green-300';
-    } else if (categoryCount === 2) {
-      return 'bg-green-200';
-    } else if (categoryCount === 1) {
-      return 'bg-green-100';
-    }
+  const category = weekData.categories?.find((cat: any) => cat.name === targetCategoryName);
+
+  if (category?.isComplete === false) {
+    return 'bg-red-500';
+  } else if (category?.isComplete === true) {
+    return 'bg-blue-500';
   }
 
   return 'bg-gray-100';
@@ -167,12 +155,4 @@ watch(() => store.currentUser, (newUser) => {
 
 /* Custom green shades */
 .bg-gray-100 { background-color: #F7FAFC; }
-.bg-green-100 { background-color: #E6F4EA; } /* Lightest green */
-.bg-green-200 { background-color: #C8E6C9; }
-.bg-green-300 { background-color: #A5D6A7; }
-.bg-green-400 { background-color: #81C784; }
-.bg-green-500 { background-color: #66BB6A; }
-.bg-green-600 { background-color: #4CAF50; }
-.bg-green-700 { background-color: #388E3C; }
-.bg-green-800 { background-color: #1B5E20; } /* Darkest green */
 </style>
