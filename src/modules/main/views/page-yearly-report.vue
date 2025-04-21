@@ -12,6 +12,21 @@ let yearList = ref<any>([])
 let reports = ref<any>(null)
 const year = ref<any>({ id: dayjs().year(), label: `${dayjs().year()}` })
 
+
+// Weeks to show labels for - more sparse to fit on one page
+const labeledWeeks = [1, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52]
+
+// Get all 52 weeks
+const getWeeksData = () => {
+  return Array.from({length: 52}, (_, i) => ({
+    weekNumber: i + 1,
+    categories: categories.value.map(cat => ({
+      name: cat,
+      isComplete: false
+    }))
+  }))
+}
+
 const categoryInitial = computed(() => {
   return categories.value.map(category => category.charAt(0).toUpperCase())
 })
@@ -32,21 +47,21 @@ const getCellClass = (weekNumber: number, categoryIndex: number) => {
   }
 
   const targetCategoryName = categories.value[categoryIndex];
-  console.log(`Week ${weekNumber}, Category Index ${categoryIndex}: Target Name - "${targetCategoryName}"`);
-  console.log('Week Data Categories:', weekData.categories);
+  // console.log(`Week ${weekNumber}, Category Index ${categoryIndex}: Target Name - "${targetCategoryName}"`);
+  // console.log('Week Data Categories:', weekData.categories);
 
   const categoryCount = weekData.categories?.filter(
     (cat: any) => cat.name === targetCategoryName
   ).length || 0;
 
-  console.log(`Week ${weekNumber}, Category "${targetCategoryName}" Count: ${categoryCount}`);
+  // console.log(`Week ${weekNumber}, Category "${targetCategoryName}" Count: ${categoryCount}`);
 
   const category = weekData.categories?.find((cat: any) => cat.name === targetCategoryName);
-  console.log("weekData", weekData);
-  console.log("targetCategoryName", targetCategoryName);
-  console.log("targetCategoryName", targetCategoryName);
-  console.log("category", category);
-  
+  // console.log("weekData", weekData);
+  // console.log("targetCategoryName", targetCategoryName);
+  // console.log("targetCategoryName", targetCategoryName);
+  // console.log("category", category);
+
 
   if (category?.isComplete === false) {
     return 'bg-red-500';
@@ -62,7 +77,7 @@ onMounted(async () => {
   let firstYear = 2021
   let lastYear = 2025
   while (firstYear <= lastYear) {
-years.push({
+    years.push({
       id: firstYear,
       label: `${firstYear}`
     })
@@ -72,10 +87,10 @@ years.push({
   if (store.currentUser && store.currentUser.categoryResolution) {
     // Use a Set to get unique category names
     categories.value = [...new Set(store.currentUser.categoryResolution.map((cat: any) => cat.name))] as any[];
-    console.log(`YearlyReport.vue (v${componentVersion}) - Unique Categories:`, categories.value);
+    // console.log(`YearlyReport.vue (v${componentVersion}) - Unique Categories:`, categories.value);
   }
   await getYearlyReport()
-  console.log('Initial reports:', reports.value);
+  // console.log('Initial reports:', reports.value);
 })
 
 watch(() => store.currentUser, (newUser) => {
@@ -90,106 +105,100 @@ watch(year, async (currentValue) => {
 })
 </script>
 
-<template>
-    <div class="main-content-container">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="font-semibold text-sm">Yearly Report</h3>
-        <BaseSelect v-model="year" :list="yearList" class="w-36"></BaseSelect>
-      </div>
 
-      <div class="report-container">
-        <div class="sticky top-0 bg-white pt-2 pb-2">
-          <div class="days-header" :class="`grid-cols-[${categories.length + 1}]`">
-            <div class="week-label"></div>
-            <div v-for="day in categoryInitial" :key="day" class="day-label">{{ day }}</div>
+<template>
+  <div class="main-content-container">
+    <div class="flex justify-between items-center mb-2">
+      <h3 class="font-semibold text-sm">Yearly Report</h3>
+      <BaseSelect v-model="year" :list="yearList" class="w-36"></BaseSelect>
+    </div>
+
+    <div class="report-container">
+      <!-- Header with category names -->
+      <div class="sticky top-0 bg-white pt-1 pb-1">
+        <div class="days-header">
+          <div class="week-column"></div>
+          <div v-for="category in categories" :key="category" class="category-column">
+            {{ category }}
           </div>
         </div>
+      </div>
 
-        <div class="grid-container">
-          <div
-            v-for="weekData in reports?.weeks"
-            :key="weekData.weekNumber"
-            class="grid-row"
-            :class="`grid-cols-[${categories.length + 1}]`"
-          >
-            <div class="week-label text-sm">Week {{ weekData.weekNumber }}</div>
-            <div
-              v-for="(category, categoryIndex) in categories"
-              :key="category"
-              class="grid-cell content-center"
-              :class="[
-                'hover:opacity-80',
-                getCellClass(weekData.weekNumber, categoryIndex)
-              ]"
-            ></div>
+      <!-- Grid content -->
+      <div class="grid-content">
+        <div v-for="week in reports?.weeks" :key="week.weekNumber" class="week-row">
+          <!-- Week label - display only on certain weeks -->
+          <div class="week-column">
+            <template v-if="labeledWeeks.includes(week.weekNumber)">
+              W. {{ week.weekNumber }}
+            </template>
+          </div>
+          
+          <!-- Category cells -->
+          <div v-for="(category, categoryIndex) in categories" :key="category" 
+            class="category-cell"
+            :class="getCellClass(week.weekNumber, categoryIndex)">
           </div>
         </div>
       </div>
     </div>
+  </div>
 </template>
 
 <style scoped>
 .report-container {
-  @apply w-full max-w-[400px] mx-auto bg-white rounded-lg shadow-sm;
-  height: calc(100vh - 180px);
+  @apply w-full max-w-3xl mx-auto bg-white rounded-lg shadow-sm px-4 pb-4;
+  max-height: 95vh;
   overflow-y: auto;
 }
 
 .days-header {
-  @apply grid grid-cols-8 gap-1 px-4;
+  @apply flex border-b border-gray-200 pb-1;
 }
 
-.grid-container {
-  @apply px-4 pb-4;
+.grid-content {
+  @apply pt-1;
 }
 
-.grid-row {
-  @apply grid grid-cols-8 gap-1 mb-1;
+.week-row {
+  @apply flex items-center;
+  height: 8px;
+  margin-bottom: 4px;
 }
 
-.day-label {
-  @apply text-center text-xs font-medium text-gray-500;
+.week-column {
+  @apply text-xs font-medium text-gray-500 pr-1;
+  min-width: 40px;
+  width: 40px;
 }
 
-.week-label {
-  @apply text-xs font-medium text-gray-500 whitespace-nowrap pr-8 w-full max-w-sm col-span-2;
+.category-column {
+  @apply flex-1 text-center text-xs font-medium text-gray-600;
+  min-width: 60px;
 }
 
-.grid-cell {
-  @apply w-4 h-4 rounded transition-all duration-200 cursor-pointer;
+.category-cell {
+  @apply flex-1 mx-1 rounded-sm transition-all duration-200;
+  min-width: 60px;
+  height: 8px; 
 }
 
-/* Custom green shades */
-.bg-gray-100 { background-color: #F7FAFC; }
+/* Color classes */
+.bg-gray-100 {
+  background-color: #F3F4F6;
+}
 
-.github-container {
-  display: grid;
-  grid-template-columns: 200px 1fr; /* Sidebar and main content */
-  grid-template-rows: auto 1fr; /* Header and main area */
-  grid-template-areas:
-    "sidebar header"
-    "sidebar main";
-  height: 100vh;
+.bg-blue-500 {
+  background-color: #3B82F6;
+}
+
+.bg-red-500 {
+  background-color: #EF4444;
 }
 
 .main-content-container {
-  grid-area: main;
-  padding: 20px;
-  overflow-y: auto;
-}
-
-/* Style the sidebar */
-.sidebar {
-  grid-area: sidebar;
-  background-color: #f0f0f0;
-  padding: 20px;
-}
-
-/* Style the header */
-.header {
-  grid-area: header;
-  background-color: #fff;
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
+  @apply p-2;
+  max-width: 100%;
+  overflow-x: auto;
 }
 </style>
