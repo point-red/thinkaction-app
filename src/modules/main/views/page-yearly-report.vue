@@ -162,7 +162,7 @@ watch(year, async (currentValue) => {
 
 .week-row {
   @apply flex items-center;
-  height: 8px;
+  height: 4px;
   margin-bottom: 4px;
 }
 
@@ -180,7 +180,7 @@ watch(year, async (currentValue) => {
 .category-cell {
   @apply flex-1 mx-1 rounded-sm transition-all duration-200;
   min-width: 60px;
-  height: 8px; 
+  height: 5px; 
 }
 
 /* Color classes */
