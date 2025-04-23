@@ -24,7 +24,7 @@ onMounted(async () => {
   <app-preloader class="print:hidden"></app-preloader>
 
   <!-- Page Wrapper -->
-  <div class="h-100vh flex grow bg-slate-50 dark:bg-slate-900">
+  <div class="flex grow bg-slate-50 dark:bg-slate-900 vhh">
     <!-- Header -->
     <app-header class="print:hidden"></app-header>
     <!-- Sidebar -->
@@ -42,6 +42,10 @@ onMounted(async () => {
 <style lang="postcss">
 .main-container {
   @apply flex flex-col w-full;
+}
+
+.vhh {
+  height: 100svh;
 }
 
 .is-sidebar-open .main-container {
