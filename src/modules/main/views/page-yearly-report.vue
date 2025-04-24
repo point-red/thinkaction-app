@@ -108,14 +108,15 @@ watch(year, async (currentValue) => {
 
 <template>
   <div class="main-content-container">
-    <div class="flex justify-between items-center mb-2">
-      <h3 class="font-semibold text-sm">Yearly Report</h3>
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="font-semibold text-lg">Yearly Report</h3>
       <BaseSelect v-model="year" :list="yearList" class="w-36"></BaseSelect>
     </div>
 
     <div class="report-container">
+
       <!-- Header with category names -->
-      <div class="sticky top-0 bg-white pt-1 pb-1">
+      <div class="sticky top-0 bg-white pt-2 pb-3 z-10">
         <div class="days-header">
           <div class="week-column"></div>
           <div v-for="category in categories" :key="category" class="category-column">
@@ -126,8 +127,8 @@ watch(year, async (currentValue) => {
 
       <!-- Grid content -->
       <div class="grid-content">
-        <div v-for="week in reports?.weeks" :key="week.weekNumber" class="week-row">
-          <!-- Week label - display only on certain weeks -->
+        <div v-for="week in reports?.weeks || getWeeksData()" :key="week.weekNumber" class="week-row">
+          <!-- Week label -->
           <div class="week-column">
             <template v-if="labeledWeeks.includes(week.weekNumber)">
               W. {{ week.weekNumber }}
@@ -147,13 +148,21 @@ watch(year, async (currentValue) => {
 
 <style scoped>
 .report-container {
-  @apply w-full max-w-3xl mx-auto bg-white rounded-lg shadow-sm px-4 pb-4;
+  @apply w-full max-w-4xl mx-auto bg-white rounded-lg shadow-sm px-6 pb-6 pt-2 relative;
   max-height: 95vh;
   overflow-y: auto;
 }
 
+.loading-overlay {
+  @apply absolute inset-0 flex items-center justify-center bg-white bg-opacity-60 z-20;
+}
+
+.loading-spinner {
+  @apply w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin;
+}
+
 .days-header {
-  @apply flex border-b border-gray-200 pb-1;
+  @apply flex border-b-2 border-gray-200 pb-1;
 }
 
 .grid-content {
@@ -162,42 +171,59 @@ watch(year, async (currentValue) => {
 
 .week-row {
   @apply flex items-center;
-  height: 4px;
-  margin-bottom: 4px;
+  height: 5px;
+  margin-bottom: 6px;
 }
 
 .week-column {
-  @apply text-xs font-medium text-gray-500 pr-1;
-  min-width: 40px;
-  width: 40px;
+  @apply text-xs font-medium text-gray-500 pr-2;
+  min-width: 45px;
+  width: 45px;
 }
 
 .category-column {
   @apply flex-1 text-center text-xs font-medium text-gray-600;
-  min-width: 60px;
+  min-width: 80px;
 }
 
 .category-cell {
-  @apply flex-1 mx-1 rounded-sm transition-all duration-200;
-  min-width: 60px;
-  height: 5px; 
+  @apply flex-1 mx-1 transition-all duration-200;
+  min-width: 80px;
+  height: 6px; 
 }
 
-/* Color classes */
+/* Color classes with improved contrast */
 .bg-gray-100 {
   background-color: #F3F4F6;
 }
 
-.bg-blue-500 {
-  background-color: #3B82F6;
+.bg-gray-200 {
+  background-color: #E5E7EB;
+}
+
+.bg-blue-600 {
+  background-color: #2563EB;
 }
 
 .bg-red-500 {
   background-color: #EF4444;
 }
 
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
 .main-content-container {
-  @apply p-2;
+  @apply p-4;
   max-width: 100%;
   overflow-x: auto;
 }
