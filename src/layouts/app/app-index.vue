@@ -45,7 +45,7 @@ onMounted(async () => {
 }
 
 .vhh {
-  height: 100svh;
+  height: 100dvh;
 }
 
 .is-sidebar-open .main-container {
