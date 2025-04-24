@@ -109,8 +109,8 @@ watch(year, async (currentValue) => {
 <template>
   <div class="main-content-container">
     <div class="flex justify-between items-center mb-4">
-      <h3 class="font-semibold text-base">Yearly Report</h3>
-      <BaseSelect v-model="year" :list="yearList" class="w-36"></BaseSelect>
+      <h3 class="font-semibold text-base w-full">Yearly Report</h3>
+      <BaseSelect v-model="year" :list="yearList" class="w-full"></BaseSelect>
     </div>
 
     <div class="report-container">
@@ -171,7 +171,7 @@ watch(year, async (currentValue) => {
 
 .week-row {
   @apply flex items-center;
-  height: 3px;
+  height: 2px;
   margin-bottom: 6px;
 }
 
