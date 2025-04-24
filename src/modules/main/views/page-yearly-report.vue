@@ -171,7 +171,7 @@ watch(year, async (currentValue) => {
 
 .week-row {
   @apply flex items-center;
-  height: 4px;
+  height: 3px;
   margin-bottom: 6px;
 }
 
