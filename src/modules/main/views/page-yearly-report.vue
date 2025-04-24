@@ -109,7 +109,7 @@ watch(year, async (currentValue) => {
 <template>
   <div class="main-content-container">
     <div class="flex justify-between items-center mb-4">
-      <h3 class="font-semibold text-lg">Yearly Report</h3>
+      <h3 class="font-semibold text-base">Yearly Report</h3>
       <BaseSelect v-model="year" :list="yearList" class="w-36"></BaseSelect>
     </div>
 
@@ -171,7 +171,7 @@ watch(year, async (currentValue) => {
 
 .week-row {
   @apply flex items-center;
-  height: 5px;
+  height: 4px;
   margin-bottom: 6px;
 }
 
@@ -189,7 +189,7 @@ watch(year, async (currentValue) => {
 .category-cell {
   @apply flex-1 mx-1 transition-all duration-200;
   min-width: 80px;
-  height: 6px; 
+  height: 5px; 
 }
 
 /* Color classes with improved contrast */
