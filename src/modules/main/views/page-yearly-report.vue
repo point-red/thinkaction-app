@@ -222,9 +222,9 @@ watch(year, async (currentValue) => {
   }
 }
 
-.main-content-container {
+/* .main-content-container {
   @apply p-4;
   max-width: 100%;
   overflow-x: auto;
-}
+} */
 </style>
