@@ -18,7 +18,7 @@ const labeledWeeks = [1, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52]
 
 // Get all 52 weeks
 const getWeeksData = () => {
-  return Array.from({length: 52}, (_, i) => ({
+  return Array.from({ length: 52 }, (_, i) => ({
     weekNumber: i + 1,
     categories: categories.value.map(cat => ({
       name: cat,
@@ -105,7 +105,6 @@ watch(year, async (currentValue) => {
 })
 </script>
 
-
 <template>
   <div class="main-content-container">
     <div class="flex justify-between items-center mb-4">
@@ -120,7 +119,7 @@ watch(year, async (currentValue) => {
         <div class="days-header">
           <div class="week-column"></div>
           <div v-for="category in categories" :key="category" class="category-column">
-            {{ category }}
+            <span>{{ category.substring(0,2) }}</span>
           </div>
         </div>
       </div>
@@ -136,7 +135,9 @@ watch(year, async (currentValue) => {
           </div>
           
           <!-- Category cells -->
-          <div v-for="(category, categoryIndex) in categories" :key="category" 
+          <div 
+            v-for="(category, categoryIndex) in categories" 
+            :key="category" 
             class="category-cell"
             :class="getCellClass(week.weekNumber, categoryIndex)">
           </div>
@@ -182,14 +183,22 @@ watch(year, async (currentValue) => {
 }
 
 .category-column {
-  @apply flex-1 text-center text-xs font-medium text-gray-600;
-  min-width: 80px;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #4B5563;
+  width: 30px;
+  min-width: 30px;
+  padding: 0;
+  margin: 0 4px; /* Increased spacing between category headers */
 }
 
 .category-cell {
-  @apply flex-1 mx-1 transition-all duration-200;
-  min-width: 80px;
   height: 5px; 
+  min-width: 30px;
+  width: 30px;
+  margin: 0 4px; /* Increased spacing between category cells - matching header */
+  transition: all 200ms;
 }
 
 /* Color classes with improved contrast */
@@ -201,8 +210,8 @@ watch(year, async (currentValue) => {
   background-color: #E5E7EB;
 }
 
-.bg-blue-600 {
-  background-color: #2563EB;
+.bg-blue-500 {
+  background-color: #3B82F6;
 }
 
 .bg-red-500 {
@@ -213,18 +222,4 @@ watch(year, async (currentValue) => {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-/* .main-content-container {
-  @apply p-4;
-  max-width: 100%;
-  overflow-x: auto;
-} */
 </style>
