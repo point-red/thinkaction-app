@@ -116,7 +116,7 @@ watch(year, async (currentValue) => {
     <div class="report-container">
 
       <!-- Header with category names -->
-      <div class="sticky top-0 bg-white pb-3 z-10">
+      <div class="sticky top-0 bg-white pb-1.5 z-10">
         <div class="days-header">
           <div class="week-column"></div>
           <div v-for="category in categories" :key="category" class="category-column">
@@ -166,7 +166,7 @@ watch(year, async (currentValue) => {
 }
 
 .grid-content {
-  @apply pt-1;
+  @apply pt-0.5;
 }
 
 .week-row {
