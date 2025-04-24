@@ -119,7 +119,7 @@ watch(year, async (currentValue) => {
         <div class="days-header">
           <div class="week-column"></div>
           <div v-for="category in categories" :key="category" class="category-column">
-            <span>{{ category.substring(0,2) }}</span>
+            <span>{{ category.substring(0,1) }}</span>
           </div>
         </div>
       </div>
