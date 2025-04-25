@@ -146,7 +146,7 @@ watch(() => store.currentUser, (newUser) => {
 }
 
 .week-label {
-  @apply text-xs font-medium text-gray-500 whitespace-nowrap;
+  @apply col-span-2 text-xs font-medium text-gray-500 whitespace-nowrap;
 }
 
 .grid-cell {
