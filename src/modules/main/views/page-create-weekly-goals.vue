@@ -118,7 +118,13 @@ const submit = async function () {
       <p class="font-semibold text-lg text-[#3D8AF7] text-center mb-8">
         Hi <UserName />, you are now in week {{ weekNumber }}, let's set a goal!
       </p>
-
+      
+      <!-- upload photo -->
+      <span class="font-semibold text-[#3D8AF7] block mb-2"
+        >Share the photo of your vision here</span
+      >
+      <ImageUpload @change="onImageChange" :previousImages="[]" />
+      
       <!-- Select Resolution -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Select Category</span>
       <BaseSelect
@@ -166,11 +172,6 @@ const submit = async function () {
         class="mb-8"
       />
 
-      <!-- upload photo -->
-      <span class="font-semibold text-[#3D8AF7] block mb-2"
-        >Share the photo of your vision here</span
-      >
-      <ImageUpload @change="onImageChange" :previousImages="[]" />
 
       <!-- share with -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Share With</span>

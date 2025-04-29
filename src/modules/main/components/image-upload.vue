@@ -12,9 +12,11 @@ const imageObjects = ref<any>([])
 const prev = ref<any>([])
 const emit = defineEmits(['change', 'remove'])
 
-const onImageChange = function (event: any) {
-  const objects = ([...event.target.files] ?? [])
-    .map((file) => {
+const onFileChange = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const files = target.files
+  const objects = (files ? Array.from(files) : [])
+    .map((file: File) => {
       if (file && file.type.startsWith('image/')) {
         return URL.createObjectURL(file)
       }
@@ -23,7 +25,7 @@ const onImageChange = function (event: any) {
     .filter((f) => !!f)
 
   imageSources.value.push(...objects)
-  imageObjects.value.push(...event.target.files)
+  imageObjects.value.push(...(files ? Array.from(files) : []))
   emit('change', imageObjects.value)
 }
 
@@ -56,7 +58,7 @@ watch(
     <label class="btn btn-primary bg-[#3D8AF7] mb-2">
       <input
         type="file"
-        @change="onImageChange"
+        @change="onFileChange"
         multiple
         class="pointer-events-none absolute opacity-0"
       />

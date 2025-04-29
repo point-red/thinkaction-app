@@ -99,7 +99,7 @@ onMounted(async () => {
     </button> -->
 
     <div class="flex justify-between my-4 md:my-14 font-bold">
-      <a href="" class="text-slate font-semibold">Forgot password?</a>
+      <router-link to="/forgot-password" class="text-slate font-semibold">Forgot password?</router-link>
       <router-link to="/register" class="text-[#ff5959]">Sign Up</router-link>
     </div>
   </div>

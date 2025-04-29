@@ -3,22 +3,32 @@ import type { ThinkActionCategory } from '../types/think-action'
 export const Categories: ThinkActionCategory[] = [
   {
     id: Math.random().toFixed(32).toString().substring(3),
-    category: 'Finance'
+    label: 'Kesehatan',
+    category: 'Kesehatan'
   },
   {
     id: Math.random().toFixed(32).toString().substring(3),
-    category: 'Mental Health'
+    label: 'Karir',
+    category: 'Karir'
   },
   {
     id: Math.random().toFixed(32).toString().substring(3),
-    category: 'Education'
+    label: 'Keuangan',
+    category: 'Keuangan'
   },
   {
     id: Math.random().toFixed(32).toString().substring(3),
-    category: 'Service'
+    label: 'Pendidikan',
+    category: 'Pendidikan'
   },
   {
     id: Math.random().toFixed(32).toString().substring(3),
-    category: 'Relationship'
+    label: 'Hobi',
+    category: 'Hobi'
+  },
+  {
+    id: Math.random().toFixed(32).toString().substring(3),
+    label: 'Relasi',
+    category: 'Relasi'
   }
 ]

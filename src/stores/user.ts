@@ -108,6 +108,38 @@ export const useUserStore = defineStore('user-store', {
         return e.response.data.errors
       }
     },
+    async forgotPassword(email: string) {
+      try {
+        const { data } = await client().post('/auth/forgot-password', { email })
+        return { success: true, message: data.message }
+      } catch (e: any) {
+        return { success: false, message: e.response?.data?.errors ?? 'An error occurred' }
+      }
+    },
+
+    async verifyResetToken(token: string) {
+      try {
+        const { data } = await client().get(`/auth/reset-password/${token}`)
+        return { success: true, message: data.message }
+      } catch (e: any) {
+        return { success: false, message: e.response?.data?.errors ?? 'Reset link has expired' }
+      }
+    },
+
+    async resetPassword(token: string, password: string) {
+      try {
+        const { data } = await client().post(`/auth/reset-password/${token}`, { password })
+        if (data.status === 'success') {
+          this.token = data.token
+          localStorage.setItem('token', data.token)
+          this.currentUser = data.data.user
+          localStorage.setItem('auth.user', JSON.stringify(data.data.user))
+          return { success: true, message: data.message }
+        }
+      } catch (e: any) {
+        return { success: false, message: e.response?.data?.errors ?? 'An error occurred' }
+      }
+    },
     getUserById: async function (_id: string) {
       try {
         const { data } = await client().get(`/users/${_id}`)

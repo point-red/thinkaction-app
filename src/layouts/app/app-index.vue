@@ -4,6 +4,19 @@ import AppPreloader from '@/components/app-preloader.vue'
 import AppHeader from './app-header.vue'
 import AppSidebar from './app-sidebar.vue'
 import AppFooter from './app-footer.vue'
+import { usePostStore } from '@/stores/post';
+import { onMounted } from 'vue';
+
+const postStore = usePostStore();
+
+onMounted(async () => {
+  await postStore.getPosts({
+    params: {
+      limit: 7,
+      page: 1,
+    },
+  }, true); // Force load the initial data
+});
 </script>
 
 <template>
@@ -11,7 +24,7 @@ import AppFooter from './app-footer.vue'
   <app-preloader class="print:hidden"></app-preloader>
 
   <!-- Page Wrapper -->
-  <div class="h-100vh flex grow bg-slate-50 dark:bg-slate-900">
+  <div class="flex grow bg-slate-50 dark:bg-slate-900 vhh">
     <!-- Header -->
     <app-header class="print:hidden"></app-header>
     <!-- Sidebar -->
@@ -21,7 +34,7 @@ import AppFooter from './app-footer.vue'
       <main class="main-content">
         <router-view />
       </main>
-      <app-footer class="md:hidden"></app-footer>
+      <app-footer></app-footer>
     </div>
   </div>
 </template>
@@ -29,6 +42,10 @@ import AppFooter from './app-footer.vue'
 <style lang="postcss">
 .main-container {
   @apply flex flex-col w-full;
+}
+
+.vhh {
+  height: 100dvh;
 }
 
 .is-sidebar-open .main-container {

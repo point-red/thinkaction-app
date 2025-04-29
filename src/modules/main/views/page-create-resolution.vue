@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { BaseInput, BaseDatepicker, BaseTextarea, BaseSelect } from '@/components/index'
+import { ref, onMounted, computed } from 'vue'
+import { BaseInput, BaseDatepicker, BaseTextarea, BaseSelect, BaseAutocomplete, BaseAutocompleteCreate } from '@/components/index'
 import { useUserStore } from '@/stores/user'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
@@ -8,6 +8,8 @@ import ImageUpload from '@/modules/main/components/image-upload.vue'
 import { usePostStore } from '@/stores/post'
 import UserName from '@/modules/main/components/users/user-name.vue'
 import { useRouter } from 'vue-router'
+import type { ThinkActionCategory } from '@/modules/types/think-action'
+import { Categories } from '@/modules/data/categories'
 
 dayjs.extend(customParseFormat)
 
@@ -22,10 +24,19 @@ const selected = ref({
 })
 
 const postStore = usePostStore()
+const userStore = useUserStore()
 const router = useRouter()
 const showErrors = ref(false)
 const globalErrors = ref('')
 const isSending = ref(false)
+const categoryResolutions = ref<ThinkActionCategory[]>([])
+const combinedCategories = computed(() => {
+  // Get unique categories by label
+  const existingLabels = new Set(categoryResolutions.value.map(cat => cat.label ))
+  const filteredDefaultCategories = Categories.filter(cat => !existingLabels.has(cat.label ))
+  
+  return [...categoryResolutions.value, ...filteredDefaultCategories]
+})
 
 const form = ref({
   categoryName: '',
@@ -33,6 +44,18 @@ const form = ref({
   caption: '',
   dueDate: '',
   photos: [] as any
+})
+
+onMounted(async () => {
+  try {
+    const userData = await userStore.getUserById(userStore.currentUser._id)
+    categoryResolutions.value = userData.categoryResolution?.map((cat: any) => ({
+      id: cat._id,
+      label: cat.name
+    })) || []
+  } catch (error) {
+    console.error('Failed to fetch user data:', error)
+  }
 })
 
 const onUpdateVisiblity = function (params: any) {
@@ -48,7 +71,10 @@ const onImageChange = function (photos: any) {
   form.value.photos = photos
 }
 
-const userStore = useUserStore()
+const onAutocompleteSelect = function(value: any) {
+  form.value.categoryName = value.label;
+}
+
 const save = async function () {
   showErrors.value = false
   globalErrors.value = ''
@@ -86,20 +112,31 @@ const save = async function () {
   <div class="main-content-container">
     <p class="text-lg font-semibold">Create Your Resolution</p>
     <hr />
-
+    
     <div>
       <p class="font-semibold text-lg text-[#3D8AF7] text-center mb-5">
         Hi <UserName />, let's start by setting up your resolutions!
       </p>
-
+      
+      <!-- upload photo -->
+      <span class="font-semibold text-[#3D8AF7] block mb-2"
+        >Share the photo of your vision here</span
+      >
+      <ImageUpload @change="onImageChange" :previousImages="[]" />
+      
       <!-- category input -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Category</span>
-      <BaseInput
+      <BaseAutocompleteCreate
         v-model="form.categoryName"
-        :error="showErrors && !(form.categoryName as any)? 'Enter a category name': ''"
-        placeholder="Input your category"
+        :list="combinedCategories"
+        placeholder="Select or create new category"
+        border="full"
+        :isError="showErrors && !form.categoryName"
+        error-message="Select a category"
         class="mb-8"
-      ></BaseInput>
+        @update:modelValue="onAutocompleteSelect"
+      ></BaseAutocompleteCreate>
+
 
       <!-- due date input -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Due Date</span>
@@ -125,11 +162,6 @@ const save = async function () {
         class="mb-8"
       ></component>
 
-      <!-- upload photo -->
-      <span class="font-semibold text-[#3D8AF7] block mb-2"
-        >Share the photo of your vision here</span
-      >
-      <ImageUpload @change="onImageChange" :previousImages="[]" />
 
       <!-- share with -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Share With</span>

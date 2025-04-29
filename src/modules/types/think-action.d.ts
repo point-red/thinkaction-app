@@ -21,6 +21,7 @@ export type ThinkActionUser = {
 export type ThinkActionCategory = {
   id: number | string
   category: string
+  label: string
 }
 
 export type ThinkActionComment = {

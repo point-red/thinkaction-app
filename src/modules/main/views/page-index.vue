@@ -12,8 +12,8 @@ const total = computed(() => {
   return postStore.total
 })
 
-const loadPosts = async (force = false) => {
-  if ((total.value !== -1 || !force) && total.value < POST_LIMIT * (currentPage.value - 1)) {
+const loadPosts = async () => {
+  if (total.value !== -1 && total.value < POST_LIMIT * (currentPage.value - 1)) {
     return
   }
   isLoading.value = true
@@ -24,8 +24,7 @@ const loadPosts = async (force = false) => {
           limit: POST_LIMIT,
           page: currentPage.value
         }
-      },
-      force
+      }
     )
     if (!loadedPosts.length) {
       currentPage.value -= 1
@@ -36,8 +35,7 @@ const loadPosts = async (force = false) => {
   isLoading.value = false
 }
 
-onMounted(async () => {
-  await loadPosts(true)
+onMounted(() => {
   document.getElementsByTagName('main')?.[0]?.addEventListener('scroll', handleScroll)
 })
 

@@ -1,24 +1,46 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { BaseDatepicker, BaseTextarea, BaseSelect, BaseInput } from '@/components/index'
-import ImageUpload from '@/modules/main/components/image-upload.vue'
+import { onMounted, ref, computed } from 'vue'
+import {
+  BaseDatepicker,
+  BaseTextarea,
+  BaseSelect,
+  BaseInput,
+  BaseAutocompleteCreate
+} from '@/components/index'
 import { useUserStore } from '@/stores/user'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
 import { usePostStore } from '@/stores/post'
+import ImageUpload from '@/modules/main/components/image-upload.vue'
 import UserName from '@/modules/main/components/users/user-name.vue'
+import type { ThinkActionCategory } from '@/modules/types/think-action'
+import { Categories } from '@/modules/data/categories'
 
-const route = useRoute()
-const router = useRouter()
+dayjs.extend(customParseFormat)
+
 const list = [
   { id: 'everyone', label: 'Everyone' },
   { id: 'supporter', label: 'Supporter' },
   { id: 'private', label: 'Private' }
 ]
 
-const userStore = useUserStore()
 const postStore = usePostStore()
+const userStore = useUserStore()
 const resolutions = ref<any>([])
+const router = useRouter()
+const showErrors = ref(false)
+const globalErrors = ref('')
+const weekNumber = ref(0)
+const isSending = ref(false)
+const categoryResolutions = ref<ThinkActionCategory[]>([])
+const combinedCategories = computed(() => {
+  // Get unique categories by label
+  const existingLabels = new Set(categoryResolutions.value.map((cat) => cat.category))
+  const filteredDefaultCategories = Categories.filter((cat) => !existingLabels.has(cat.category))
+
+  return [...categoryResolutions.value, ...filteredDefaultCategories]
+})
 
 const selected = ref({
   visibility: { id: 'everyone', label: 'Everyone' },
@@ -34,15 +56,27 @@ const form = ref<any>({
   shareWith: 'everyone',
   photo: []
 })
+const user = ref(userStore.currentUser)
 
-const id = route.params.id as string
-// const categories = ref<any>([])
-const currentGoal = ref<any>(null)
-const removedPhotos = ref<string[]>([])
-const showErrors = ref(false)
-const weekNumber = ref(0)
-const globalErrors = ref('')
-const isSending = ref(false)
+onMounted(async () => {
+  try {
+    user.value = await userStore.getUserById(userStore.currentUser._id)
+    resolutions.value = (user.value.categoryResolution ?? [])
+    
+    const userData = user.value
+    categoryResolutions.value =
+      userData.categoryResolution?.map((cat: any) => ({
+        id: cat._id,
+        label: cat.name
+      })) || []
+  } catch (error) {
+    console.error('Failed to fetch user data:', error)
+  }
+})
+
+const onAutocompleteSelect = function (value: any) {
+  form.value.categoryName = value.category
+}
 
 function getWeekNumber() {
   const now = new Date()
@@ -56,34 +90,6 @@ function getWeekNumber() {
   return Math.ceil((pastDaysOfYear + startDay + 1) / 7)
 }
 
-onMounted(async () => {
-  let goal = await postStore.getPostById(id as string)
-  weekNumber.value = getWeekNumber()
-  if (!goal?._id) {
-    return
-  }
-  const resolution = goal?.userInfo?.categoryResolution?.find(
-    (c: any) => goal.categoryResolutionId === c._id
-  )
-
-  form.value.resolution = resolution
-  selected.value.resolution = resolution
-    ? {
-        id: resolution._id,
-        label: resolution.name
-      }
-    : {}
-
-  selected.value.visibility = list.find((l) => l.id === goal.shareWith) ?? list[0]
-  form.value.caption = goal?.caption
-  form.value.shareWith = goal?.shareWith
-  form.value.dueDate = dayjs(goal?.dueDate)?.format?.('DD-MM-YYYY')
-  form.value.categoryResolutionId = goal?.categoryResolutionId
-
-  resolutions.value = goal?.userInfo?.categoryResolution
-  currentGoal.value = goal
-})
-
 const onUpdateVisiblity = function (params: any) {
   if (!params.id) {
     form.value.shareWith = ''
@@ -93,8 +99,18 @@ const onUpdateVisiblity = function (params: any) {
   form.value.shareWith = id
 }
 
-const onUpdateResolution = async function (params: any) {
-  form.value.resolution = resolutions.value.find((r: any) => r._id === params.id)
+const onUpdateResolution = async function (value: any) {
+  const resolution = resolutions.value.find((r: any) => r.name === value.label || r._id === value.id)
+  console.log(resolutions.value);
+  
+  if (resolution) {
+    form.value.resolution = resolution
+    form.value.categoryResolutionId = resolution._id
+    selected.value.resolution = {
+      id: resolution._id,
+      label: resolution.name
+    }
+  }
 }
 
 const onImageChange = function (photos: any) {
@@ -104,47 +120,39 @@ const onImageChange = function (photos: any) {
 const submit = async function () {
   let values = form.value
   let isAllFilled = values.caption && values.shareWith && (form.value.resolution as any)?._id // @ts-ignore-all
-
   showErrors.value = false
   globalErrors.value = ''
-
+  // @ts-ignore
   if (!isAllFilled) {
     showErrors.value = true
-    return
   }
-  // @ts-ignore
-  isSending.value = true
 
   const formData = new FormData()
   formData.append('caption', values.caption)
   formData.append('categoryResolutionId', (form.value.resolution as any)?._id)
   formData.append('shareWith', values.shareWith)
-  formData.append('dueDate', new Date(values.dueDate.split('-').reverse().join('-')).toISOString())
+  formData.append('dueDate', dayjs(values.dueDate, 'DD-MM-YYYY').toISOString())
   values.photo?.forEach((photo: any) => {
     formData.append('photo[]', photo)
   })
 
-  removedPhotos.value.forEach((url: string) => {
-    formData.append('removedImages[]', url)
-  })
-
-  try {
-    await userStore.editWeeklyGoal(formData, currentGoal.value._id)
-    postStore.resetPosts()
-    router.push('/')
-  } catch (e: any) {
-    globalErrors.value = e.response?.data?.errors
+  if (isAllFilled) {
+    isSending.value = true
+    try {
+      await userStore.addWeeklyGoal(formData)
+      postStore.resetPosts()
+      router.push('/')
+    } catch (e: any) {
+      globalErrors.value = e.response?.data?.errors
+    }
+    isSending.value = false
   }
-  isSending.value = false
-}
-
-const removePrev = (photoUrl: string) => {
-  removedPhotos.value.push(photoUrl)
 }
 </script>
+
 <template>
-  <div v-if="currentGoal" class="main-content-container">
-    <p class="text-lg font-semibold">Edit Your Weekly Goals</p>
+  <div class="main-content-container">
+    <p class="text-lg font-semibold">Create Your Weekly Goals</p>
     <hr />
 
     <div>
@@ -152,32 +160,18 @@ const removePrev = (photoUrl: string) => {
         Hi <UserName />, you are now in week {{ weekNumber }}, let's set a goal!
       </p>
 
-      <!-- upload photo -->
-      <span class="font-semibold text-[#3D8AF7] block mb-2"
-        >Share the photo of your vision here</span
-      >
-      <ImageUpload
-        @change="onImageChange"
-        :previousImages="currentGoal.photo"
-        @remove="removePrev"
-      />
-
       <!-- Select Resolution -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Select Category</span>
-      <BaseSelect
+      <BaseAutocompleteCreate
         v-model="selected.resolution"
         @update:modelValue="onUpdateResolution"
-        errorMessage="Choose a category"
-        :is-error="showErrors && !(selected.resolution as any).id"
-        :list="
-          resolutions.map(({ _id, name }: any) => ({
-            id: _id,
-            label: name,
-          }))
-        "
+        :list="combinedCategories"
+        placeholder="Select category"
         border="full"
+        :isError="showErrors && !(selected.resolution as any).id"
+        error-message="Choose a category"
         class="mb-8"
-      ></BaseSelect>
+      ></BaseAutocompleteCreate>
 
       <span class="font-semibold text-[#3D8AF7] block mb-2">Resolution</span>
       <BaseInput
@@ -200,7 +194,7 @@ const removePrev = (photoUrl: string) => {
       <span class="font-semibold text-[#3D8AF7] block mb-2">Due Date</span>
       <BaseDatepicker
         :error="
-          showErrors && (!form.dueDate || dayjs(form.dueDate).isBefore(dayjs()))
+          showErrors && (!form.dueDate || dayjs(form.dueDate, 'DD-MM-YYYY').isBefore(dayjs()))
             ? 'Enter a valid date'
             : ''
         "
@@ -208,6 +202,12 @@ const removePrev = (photoUrl: string) => {
         border="full"
         class="mb-8"
       />
+
+      <!-- upload photo -->
+      <span class="font-semibold text-[#3D8AF7] block mb-2"
+>Share the photo of your vision here</span
+>
+      <ImageUpload @change="onImageChange" :previousImages="[]" />
 
       <!-- share with -->
       <span class="font-semibold text-[#3D8AF7] block mb-2">Share With</span>

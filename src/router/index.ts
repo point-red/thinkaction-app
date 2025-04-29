@@ -22,18 +22,23 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  if (to.matched?.some((a) => ['Login', 'Register'].includes(a.name as string))) {
+  // Allow access to auth-related routes without authentication
+  if (to.matched?.some((route) => ['Login', 'Register', 'ForgotPassword', 'ResetPassword'].includes(route.name as string))) {
     next()
+    return
   }
+
+  // Check authentication for other routes
   try {
     await client().get('/users/history?limit=1')
+    next()
   } catch (e: any) {
     if (e.response?.status === 401) {
       next({ name: 'Login' })
       return
     }
+    next()
   }
-  next()
 })
 
 export default router
