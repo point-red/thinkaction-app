@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 
 import MainApp from './main-app.vue'
 import router from '@/router'
+import VueGtag from "vue-gtag";
 // import vue3GoogleLogin from 'vue3-google-login'
 
 // unocss
@@ -30,7 +31,14 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 dayjs.extend(relativeTime)
 
+
+
 const app = createApp(MainApp)
+
+app.use(VueGtag, {
+  config: { id: "G-JJLBHZWYJ2" }
+});
+
 app.directive('cleave', {
   mounted: (el, binding) => {
     el.cleave = new Cleave(el, binding.value || {})
