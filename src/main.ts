@@ -30,7 +30,15 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 dayjs.extend(relativeTime)
 
+import { configure } from "vue-gtag";
+
+configure({
+  tagId: "G-JJLBHZWYJ2"
+})
+
+
 const app = createApp(MainApp)
+
 app.directive('cleave', {
   mounted: (el, binding) => {
     el.cleave = new Cleave(el, binding.value || {})
