@@ -106,7 +106,7 @@ const deletePost = function () {
           class="flex gap-x-3 mb-3 items-center"
         >
           <img
-            :src="getFile(props.user?.photo!)"
+            :src="props.user?.photo! ? getFile(props.user?.photo!) : '/public/profile.png'"
             alt="user-photo"
             class="w-14 h-14 object-cover bg-slate-300 rounded-full"
           />
