@@ -33,7 +33,7 @@ const register = async function () {
   form.value.errors = ''
   const loggedIn = await userStore.register(form.value)
   if (loggedIn === true) {
-    router.push('/')
+    router.push('/profile')
     return
   } else if (loggedIn?.errors) {
     form.value.errors = loggedIn.errors
