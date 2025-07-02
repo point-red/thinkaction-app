@@ -200,5 +200,5 @@ const removePrev = (photoUrl: string) => {
       </div>
     </div>
   </div>
-  <div v-else>Goal not found</div>
+  <div v-else></div>
 </template>
