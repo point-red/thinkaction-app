@@ -54,6 +54,5 @@
 }
 
 h1 {
-  color: #e91e63; /* Pink color */
 }
 </style>
