@@ -42,7 +42,7 @@ const props = withDefaults(defineProps<Props>(), {
     <div class="flex space-x-3 mb-3 justify-between">
       <div class="flex">
         <img
-          :src="props.user?.avatar"
+          :src="props.user?.avatar ? props.user?.avatar : '/public/profile.png'"
           alt="user-photo"
           class="w-20 h-20 bg-slate-300 rounded-full"
         />

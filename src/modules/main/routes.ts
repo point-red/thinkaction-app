@@ -7,6 +7,12 @@ export const routes = {
       component: () => import('./views/page-index.vue')
     },
     {
+      path: '/welcome',
+      name: 'Welcome',
+      // @ts-ignore
+      component: () => import('./views/page-welcome.vue')
+    },
+    {
       path: 'find',
       component: () => import('./views/page-find-user.vue')
     },

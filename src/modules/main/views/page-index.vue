@@ -37,6 +37,7 @@ const loadPosts = async () => {
 
 onMounted(() => {
   document.getElementsByTagName('main')?.[0]?.addEventListener('scroll', handleScroll)
+  loadPosts()
 })
 
 onUnmounted(() => {

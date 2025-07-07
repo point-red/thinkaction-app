@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { BaseInput, BasePopper } from '@/components/index'
 import { appName } from '@/config/app'
 import { RouterLink, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import { getFile } from '@/lib/connection'
 
 const router = useRouter()
 const form = ref({
@@ -12,6 +13,9 @@ const form = ref({
 
 let isDropdownOpen = ref(false)
 const userStore = useUserStore()
+const user = computed(() => {
+  return userStore.currentUser
+})
 
 const toggleHeader = function () {
   isDropdownOpen.value = !isDropdownOpen.value
@@ -114,7 +118,11 @@ const submitForm = () => {
             </router-link>
 
             <button @click="toggleHeader" class="avatar avatar-sm relative">
-              <span class="avatar-initial rounded-full bg-warning text-white">JD</span>
+              <img
+                :src="user.avatar ? getFile(user.avatar) : '/public/profile.png'"
+                alt="user photo"
+                class="w-4 h-4 object-cover rounded-full"
+              />
             </button>
 
             <div

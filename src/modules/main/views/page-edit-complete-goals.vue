@@ -44,7 +44,7 @@ onMounted(async () => {
         id: goal.weeklyGoalId,
         label: weeklyGoal?.caption
       },
-      photos: goal.photos
+      photo: goal.photo
     }
     checked.value = goal.isComplete
     currentGoal.value = goal
@@ -63,7 +63,7 @@ const computedGoals = computed(() => {
 })
 
 const onImageChange = function (photos: any) {
-  form.value.photos = photos
+  form.value.photo = photos
 }
 
 const checked = ref<any>(false)
@@ -99,7 +99,7 @@ const submit = async function () {
   formData.append('shareWith', values.visibility?.id)
   formData.append('updatedDate', new Date().toISOString())
   formData.append('isComplete', checked.value)
-  values.photos?.forEach((photo: any) => {
+  values.photo?.forEach((photo: any) => {
     formData.append('photo[]', photo)
   })
 
@@ -200,5 +200,5 @@ const removePrev = (photoUrl: string) => {
       </div>
     </div>
   </div>
-  <div v-else>Goal not found</div>
+  <div v-else></div>
 </template>
